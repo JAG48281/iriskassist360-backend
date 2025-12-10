@@ -270,8 +270,13 @@ def calculate_iar(payload: FireCalcRequest, db: Session = Depends(get_db)):
 # ---------------------------------------------------------
 # OPTIONAL PDF Endpoint
 # ---------------------------------------------------------
-@router.post("/calculate/pdf")
+@router.post("/calculate/pdf", response_model=ResponseModel[dict])
 def any_product_pdf(payload: FireCalcRequest, db: Session = Depends(get_db)):
     resp = calculate_blusp(payload, db).data # Access .data from ResponseModel
     pdf = generate_premium_pdf(resp)
-    return {"message": "PDF generated", "pdf_size_bytes": len(pdf)}
+    # Return standard response
+    return ResponseModel(
+        success=True, 
+        message="PDF generated successfully", 
+        data={"pdf_size_bytes": len(pdf), "download_link": "TODO_LINK"} # Placeholder logic
+    )
