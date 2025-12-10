@@ -10,13 +10,15 @@ from app.utils.jwt_handler import create_access_token
 from app.utils.otp_handler import create_otp, verify_otp_code
 from pydantic import BaseModel
 
+from app.schemas.response import ResponseModel
+
 router = APIRouter(prefix="/irisk/auth", tags=["Authentication"])
 
 
 # --------------------------
 #  USER REGISTRATION
 # --------------------------
-@router.post("/register", response_model=UserOut)
+@router.post("/register", response_model=ResponseModel[UserOut])
 def register_user(payload: UserCreate, db: Session = Depends(get_db)):
     # Must have at least email or mobile
     if not payload.email and not payload.mobile:
@@ -54,13 +56,13 @@ def register_user(payload: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
 
-    return user
+    return ResponseModel(success=True, message="User registered successfully", data=user)
 
 
 # --------------------------
 #  USER LOGIN
 # --------------------------
-@router.post("/login")
+@router.post("/login", response_model=ResponseModel[dict])
 def login_user(payload: UserCreate, db: Session = Depends(get_db)):
     # Requirement → Login by Email + Password
     if not payload.email or not payload.password:
@@ -91,12 +93,13 @@ def login_user(payload: UserCreate, db: Session = Depends(get_db)):
 
     token = create_access_token({"user_id": user.id})
 
-    return {
+    data = {
         "access_token": token,
         "token_type": "bearer",
         "user_id": user.id,
         "email": user.email
     }
+    return ResponseModel(success=True, message="Login successful", data=data)
 
 # --------------------------
 #  OTP AUTHENTICATION
@@ -109,7 +112,7 @@ class OtpVerifyRequest(BaseModel):
     mobile: str
     otp: str
 
-@router.post("/send-otp")
+@router.post("/send-otp", response_model=ResponseModel[dict])
 def send_otp(payload: OtpRequest, db: Session = Depends(get_db)):
     # 1. Check if mobile is valid (basic check)
     if len(payload.mobile) != 10:
@@ -121,9 +124,9 @@ def send_otp(payload: OtpRequest, db: Session = Depends(get_db)):
     # 3. "Send" OTP (Mock)
     print(f"OTP for {payload.mobile} is {otp}")
     
-    return {"message": "OTP sent successfully", "mock_otp": otp}
+    return ResponseModel(success=True, message="OTP sent successfully", data={"mock_otp": otp})
 
-@router.post("/verify-otp")
+@router.post("/verify-otp", response_model=ResponseModel[dict])
 def verify_otp_endpoint(payload: OtpVerifyRequest, db: Session = Depends(get_db)):
     # 1. Verify OTP
     is_valid = verify_otp_code(db, payload.mobile, payload.otp)
@@ -142,9 +145,10 @@ def verify_otp_endpoint(payload: OtpVerifyRequest, db: Session = Depends(get_db)
     # 3. Generate Token
     token = create_access_token({"user_id": user.id})
     
-    return {
+    data = {
         "access_token": token,
         "token_type": "bearer",
         "user_id": user.id,
         "mobile": user.mobile
     }
+    return ResponseModel(success=True, message="OTP verified successfully", data=data)

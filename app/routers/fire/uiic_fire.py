@@ -7,6 +7,8 @@ from app.models.rate import Rate
 from app.models.quote import Quote
 from app.utils.pdf_generator import generate_premium_pdf
 
+from app.schemas.response import ResponseModel
+
 router = APIRouter(prefix="/irisk/fire/uiic", tags=["UIIC-Fire"])
 
 # -------------------------------
@@ -93,7 +95,7 @@ def _save_quote(db: Session, product_code: str, payload: Any, response: Dict[str
 # ---------------------------------------------------------
 # PRODUCT 1: Value Udyam Suraksha Policy (VUSP)
 # ---------------------------------------------------------
-@router.post("/vusp/calculate")
+@router.post("/vusp/calculate", response_model=ResponseModel[dict])
 def calculate_vusp(payload: FireCalcRequest, db: Session = Depends(get_db)):
     product_code = "VUSP"
     fallback = {"Office": 0.20, "Residential": 0.16, "Hospital": 0.22, "Shop": 0.25}
@@ -110,12 +112,12 @@ def calculate_vusp(payload: FireCalcRequest, db: Session = Depends(get_db)):
         **result
     }
     _save_quote(db, product_code, payload, response)
-    return response
+    return ResponseModel(success=True, message="VUSP Premium Calculated", data=response)
 
 # ---------------------------------------------------------
 # PRODUCT 2: Bharat Sookshma Udyam Suraksha (BSUSP)
 # ---------------------------------------------------------
-@router.post("/bsusp/calculate")
+@router.post("/bsusp/calculate", response_model=ResponseModel[dict])
 def calculate_bsusp(payload: FireCalcRequest, db: Session = Depends(get_db)):
     product_code = "BSUSP"
     fallback = {"Office": 0.20, "Residential": 0.16, "Hospital": 0.22, "Shop": 0.25}
@@ -132,12 +134,12 @@ def calculate_bsusp(payload: FireCalcRequest, db: Session = Depends(get_db)):
         **result
     }
     _save_quote(db, product_code, payload, response)
-    return response
+    return ResponseModel(success=True, message="BSUSP Premium Calculated", data=response)
 
 # ---------------------------------------------------------
 # PRODUCT 3: Bharat Laghu Udyam Suraksha (BLUSP)
 # ---------------------------------------------------------
-@router.post("/blusp/calculate")
+@router.post("/blusp/calculate", response_model=ResponseModel[dict])
 def calculate_blusp(payload: FireCalcRequest, db: Session = Depends(get_db)):
     product_code = "BLUSP"
     fallback = {"Office": 0.20, "Residential": 0.16, "Hospital": 0.22, "Shop": 0.25}
@@ -154,12 +156,12 @@ def calculate_blusp(payload: FireCalcRequest, db: Session = Depends(get_db)):
         **result
     }
     _save_quote(db, product_code, payload, response)
-    return response
+    return ResponseModel(success=True, message="BLUSP Premium Calculated", data=response)
 
 # ---------------------------------------------------------
 # PRODUCT 4: Bharat Griha Raksha Policy (BGRP)
 # ---------------------------------------------------------
-@router.post("/bgrp/calculate")
+@router.post("/bgrp/calculate", response_model=ResponseModel[dict])
 def calculate_bgrp(payload: UBGRRequest, db: Session = Depends(get_db)):
     product_code = "BGRP"
     
@@ -219,12 +221,12 @@ def calculate_bgrp(payload: UBGRRequest, db: Session = Depends(get_db)):
     }
 
     _save_quote(db, product_code, payload, response)
-    return response
+    return ResponseModel(success=True, message="BGRP Premium Calculated", data=response)
 
 # ---------------------------------------------------------
 # PRODUCT 5: Standard Fire & Special Perils Policy (SFSP)
 # ---------------------------------------------------------
-@router.post("/sfsp/calculate")
+@router.post("/sfsp/calculate", response_model=ResponseModel[dict])
 def calculate_sfsp(payload: FireCalcRequest, db: Session = Depends(get_db)):
     product_code = "SFSP"
     fallback = {"Factory": 0.60, "Plant": 0.75, "Warehouse": 0.40}
@@ -241,12 +243,12 @@ def calculate_sfsp(payload: FireCalcRequest, db: Session = Depends(get_db)):
         **result
     }
     _save_quote(db, product_code, payload, response)
-    return response
+    return ResponseModel(success=True, message="SFSP Premium Calculated", data=response)
 
 # ---------------------------------------------------------
 # PRODUCT 6: Industrial All Risks Policy (IAR)
 # ---------------------------------------------------------
-@router.post("/iar/calculate")
+@router.post("/iar/calculate", response_model=ResponseModel[dict])
 def calculate_iar(payload: FireCalcRequest, db: Session = Depends(get_db)):
     product_code = "IAR"
     fallback = {"Factory": 0.60, "Plant": 0.75, "Warehouse": 0.40}
@@ -263,13 +265,13 @@ def calculate_iar(payload: FireCalcRequest, db: Session = Depends(get_db)):
         **result
     }
     _save_quote(db, product_code, payload, response)
-    return response
+    return ResponseModel(success=True, message="IAR Premium Calculated", data=response)
 
 # ---------------------------------------------------------
 # OPTIONAL PDF Endpoint
 # ---------------------------------------------------------
 @router.post("/calculate/pdf")
 def any_product_pdf(payload: FireCalcRequest, db: Session = Depends(get_db)):
-    resp = calculate_blusp(payload, db)
+    resp = calculate_blusp(payload, db).data # Access .data from ResponseModel
     pdf = generate_premium_pdf(resp)
     return {"message": "PDF generated", "pdf_size_bytes": len(pdf)}
