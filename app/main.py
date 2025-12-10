@@ -55,9 +55,11 @@ def create_app():
     app.include_router(uiic_fire.router)
     
     # New Routers for Flutter App
-    from app.routers import premium, rates
-    app.include_router(premium.router)
-    app.include_router(rates.router)
+    from app.routers.premium import router as premium_router
+    from app.routers.rates import router as rates_router
+    
+    app.include_router(premium_router, prefix="/api/premium")
+    app.include_router(rates_router, prefix="/api/rates")
 
     return app
 

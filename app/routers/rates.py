@@ -9,7 +9,7 @@ from app.schemas.response import ResponseModel
 # Setup Logger
 logger = logging.getLogger("irisk_backend")
 
-router = APIRouter(prefix="/api/rates", tags=["Rates"])
+router = APIRouter(tags=["Rates"])
 
 @router.get("/ubgr", response_model=ResponseModel[List[Dict[str, Any]]])
 def get_ubgr_rates(db: Session = Depends(get_db)):

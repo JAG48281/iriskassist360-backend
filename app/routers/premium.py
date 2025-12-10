@@ -9,7 +9,7 @@ from app.schemas.uvgs_schema import UVGSRequest
 # Setup Logger
 logger = logging.getLogger("irisk_backend")
 
-router = APIRouter(prefix="/api/premium", tags=["Premium Calculation"])
+router = APIRouter(tags=["Premium Calculation"])
 
 @router.post("/uvgs/calculate", response_model=ResponseModel[dict])
 def calculate_uvgs_premium(payload: UVGSRequest, db: Session = Depends(get_db)):
