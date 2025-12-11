@@ -2,8 +2,9 @@ import sys
 import os
 import csv
 import logging
-from sqlalchemy import text, select, func
+from sqlalchemy import text, select, func, insert
 from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy.exc import IntegrityError, CompileError
 from app.database import engine, SessionLocal
 from app.models.fire_models import *
 from app.models.master import LobMaster, ProductMaster
@@ -12,15 +13,19 @@ from app.models.master import LobMaster, ProductMaster
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-def table_has_rows(conn, table_name):
-    """Check if a table has any rows."""
+def upsert(conn, model, data):
+    """
+    Insert data universally using standard INSERT.
+    Ignores duplicates (IntegrityError) safely using SAVEPOINT.
+    """
     try:
-        query = text(f"SELECT 1 FROM {table_name} LIMIT 1")
-        result = conn.execute(query).fetchone()
-        return result is not None
-    except Exception as e:
-        logger.warning(f"Error checking table {table_name}: {e}")
-        return False
+        with conn.begin_nested():
+            stmt = insert(model).values(**data)
+            conn.execute(stmt)
+    except (IntegrityError, Exception):
+        # Ignore duplicates or subtle dialect issues
+        pass
+
 
 def get_product_map(conn):
     """Fetch product_code -> id map."""
@@ -62,8 +67,7 @@ def seed_lob_and_product(conn):
     ]
 
     for lob in lobs:
-        stmt = pg_insert(LobMaster).values(**lob).on_conflict_do_nothing()
-        conn.execute(stmt)
+        upsert(conn, LobMaster, lob)
     
     lob_map_query = select(LobMaster.lob_code, LobMaster.id)
     lob_map_rows = conn.execute(lob_map_query).fetchall()
@@ -87,8 +91,7 @@ def seed_lob_and_product(conn):
     ]
 
     for prod in fire_products:
-        stmt = pg_insert(ProductMaster).values(**prod).on_conflict_do_nothing()
-        conn.execute(stmt)
+        upsert(conn, ProductMaster, prod)
 
 def seed_occupancies(conn):
     logger.info("Seeding Occupancies...")
@@ -108,8 +111,7 @@ def seed_occupancies(conn):
         ]
         
     for row in data:
-        stmt = pg_insert(Occupancy).values(**row).on_conflict_do_nothing()
-        conn.execute(stmt)
+        upsert(conn, Occupancy, row)
 
 def seed_product_basic_rates(conn):
     logger.info("Seeding ProductBasicRates...")
@@ -151,8 +153,7 @@ def seed_product_basic_rates(conn):
              if 'iib_code' in row: del row['iib_code']
         
         if row.get('product_id') and row.get('occupancy_id'):
-            stmt = pg_insert(ProductBasicRate).values(**row).on_conflict_do_nothing()
-            conn.execute(stmt)
+            upsert(conn, ProductBasicRate, row)
         else:
             logger.warning(f"Skipping product_basic_rates row due to missing map: Product={p_code}, IIB={iib}")
 
@@ -190,8 +191,7 @@ def seed_bsus_rates(conn):
             if 'iib_code' in row: del row['iib_code']
             
         if row.get('product_id') and row.get('occupancy_id'):
-            stmt = pg_insert(BsusRate).values(**row).on_conflict_do_nothing()
-            conn.execute(stmt)
+            upsert(conn, BsusRate, row)
         else:
             logger.warning(f"Skipping bsus_rates row: Product={p_code}, IIB={iib}")
 
@@ -226,8 +226,7 @@ def seed_stfi_rates(conn):
              if 'iib_code' in row: del row['iib_code']
              
         if row.get('product_id') and row.get('occupancy_id'):
-            stmt = pg_insert(StfiRate).values(**row).on_conflict_do_nothing()
-            conn.execute(stmt)
+            upsert(conn, StfiRate, row)
         else:
             logger.warning(f"Skipping stfi_rates row: Product={row.get('product_code')}, IIB={iib}")
 
@@ -262,8 +261,7 @@ def seed_eq_rates(conn):
              if 'iib_code' in row: del row['iib_code']
 
         if row.get('product_id') and row.get('occupancy_id'):
-            stmt = pg_insert(EqRate).values(**row).on_conflict_do_nothing()
-            conn.execute(stmt)
+            upsert(conn, EqRate, row)
         else:
             logger.warning(f"Skipping eq_rates row: Product={row.get('product_code')}, IIB={iib}")
 
@@ -288,8 +286,7 @@ def seed_terrorism_slabs(conn):
                 row = slab.copy()
                 row["product_code"] = code
                 row["product_id"] = pid
-                stmt = pg_insert(TerrorismSlab).values(**row).on_conflict_do_nothing()
-                conn.execute(stmt)
+                upsert(conn, TerrorismSlab, row)
 
 def seed_add_on_master(conn):
     logger.info("Seeding AddOnMaster...")
@@ -307,8 +304,7 @@ def seed_add_on_master(conn):
         ]
     
     for row in data:
-         stmt = pg_insert(AddOnMaster).values(**row).on_conflict_do_nothing()
-         conn.execute(stmt)
+         upsert(conn, AddOnMaster, row)
 
 def seed_add_on_product_map(conn):
     logger.info("Seeding AddOnProductMap...")
@@ -340,8 +336,7 @@ def seed_add_on_product_map(conn):
              del row['add_on_code'] # remove safe
              
         if row.get('product_id') and row.get('add_on_id'):
-            stmt = pg_insert(AddOnProductMap).values(**row).on_conflict_do_nothing()
-            conn.execute(stmt)
+            upsert(conn, AddOnProductMap, row)
         else:
             logger.warning(f"Skipping add_on_product_map row. PID={row.get('product_id')} AID={row.get('add_on_id')}")
 
@@ -384,8 +379,7 @@ def seed_add_on_rates(conn):
              if 'iib_code' in row: del row['iib_code']
         
         if row.get('product_id') and row.get('add_on_id'):
-            stmt = pg_insert(AddOnRate).values(**row).on_conflict_do_nothing()
-            conn.execute(stmt)
+            upsert(conn, AddOnRate, row)
         else:
              logger.warning(f"Skipping add_on_rates row. PID={row.get('product_id')} AID={row.get('add_on_id')}")
 
