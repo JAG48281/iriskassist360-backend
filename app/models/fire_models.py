@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, DateTime, func, Text, CheckConstraint, Boolean
+from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, DateTime, func, Text, CheckConstraint, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
 from app.database import Base
 from app.models.master import ProductMaster
@@ -101,15 +101,20 @@ class BsusRate(Base):
     __tablename__ = "bsus_rates"
 
     id = Column(Integer, primary_key=True, index=True)
-    product_code = Column(String(length=20), nullable=True) # Adding
+    product_code = Column(String(length=20), nullable=True) 
     product_id = Column(Integer, ForeignKey("product_master.id"), nullable=True)
-    occupancy_type = Column(String(length=50), nullable=False)
+    occupancy_id = Column(Integer, ForeignKey("occupancies.id"), nullable=False)
     eq_zone = Column(String(length=20), nullable=False)
     basic_rate = Column(Numeric(precision=10, scale=6), nullable=False)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
     product = relationship("ProductMaster")
+    occupancy = relationship("Occupancy")
+
+    __table_args__ = (
+        UniqueConstraint('occupancy_id', 'eq_zone', name='uq_bsus_rates_occupancy_eq'),
+    )
 
 class AddOnRate(Base):
     __tablename__ = "add_on_rates"

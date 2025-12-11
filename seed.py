@@ -175,6 +175,7 @@ def seed_bsus_rates(conn):
         
     logger.info("Seeding BsusRates...")
     prod_map = get_product_map(conn)
+    occ_id_map = get_occupancy_id_map(conn)
     
     csv_path = "data/bsus_rates.csv"
     data = []
@@ -185,20 +186,30 @@ def seed_bsus_rates(conn):
             data = [row for row in reader]
     else:
         if "BSUSP" in prod_map:
+            # Use '201' for Non-Industrial for BSUS sample
             data.append({
                 "product_code": "BSUSP", 
-                "occupancy_type": "Non-Industrial", 
+                "iib_code": "201", 
                 "eq_zone": "Zone I", 
                 "basic_rate": 0.25
             })
 
     for row in data:
-        if 'product_id' not in row and 'product_code' in row:
-            row['product_id'] = prod_map.get(row['product_code'])
+        p_code = row.get("product_code")
+        iib = row.get("iib_code")
+        
+        if 'product_id' not in row:
+            row['product_id'] = prod_map.get(p_code)
+
+        if 'occupancy_id' not in row and iib:
+            row['occupancy_id'] = occ_id_map.get(iib)
+            if 'iib_code' in row: del row['iib_code']
             
-        if row.get('product_id'):
+        if row.get('product_id') and row.get('occupancy_id'):
             stmt = pg_insert(BsusRate).values(**row).on_conflict_do_nothing()
             conn.execute(stmt)
+        else:
+            logger.warning(f"Skipping bsus_rates row: Product={p_code}, IIB={iib}")
 
 def seed_stfi_rates(conn):
     if table_has_rows(conn, "stfi_rates"): return
