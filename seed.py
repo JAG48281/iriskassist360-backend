@@ -34,10 +34,15 @@ def get_lob_map(conn):
     result = conn.execute(query).fetchall()
     return {row[0]: row[1] for row in result}
 
-def get_occupancy_map(conn):
-    """Fetch occupancy_id -> iib_code or similar?"""
-    # Needed for rates that reference occupancy_id
+def get_occupancy_id_map(conn):
+    """Fetch iib_code -> id map."""
     query = select(Occupancy.iib_code, Occupancy.id)
+    result = conn.execute(query).fetchall()
+    return {row[0]: row[1] for row in result}
+
+def get_occupancy_type_map(conn):
+    """Fetch iib_code -> occupancy_type map."""
+    query = select(Occupancy.iib_code, Occupancy.occupancy_type)
     result = conn.execute(query).fetchall()
     return {row[0]: row[1] for row in result}
 
@@ -64,9 +69,6 @@ def seed_lob_and_product(conn):
         stmt = pg_insert(LobMaster).values(**lob).on_conflict_do_nothing()
         conn.execute(stmt)
     
-    # Need to commit or flush to get IDs if needed, but we can just re-fetch map later or rely on sequences
-    # Since we are in a transaction, we need to ensure visibility? Actually pg_insert is executed.
-
     lob_map_query = select(LobMaster.lob_code, LobMaster.id)
     lob_map_rows = conn.execute(lob_map_query).fetchall()
     lob_map = {row[0]: row[1] for row in lob_map_rows}
@@ -125,14 +127,9 @@ def seed_product_basic_rates(conn):
     logger.info("Seeding ProductBasicRates...")
     
     prod_map = get_product_map(conn)
-    # Map occupancy iib_code to id? We need occupancy_id. 
-    # For sample data we know the iib_code keys 101, 201, 301 from seed_occupancies.
-    # We should fetch current occupancies.
-    occ_map_q = select(Occupancy.iib_code, Occupancy.id)
-    occ_rows = conn.execute(occ_map_q).fetchall()
-    occ_map = {row[0]: row[1] for row in occ_rows}
+    occ_id_map = get_occupancy_id_map(conn)
     
-    if not occ_map:
+    if not occ_id_map:
         logger.warning("No occupancies found, cannot seed rates.")
         return
 
@@ -143,35 +140,33 @@ def seed_product_basic_rates(conn):
          with open(csv_path, 'r') as f:
             reader = csv.DictReader(f)
             data = [row for row in reader]
-            # Must convert product_code to id and iib_code to occupancy_id
     else:
-        # Sample
-        # Ensure we have codes '101' '201' '301' in occ_map
-        residential_id = occ_map.get("101")
-        office_id = occ_map.get("201")
-        
-        # Fallback if specific codes missing?
-        first_occ_id = list(occ_map.values())[0] if occ_map else None
-        
+        # Sample using iib_code
         data = []
-        if residential_id and "BGRP" in prod_map:
-            data.append({"product_code": "BGRP", "product_id": prod_map["BGRP"], "occupancy_id": residential_id, "basic_rate": 0.15})
-        if office_id and "BSUSP" in prod_map:
-            data.append({"product_code": "BSUSP", "product_id": prod_map["BSUSP"], "occupancy_id": office_id, "basic_rate": 0.20})
+        if "BGRP" in prod_map:
+            data.append({"product_code": "BGRP", "iib_code": "101", "basic_rate": 0.15})
+        if "BSUSP" in prod_map:
+            data.append({"product_code": "BSUSP", "iib_code": "201", "basic_rate": 0.20})
 
     for row in data:
-        # If loading from CSV, we might need to resolve IDs. Assuming CSV has codes.
-        # Minimal Logic for CSV resolution:
-        if 'product_id' not in row and 'product_code' in row:
-             row['product_id'] = prod_map.get(row['product_code'])
-        if 'occupancy_id' not in row and 'iib_code' in row:
-             row['occupancy_id'] = occ_map.get(row['iib_code'])
-             del row['iib_code'] # remove if model doesn't accept
+        p_code = row.get("product_code")
+        iib = row.get("iib_code")
+        
+        # Determine product_id
+        if 'product_id' not in row:
+             row['product_id'] = prod_map.get(p_code)
+
+        # Determine occupancy_id from iib_code if present
+        if 'occupancy_id' not in row and iib:
+             row['occupancy_id'] = occ_id_map.get(iib)
+             # Remove iib_code so it doesn't fail insert if model doesn't have it
+             if 'iib_code' in row: del row['iib_code']
         
         if row.get('product_id') and row.get('occupancy_id'):
             stmt = pg_insert(ProductBasicRate).values(**row).on_conflict_do_nothing()
             conn.execute(stmt)
-
+        else:
+            logger.warning(f"Skipping product_basic_rates row due to missing map: Product={p_code}, IIB={iib}")
 
 def seed_bsus_rates(conn):
     if table_has_rows(conn, "bsus_rates"):
@@ -192,7 +187,6 @@ def seed_bsus_rates(conn):
         if "BSUSP" in prod_map:
             data.append({
                 "product_code": "BSUSP", 
-                "product_id": prod_map["BSUSP"], 
                 "occupancy_type": "Non-Industrial", 
                 "eq_zone": "Zone I", 
                 "basic_rate": 0.25
@@ -210,9 +204,7 @@ def seed_stfi_rates(conn):
     if table_has_rows(conn, "stfi_rates"): return
     logger.info("Seeding STFI Rates...")
     prod_map = get_product_map(conn)
-    occ_map_q = select(Occupancy.iib_code, Occupancy.id)
-    occ_rows = conn.execute(occ_map_q).fetchall()
-    occ_map = {row[0]: row[1] for row in occ_rows}
+    occ_id_map = get_occupancy_id_map(conn)
     
     csv_path = "data/stfi_rates.csv"
     data = []
@@ -221,34 +213,35 @@ def seed_stfi_rates(conn):
             reader = csv.DictReader(f)
             data = [row for row in reader]
     else:
-        # Sample
-        res_id = occ_map.get("101")
-        if res_id and "BGRP" in prod_map:
+        # Sample using iib_code
+        data = []
+        if "BGRP" in prod_map:
             data.append({
                 "product_code": "BGRP", 
-                "product_id": prod_map["BGRP"], 
-                "occupancy_id": res_id, 
+                "iib_code": "101",
                 "stfi_rate": 0.05
             })
             
     for row in data:
         if 'product_id' not in row and 'product_code' in row:
              row['product_id'] = prod_map.get(row['product_code'])
-        if 'occupancy_id' not in row and 'iib_code' in row:
-             row['occupancy_id'] = occ_map.get(row['iib_code'])
-             del row['iib_code']
+        
+        iib = row.get("iib_code")
+        if 'occupancy_id' not in row and iib:
+             row['occupancy_id'] = occ_id_map.get(iib)
+             if 'iib_code' in row: del row['iib_code']
              
         if row.get('product_id') and row.get('occupancy_id'):
             stmt = pg_insert(StfiRate).values(**row).on_conflict_do_nothing()
             conn.execute(stmt)
+        else:
+            logger.warning(f"Skipping stfi_rates row: Product={row.get('product_code')}, IIB={iib}")
 
 def seed_eq_rates(conn):
     if table_has_rows(conn, "eq_rates"): return
     logger.info("Seeding EQ Rates...")
     prod_map = get_product_map(conn)
-    occ_map_q = select(Occupancy.iib_code, Occupancy.id)
-    occ_rows = conn.execute(occ_map_q).fetchall()
-    occ_map = {row[0]: row[1] for row in occ_rows}
+    occ_id_map = get_occupancy_id_map(conn)
     
     csv_path = "data/eq_rates.csv"
     data = []
@@ -257,12 +250,11 @@ def seed_eq_rates(conn):
              reader = csv.DictReader(f)
              data = [row for row in reader]
     else:
-        res_id = occ_map.get("101")
-        if res_id and "BGRP" in prod_map:
+        data = []
+        if "BGRP" in prod_map:
             data.append({
                 "product_code": "BGRP", 
-                "product_id": prod_map["BGRP"], 
-                "occupancy_id": res_id, 
+                "iib_code": "101",
                 "eq_zone": "Zone I",
                 "eq_rate": 0.10
             })
@@ -270,46 +262,34 @@ def seed_eq_rates(conn):
     for row in data:
         if 'product_id' not in row and 'product_code' in row:
              row['product_id'] = prod_map.get(row['product_code'])
-        if 'occupancy_id' not in row and 'iib_code' in row:
-             row['occupancy_id'] = occ_map.get(row['iib_code'])
-             del row['iib_code']
+        
+        iib = row.get("iib_code")
+        if 'occupancy_id' not in row and iib:
+             row['occupancy_id'] = occ_id_map.get(iib)
+             if 'iib_code' in row: del row['iib_code']
 
         if row.get('product_id') and row.get('occupancy_id'):
             stmt = pg_insert(EqRate).values(**row).on_conflict_do_nothing()
             conn.execute(stmt)
+        else:
+            logger.warning(f"Skipping eq_rates row: Product={row.get('product_code')}, IIB={iib}")
 
 def seed_terrorism_slabs(conn):
-    # This must populate REAL values and handle the logic
-    # We will use upsert safely or empty check
     if table_has_rows(conn, "terrorism_slabs"): 
         logger.info("Skipping TerrorismSlabs (Data exists)")
         return
     logger.info("Seeding TerrorismSlabs (Official Circular Values)...")
     prod_map = get_product_map(conn)
     
-    # Official / Standard Pool Rates
-    # Note: si_max of None can represent Infinity
     slabs = [
-        # Residential: 0.10 per mille flat
         {"occupancy_type": "Residential", "si_min": 0, "si_max": None, "rate_per_mille": 0.10},
-        # Non-Industrial: 0-2000Cr -> 0.12? Let's use 0.15 for safety/standard
         {"occupancy_type": "Non-Industrial", "si_min": 0, "si_max": 20000000000, "rate_per_mille": 0.15},
-        # Non-Industrial: >20000Cr -> 0.12
         {"occupancy_type": "Non-Industrial", "si_min": 20000000000, "si_max": None, "rate_per_mille": 0.12},
-        # Industrial: 0-2000Cr -> 0.20
         {"occupancy_type": "Industrial", "si_min": 0, "si_max": 20000000000, "rate_per_mille": 0.20},
-        # Industrial: >2000Cr -> 0.15
         {"occupancy_type": "Industrial", "si_min": 20000000000, "si_max": None, "rate_per_mille": 0.15},
     ]
 
-    # Insert for ALL applicable products? Or generic?
-    # The table has product_code.
-    # We should insert these slab rows for every Fire product that uses Slab logic.
-    # Typically SFSP, IAR. 
-    # BGRP usually has flat rate but can share structure.
-    # Let's add them for all loaded Fire products to be safe.
-    
-    fire_products = ["SFSP", "IAR", "BSUSP", "BLUSP"] # BGRP is usually handled separately but we can add
+    fire_products = ["SFSP", "IAR", "BSUSP", "BLUSP"] 
     
     for code in fire_products:
         pid = prod_map.get(code)
@@ -362,14 +342,14 @@ def seed_add_on_product_map(conn):
         pid = prod_map.get("SFSP")
         aid = ao_map.get("EARTHQUAKE")
         if pid and aid:
-            data.append({"add_on_id": aid, "product_code": "SFSP", "product_id": pid})
+            data.append({"add_on_code": "EARTHQUAKE", "product_code": "SFSP"})
             
     for row in data:
         if 'product_id' not in row and 'product_code' in row:
              row['product_id'] = prod_map.get(row['product_code'])
         if 'add_on_id' not in row and 'add_on_code' in row:
              row['add_on_id'] = ao_map.get(row['add_on_code'])
-             del row['add_on_code']
+             del row['add_on_code'] # remove safe
              
         if row.get('product_id') and row.get('add_on_id'):
             stmt = pg_insert(AddOnProductMap).values(**row).on_conflict_do_nothing()
@@ -383,7 +363,8 @@ def seed_add_on_rates(conn):
     ao_q = select(AddOnMaster.add_on_code, AddOnMaster.id)
     ao_rows = conn.execute(ao_q).fetchall()
     ao_map = {row[0]: row[1] for row in ao_rows}
-    
+    occ_type_map = get_occupancy_type_map(conn)
+
     csv_path = "data/add_on_rates.csv"
     data = []
     if os.path.exists(csv_path):
@@ -392,14 +373,11 @@ def seed_add_on_rates(conn):
              data = [row for row in reader]
     else:
          # Sample
-         pid = prod_map.get("SFSP")
-         aid = ao_map.get("EARTHQUAKE")
-         if pid and aid:
+         if "SFSP" in prod_map and "EARTHQUAKE" in ao_map:
             data.append({
                 "product_code": "SFSP",
-                "product_id": pid,
-                "add_on_id": aid,
-                "occupancy_type": "Residential",
+                "add_on_code": "EARTHQUAKE",
+                "iib_code": "101", # Should resolve to Residential
                 "rate_type": "per_mille",
                 "rate_value": 0.10
             })
@@ -411,9 +389,16 @@ def seed_add_on_rates(conn):
              row['add_on_id'] = ao_map.get(row['add_on_code'])
              del row['add_on_code']
         
+        iib = row.get("iib_code")
+        if 'occupancy_type' not in row and iib:
+             row['occupancy_type'] = occ_type_map.get(iib)
+             if 'iib_code' in row: del row['iib_code']
+        
         if row.get('product_id') and row.get('add_on_id'):
             stmt = pg_insert(AddOnRate).values(**row).on_conflict_do_nothing()
             conn.execute(stmt)
+        else:
+             logger.warning(f"Skipping add_on_rates row. PID={row.get('product_id')} AID={row.get('add_on_id')}")
 
 
 def main():

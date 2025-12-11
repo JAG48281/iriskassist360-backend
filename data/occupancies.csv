@@ -1,0 +1,334 @@
+iib_code,section_aift,occupancy_type,occupancy_description
+1001,III,Residential,Dwellings
+1001_2,III,Residential,Dwellings: Co-operative society
+1002,III,Non-Industrial,Places of worships
+1003,III,Non-Industrial,Libraries
+1004,III,Non-Industrial,Museums
+1005,III,Non-Industrial,"Schools, Colleges"
+1006,III,Non-Industrial,Hospitals including X-ray and other Diagnostic clinics
+1007,III,Non-Industrial,"Office premises, Meeting Rooms"
+1008,III,Non-Industrial,"Auditoriums, Planetarium"
+1009,III,Non-Industrial,"Mess Houses, Clubs"
+1010,III,Non-Industrial,Marriage Halls
+1011,III,Non-Industrial,"Showrooms and display centers where goods are kept for
+display and no sales are carried out"
+1012,III,Non-Industrial,"Educational and Research Institutes imparting training in
+various crafts"
+1013,III,Non-Industrial,Lodging/Boarding Houses
+1014,III,Non-Industrial,Cycle Shed
+1015,III,Non-Industrial,Dish Antenna
+1016,III,Non-Industrial,"Indoor stadiums, Health Club, Gymnasium and Swimming pool"
+1029,III,Non-Industrial,"Data Processing/Call Centers/ Business Process Outsourcing
+Centers"
+1017,III,Non-Industrial,"Cafes, Restaurants, Hotels, Confectioner & Sweet meat sellers, Health Resorts"
+1018,III,Non-Industrial,"Laundries, Dry Cleaning"
+1019,III,Non-Industrial,Battery Charging Service Stations
+1020,III,Non-Industrial,Amusement parks
+1021,III,Non-Industrial,"Hoarding, Neon sign"
+1022,III,Non-Industrial,"Sports Galleries, Outdoor stadiums."
+1023,III,Non-Industrial,Shops dealing in goods otherwise not provided for
+1024,III,Non-Industrial,Shops dealing in hazardous goods
+1025,III,Non-Industrial,"Arms & Ammunition dealers,"
+1026,III,Non-Industrial,Motor Vehicle showroom including sales and service
+1027,III,Non-Industrial,"Fuel stations, Petrol / Diesel Kiosks (Without CNG)"
+1028,III,Non-Industrial,"Fuel stations, Petrol / Diesel Kiosks (CNG)"
+2001,IV,Industrial,Abrasive Manufacturing
+2002,IV,Industrial,Aerated Water Factories
+2003,IV,Industrial,Aerial Ropeway including trolley stations
+2004,IV,Industrial,Agarbatti manufacturing
+2005,IV,Industrial,Aircraft Hangers
+2006,IV,Industrial,"Airport Terminal Buildings (including all facilities like
+Cafes, Shops etc)"
+2007,IV,Industrial,Aluminium/ Magnesium Powder Plants
+2008,IV,Industrial,"Aluminium ,Zinc,Copper Factories"
+2009,IV,Industrial,Arecanut and/or Betelnut factories
+2010,IV,Industrial,Asbestos Steam Packing and lagging manufacturing
+2011,IV,Industrial,Atta and Cereal Grinding (excluding Dal Mills)
+2012,IV,Industrial,Audio/Video Cassette Manufacturing
+2013,IV,Industrial,Automobile Manufacturing
+2212,IV,Industrial,Automobile Filter Mfg
+2014,IV,Industrial,Bakeries
+2015,IV,Industrial,Basket Weavers and Cane Furniture Makers
+2016,IV,Industrial,Battery Manufacturing
+2017,IV,Industrial,Beedi Factories
+2018,IV,Industrial,Biscuit Factories
+2019,IV,Industrial,"Bitumenised Paper and / or Hessian Cloth Manufacturing
+including Tar Felt Manufacturing."
+2020,IV,Industrial,"Book Binders, Envelope and Paper Bag Manufacturing."
+2021,IV,Industrial,Breweries
+2022,IV,Industrial,Brickworks (including refractories and fire bricks)
+2023,IV,Industrial,Bridges - Concrete/Steel
+2024,IV,Industrial,Bridges-Wooden
+2025,IV,Industrial,Building In course of construction
+2026,IV,Industrial,Cable Manufacturing
+2027,IV,Industrial,Camphor Manufacturing
+2028,IV,Industrial,Candle Works
+2029,IV,Industrial,Canning Factories
+2030,IV,Industrial,Capsule Manufacturing
+2031,IV,Industrial,Carbon paper / Typewriter Ribbon Manufacturing
+2032,IV,Industrial,Cardamom Factories
+2033,IV,Industrial,Cardboard Box Manufacturing
+2034,IV,Industrial,"Carpenters, Wood wool Manufacturing, Furniture Manufacturing and other wood worker shops (excluding
+saw mill)"
+2035,IV,Industrial,Carpet and Drugget Manufacturing (Cotton/jute/wool )
+2036,IV,Industrial,Carpet and Drugget Manufacturing (Others)
+2037,IV,Industrial,Cashew nut Factories
+2038,IV,Industrial,Cattle feed Mill
+2039,IV,Industrial,Celluloid Goods Manufacturing
+2040,IV,Industrial,Cement / asbestos/concrete products Manufacturing
+2041,IV,Industrial,Cement Factories
+2042,IV,Industrial,"Ceramic Factories and Crockery and Stoneware pipe
+Manufacturing/Clay Works."
+2043,IV,Industrial,"Chemical  Manufacturing(Using  materials with  Flash  Point below 32OC), Bulk Drug Manufacturing"
+2044,IV,Industrial,"Chemical Manufacturing(others), Pharmaceuticals,
+Toiletry products"
+2045,IV,Industrial,Cigar and Cigarette Manufacturing
+2046,IV,Industrial,"Cigarette  Filter  Manufacturing  (Using  Solvents  with  Flash
+Point below 32OC )"
+2047,IV,Industrial,Cigarette Filter Manufacturing (Others)
+2048,IV,Industrial,Cinema Film Production Studios
+2049,IV,Industrial,"Cinematography   Film   Editing,   Laboratory   and   Sound
+recording rooms where Film processing is carried out"
+2050,IV,Industrial,"Cinematography Film Editing, Laboratory and Sound
+recording rooms without Film processing."
+2051,IV,Industrial,Cinema Theatres (for single screen)
+2229,IV,Industrial,Multiplex Theatre Complexes
+2230,IV,Industrial,Shopping malls(other than Multiplexes)
+2052,IV,Industrial,"Circus, Touring Drama Troupes and Touring Cinema
+Theatres"
+2053,IV,Industrial,"Cloth  Processing  units  situated  outside  the  compound  of Textile  mills  and  Cloth  processing  units  which  are  not owned     by     the     textile     mills     but     are     situated
+within the textile mills complex/compound."
+2054,IV,Industrial,Coal/Coke/Charcoal ball & briquettes Manufacturing
+2055,IV,Industrial,Coal Processing Plants
+2213,IV,Industrial,Lignite Handling system
+2056,IV,Industrial,"Coffee Curing, Roasting / Grinding"
+2057,IV,Industrial,Coir Factories
+2058,IV,Industrial,"Collieries - underground Machinery and pit head gear and
+Dragline Machine used in Collieries"
+2059,IV,Industrial,"Condensed Milk Factories, Milk Pasturisings Plants and
+Dairies"
+2060,IV,Industrial,"Confectionery Manufacturing, Sugar Candy Manufacturing
+Plants and  Sweet meat Manufacturing Plants"
+2061,IV,Industrial,Contractors Plant and Machinery (    At one location only)
+2209,IV,Industrial,"Contractors Plant and Machinery Anywhere in India (at
+specified locations)"
+2062,IV,Industrial,Cork Products Manufacturing
+2063,IV,Industrial,Cotton Gin and Press Houses
+2064,IV,Industrial,Cotton Seed cleaning / Delinting Factory
+2065,IV,Industrial,Dehydration Factories
+2066,IV,Industrial,Detergent Manufacturing with Sulphonation Plant
+2067,IV,Industrial,Detergent Manufacturing (Others)
+2068,IV,Industrial,Distilleries
+2069,IV,Industrial,Duplicating/stencil paper Manufacturing
+2070,IV,Industrial,Electric Generation Stations – Hydro
+2210,IV,Industrial,Electric Generation (Others)
+2220,IV,Industrial,Electric Generation -Nuclear Power Station
+2217,IV,Industrial,Electric Generation - Thermal Power Stations
+2218,IV,Industrial,Electric Generation Stations –Solar Power Plants
+2219,IV,Industrial,Electric Generation Stations – Windmill
+2221,IV,Industrial,Electric Generation Stations – Biomass Power Stations
+2071,IV,Industrial,Electric Lamp /T.V. Picture Tube Manufacturing
+2072,IV,Industrial,Electronic Goods Manufacturing /Assembly
+2073,IV,Industrial,"Electronic Software Parks/ Electronic Software
+Development Unit/s"
+2074,IV,Industrial,Enamel-ware factories
+2075,IV,Industrial,"Engineering Workshop - Structural Steel fabricators, Sheet
+Metal fabricators"
+2222,IV,Industrial,Engineering Workshop - Steel Plant
+2223,IV,Industrial,Engineering Workshop -  Rolling Mill
+2224,IV,Industrial,"Engineering     Workshop-     Pipe     Extruding,     Stamping, Pressing,    Forging    Mills,    Metal    smelting,    Foundries,
+Galvanising works,"
+2225,IV,Industrial,"Engineering Workshop - Metal Extraction, Ore processing
+(other  than  Aluminium,  Copper,  Zinc),  Plant  processing Raw sand into Silica"
+2226,IV,Industrial,Engineering Workshop - Ferro plants
+2227,IV,Industrial,Engineering Workshop - Clock / Watch manufacturing
+2076,IV,Industrial,"Engineering Workshop (Others), Motor Vehicle Garages"
+2228,IV,Industrial,Engineering workshop- Manufacturing of Cut & Polished diamonds (Manufacturing of diamonds)
+2077,IV,Industrial,"Exhibitions, Fetes, Mandaps."
+2078,IV,Industrial,Explosives / Blasting Factories
+2079,IV,Industrial,"Fertiliser Manufacturing (other than those rateable under
+Petrochemical Tariff)"
+2080,IV,Industrial,Filter and wax paper Manufacturing
+2081,IV,Industrial,Fireworks Manufacturing
+2082,IV,Industrial,Flax / Hemp Mills
+2083,IV,Industrial,Flour Mills
+2084,IV,Industrial,Foamed Plastics Manufacturing and / or converting plants
+2085,IV,Industrial,Foam Rubber Manufacturing
+2086,IV,Industrial,French Polish Manufacturing
+2087,IV,Industrial,Fruit and vegetable drying/dehydrating factories
+2088,IV,Industrial,Fruit products and Condiment Factories (including fruit pulp making)
+2089,IV,Industrial,"Garment Makers, Topee, Hats and the like makers"
+2090,IV,Industrial,Ghee Factories including vegetable Ghee mfg.
+2091,IV,Industrial,Glass Fibre Manufacturing
+2092,IV,Industrial,Glass wool Manufacturing
+2093,IV,Industrial,Glass Manufacturing/Automobile Glass Manufacturing
+2094,IV,Industrial,Gold thread factories / Gilding factories
+2095,IV,Industrial,Granite Factories using inflammable solvents
+2096,IV,Industrial,Granite Factories (Others)
+2097,IV,Industrial,Graphite electrode Manufacturing
+2098,IV,Industrial,"Grain/seeds disintegrating/crushing/ Decorticating
+factories/ Dal mills."
+2099,IV,Industrial,Grease / Wax Manufacturing
+2100,IV,Industrial,Green Houses/ Algae/ Spirulina and the like
+2101,IV,Industrial,Gum/Glue/Gelatine Manufacturing
+2102,IV,Industrial,Gypsum  board manufacturer
+2103,IV,Industrial,"Hoisery,lace, Embroidery/Thread factories"
+2104,IV,Industrial,Ice candy and Ice cream Manufacturing
+2105,IV,Industrial,Ice factories
+2106,IV,Industrial,Incandescent Gas mantle Manufacturing
+2107,IV,Industrial,Industrial Diamonds Manufacturing
+2108,IV,Industrial,Industrial Gas Manufacturing
+2109,IV,Industrial,Ink (excluding printing ink) Manufacturing
+2110,IV,Industrial,Jaggery Manufacturing
+2111,IV,Industrial,Jute Mills
+2112,IV,Industrial,Katha Manufacturing
+2113,IV,Industrial,Khandsari Sugar Manufacturing
+2114,IV,Industrial,Lac or Shellac Factories
+2115,IV,Industrial,Leather Cloth Factories
+2116,IV,Industrial,Leather Goods Manufacturing ( incl. boot/shoe)
+2117,IV,Industrial,Lime Kiln
+2118,IV,Industrial,Lithographic presses
+2119,IV,Industrial,Liquified Gas Bottling/Recovery Plant
+2120,IV,Industrial,Malt Extraction Plants
+2121,IV,Industrial,Man-made Fibre Manufacturing (using Cellulose)
+2122,IV,Industrial,Man-made Fibre Manufacturing Plant (Others)
+2123,IV,Industrial,Manure Blending works
+2124,IV,Industrial,Match Factories
+2125,IV,Industrial,Mattress and Pillow making
+2126,IV,Industrial,Metallizing works ( involving metals only)
+2127,IV,Industrial,Metallising Works (others)
+2128,IV,Industrial,Metal/Tin printers
+2129,IV,Industrial,Mica Products Manufacturing
+2130,IV,Industrial,Mineral Oil blending and processing
+2131,IV,Industrial,Mosaic Factories
+2132,IV,Industrial,Mushroom Growing Premises (Excluding Crops)
+2214,IV,Industrial,Nitro Cellulose Manufacturing (others)
+2133,IV,Industrial,Nitro Cellulose Manufacturing-Industrial Grade
+2134,IV,Industrial,Non-woven fabric Manufacturing
+2135,IV,Industrial,Oil Extraction
+2136,IV,Industrial,Oil Distillation Plants (essential)
+2137,IV,Industrial,Oil Mills refining ( Veg/Animal)
+2138,IV,Industrial,Oil Mills (Vegetable)
+2139,IV,Industrial,Oil and Leather Cloth Factories
+2140,IV,Industrial,Paint factories (Water based)
+2141,IV,Industrial,Paint (others) & Varnish Factories
+2142,IV,Industrial,Paints - Nitrocellulose based
+2143,IV,Industrial,Pan Masala making
+2144,IV,Industrial,Paper and Cardboard Mills (including Lamination)
+2231,IV,Industrial,Disposable Diaper Manufacturing
+2145,IV,Industrial,Particle Board Manufacturing
+2146,IV,Industrial,Pencil Manufacturing
+2147,IV,Industrial,Petroleum Coke Calcination
+2148,IV,Industrial,"Plastic goods manufacturing (Excluding foam plastics) Using Plastic raw materials having calorific value upto 15,000 btu/lb. Polytetrafluoroethylene, Polychorotrifluroethylene, Polyvinyl chloride, polyvinylidene chlororide,
+Polyvinylidene fluoride, Chlorinated polyether, Polycarbonate, Polymethyl methacrylate, Phenolformaldehyde, Urea-formaldehyde. Melamone- formaldhyde, Polyurethane, Polyester, Silicones."
+2216,IV,Industrial,"Plastic goods manufacturing (Excluding foam plastics) Using Plastic raw materials having calorific value above 15,000 btu/lb. Polyethylene, Polypropylene, Polystyrene, Poly-alphamethylstyrene, Acrylonitrilebutadienestyrene,
+Polybutylene"
+2149,IV,Industrial,Plywood / Wood veneering Factories/ Laminating Factories
+2150,IV,Industrial,Polyester Film Manufacturing / BOPP Film Manufacturing
+2151,IV,Industrial,"Port Premises including jetties and equipment thereon
+And other port facilities"
+2152,IV,Industrial,Poultry Farms (Excluding birds therein)
+2153,IV,Industrial,Presses for coir fibres/waste/Grass/fodder/boosa/Jute
+2154,IV,Industrial,Presses for coir yarn / cotton/senna leaves
+2155,IV,Industrial,"Presses for carpets, rugs and tobacco"
+2156,IV,Industrial,Presses for hides and skins
+2157,IV,Industrial,Printing Ink Manufacturing / Roller composition factories
+2158,IV,Industrial,Printing Press
+2159,IV,Industrial,Pulverising Plants(Metals and non-hazardous goods)
+2160,IV,Industrial,Pulverizing Plants (Others)
+2161,IV,Industrial,Rice Mills
+2162,IV,Industrial,Rice Polishing Units
+2163,IV,Industrial,"Rope works  (Plastic), Assembling of Plastic Goods such as Toys and the like"
+2232,IV,Industrial,Sports Goods Manufacturing
+2164,IV,Industrial,Rope Works (others)
+2165,IV,Industrial,Rubber Factories
+2166,IV,Industrial,Rubber Goods Mfg with Spreading
+2167,IV,Industrial,Rubber Goods Manufacturing without spreading
+2168,IV,Industrial,Salt crushing Factories and Refineries
+2169,IV,Industrial,"Saw Mills (including Timber Merchants premises where
+sawing is done)."
+2170,IV,Industrial,Sea Food / Meat Processing
+2171,IV,Industrial,Silk Mills / Spun Silk Mills
+2172,IV,Industrial,Snuff Manufacturing
+2173,IV,Industrial,Soap Manufacturing
+2174,IV,Industrial,Sponge Iron Plants
+2175,IV,Industrial,"Spray Painting, Powder coating"
+2176,IV,Industrial,Stables (excluding animals)
+2177,IV,Industrial,Starch Factories
+2178,IV,Industrial,Stone quarries
+2180,IV,Industrial,Sugar factories
+2181,IV,Industrial,Surgical Cotton Manufacturing
+2183,IV,Industrial,Tanneries
+2184,IV,Industrial,Tapioca factories
+2185,IV,Industrial,Tarpaulin and canvas proofing factories
+2186,IV,Industrial,Tea blending/packing factories
+2187,IV,Industrial,Tea Factories
+2188,IV,Industrial,Telephone Exchanges
+2189,IV,Industrial,Textile Mills-Spinning mills
+2211,IV,Industrial,Textile Mills-Composite mills
+2190,IV,Industrial,Tile & Pottery works
+2191,IV,Industrial,"Tiny sector Industries with values at risk not exceeding Rs
+10 lakhs"
+2192,IV,Industrial,Tissue Culture Premises (Excluding Crops)
+2193,IV,Industrial,Tobacco Curing / Redrying Factories
+2194,IV,Industrial,Tobacco grinding/ crushing Manufacturing
+2195,IV,Industrial,Turpentine and rosin distilleries
+2196,IV,Industrial,Tyres and Tubes Manufacturing
+2197,IV,Industrial,Tyre Retreading and Resoling factories
+2198,IV,Industrial,Umbrella Assembly factories
+2199,IV,Industrial,Velvet Cloth Manufacturing
+2200,IV,Industrial,Vermicelli factories
+2201,IV,Industrial,Weigh Bridges
+2202,IV,Industrial,Weaving Mills
+2203,IV,Industrial,Wheat Threshers
+2204,IV,Industrial,Wood seasoning/treatment/ impregnation
+2205,IV,Industrial,Wool cleaning and pressing factories
+2206,IV,Industrial,Woollen Mills/Fur garments and accessories
+2207,IV,Industrial,Yarn Processing
+2208,IV,Industrial,Zip fasteners Manufacturing
+4900,IV,Industrial,Silent risk
+3001,V,Industrial,Analytical / Quality Control Laboratories
+3002,V,Industrial,Boiler House
+3003,V,Industrial,Dam
+3004,V,Industrial,Effluent /Sewage Treatment Plant
+3005,V,Industrial,"Electric Sub-Stations, Loco Sheds"
+3006,V,Industrial,Electric Transmission / Distribution Lines
+3007,V,Industrial,Pipe lines (carrying water only)
+3008,V,Industrial,Pipe lines (others)
+3009,V,Industrial,Pump House (Water)
+3010,V,Industrial,Pump House (Others)
+3011,V,Industrial,Railway tracks
+3012,V,Industrial,Roads
+3013,V,Industrial,Water Treatment Plant/Water tanks
+3014,V,Industrial,Wireless Transmitting Stations
+3015,V,Industrial,"Compressor houses - Compressors handling air, Inert Gas
+and CO2"
+3016,V,Industrial,Compressor houses - Compressor (others)
+3017,V,Industrial,Boundary Walls Made of combustible materials
+3018,V,Industrial,Boundary Walls (others)
+3019,V,Industrial,Electric Crematoriums
+4001,VI,Industrial,"Storage  of  Non-hazardous  goods  subject  to  warranty  that hazardous  goods of Category I, II, III , Coir waste, Coir fibre and  Caddies  are  not  stored  therein  (Materials  stored  in
+Godowns & Silos)"
+4012,VI,Industrial,"Storage  of  Non-hazardous  goods  subject  to  warranty  that hazardous  goods of Category I, II, III , Coir waste, Coir fibre and  Caddies  are  not  stored  therein  (Materials  stored  in open)"
+4002,VI,Industrial,"Storage   of    Category   I   hazaardous   Goods   subject   to warranty that goods listed in Category II, III, Coir waste, Coir fibre and  Caddies are not stored therein. (Materials stored
+in Godowns & Silos)"
+4013,VI,Industrial,"Storage   of    Category   I   hazaardous   Goods   subject   to warranty that goods listed in Category II, III, Coir waste, Coir fibre and  Caddies are not stored therein. (Materials stored
+in open)"
+4019,VI,Industrial,Vehicle stored in open including tractors
+4003,VI,Industrial,"Storage of hazardous Goods listed in Category II subject to warranty that  goods listed  in  Category III, Coir waste,  Coir fibre and Caddies are not stored therein. (Materials stored in Godowns & Silos)"
+4014,VI,Industrial,"Storage of hazardous Goods listed in Category II subject to warranty that  goods listed  in  Category III, Coir waste,  Coir fibre and  Caddies are not stored therein. (Materials stored
+in open)"
+4018,VI,Industrial,Bus Terminus
+4004,VI,Industrial,"Storage of hazardous Goods listed in Category III subject to warranty  that  Coir  waste,  Coir  fibre  and  ,  Caddies  are  not stored therein. (Materials stored in Godowns & Silos)"
+4015,VI,Industrial,"Storage of hazardous Goods listed in Category III subject to
+warranty  that  Coir  waste,  Coir  fibre  and  ,  Caddies  are  not stored therein. (Materials stored in open)"
+4005,VI,Industrial,Transporter’s    godowns    &    Godowns    of    clearing    and forwarding agents. (Materials stored in Godowns & Silos)
+4016,VI,Industrial,Transporter’s    godowns    &    Godowns    of    clearing    and forwarding agents. (Materials stored in open)
+4006,VI,Industrial,"Storage of Coir Waste ,Coir Fibre, Caddies (Materials stored in Godowns & Silos)"
+4017,VI,Industrial,"Storage of Coir Waste ,Coir Fibre, Caddies. (Materials stored in open)"
+4007,VI,Industrial,Cold Storage premises
+4008,VII,Industrial,"Gas Holders/ Bullets/spheres and storages for liquified gases except for Nitrogen, Carbon dioxide and inert gases"
+4009,VII,Industrial,"Gas Holders/ Vessels for Nitrogen, Carbon dioxide and inert
+gases"
+4010,VII,Industrial,Tanks containing liquids flashing at 32?C & below
+4011,VII,Industrial,Tanks (Others)
