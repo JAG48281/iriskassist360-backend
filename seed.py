@@ -392,24 +392,51 @@ def seed_add_on_rates(conn):
 def verify_seeding(conn):
     tables = ["lob_master", "product_master", "occupancies", "product_basic_rates", "bsus_rates", "stfi_rates", "eq_rates", "terrorism_slabs", "add_on_master", "add_on_product_map", "add_on_rates"]
     logger.info("--- Post-Seeding Validation ---")
+    
+    total_failure = False
+    
     for t in tables:
-        count = conn.execute(text(f"SELECT COUNT(*) FROM {t}")).scalar()
-        logger.info(f"Table {t}: {count} rows")
+        try:
+            count = conn.execute(text(f"SELECT COUNT(*) FROM {t}")).scalar()
+            logger.info(f"Table {t}: {count} rows")
+            
+            if t == "lob_master" and count == 0:
+                logger.error("CRITICAL: lob_master is empty! Seeding definitely failed.")
+                total_failure = True
+        except Exception as e:
+            logger.error(f"Could not count {t}: {e}")
+
+    if total_failure:
+        raise Exception("Verification failed: Critical tables are empty.")
 
 def main():
+    # Debug Info
+    import os
+    logger.info(f"Current Working Directory: {os.getcwd()}")
+    
+    data_dir = os.path.join(os.getcwd(), "data")
+    if os.path.exists(data_dir):
+        logger.info(f"Contents of {data_dir}: {os.listdir(data_dir)}")
+    else:
+        logger.warning(f"Data directory {data_dir} does NOT exist!")
+
     logger.info("Starting Seeding Process...")
+    
     # Wrap in transaction
     conn = engine.connect()
+    
+    # Check what DB we are connected to
+    try:
+        db_name = conn.execute(text("SELECT current_database()")).scalar()
+        logger.info(f"Connected to Database: {db_name}")
+    except Exception as e:
+        logger.error(f"DB Connection check failed: {e}")
+
     trans = conn.begin()
     
     try:
-        seed_lob_and_product(conn) # Ensure masters exist first
+        seed_lob_and_product(conn)
         seed_occupancies(conn)
-        
-        # Ensure occupancies are flushed/committed so maps work?
-        # Since we are in ONE transaction, previous inserts are visible to subsequent selects in same transaction.
-        # So we don't need intermediate commit.
-
         seed_product_basic_rates(conn)
         seed_bsus_rates(conn)
         seed_stfi_rates(conn)
