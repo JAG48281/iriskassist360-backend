@@ -47,11 +47,7 @@ def get_occupancy_type_map(conn):
     return {row[0]: row[1] for row in result}
 
 def seed_lob_and_product(conn):
-    """Seed LobMaster and ProductMaster if empty."""
-    if table_has_rows(conn, "lob_master") and table_has_rows(conn, "product_master"):
-        logger.info("Skipping LOB and Product seeding (Tables have data)")
-        return
-
+    """Seed LobMaster and ProductMaster."""
     logger.info("Seeding LOB and Products...")
     
     # LOBs
@@ -95,10 +91,6 @@ def seed_lob_and_product(conn):
         conn.execute(stmt)
 
 def seed_occupancies(conn):
-    if table_has_rows(conn, "occupancies"):
-        logger.info("Skipping Occupancies (Data exists)")
-        return
-    
     logger.info("Seeding Occupancies...")
     csv_path = "data/occupancies.csv"
     data = []
@@ -120,10 +112,6 @@ def seed_occupancies(conn):
         conn.execute(stmt)
 
 def seed_product_basic_rates(conn):
-    if table_has_rows(conn, "product_basic_rates"):
-        logger.info("Skipping ProductBasicRates (Data exists)")
-        return
-    
     logger.info("Seeding ProductBasicRates...")
     
     prod_map = get_product_map(conn)
@@ -169,10 +157,6 @@ def seed_product_basic_rates(conn):
             logger.warning(f"Skipping product_basic_rates row due to missing map: Product={p_code}, IIB={iib}")
 
 def seed_bsus_rates(conn):
-    if table_has_rows(conn, "bsus_rates"):
-        logger.info("Skipping BsusRates (Data exists)")
-        return
-        
     logger.info("Seeding BsusRates...")
     prod_map = get_product_map(conn)
     occ_id_map = get_occupancy_id_map(conn)
@@ -212,7 +196,6 @@ def seed_bsus_rates(conn):
             logger.warning(f"Skipping bsus_rates row: Product={p_code}, IIB={iib}")
 
 def seed_stfi_rates(conn):
-    if table_has_rows(conn, "stfi_rates"): return
     logger.info("Seeding STFI Rates...")
     prod_map = get_product_map(conn)
     occ_id_map = get_occupancy_id_map(conn)
@@ -249,7 +232,6 @@ def seed_stfi_rates(conn):
             logger.warning(f"Skipping stfi_rates row: Product={row.get('product_code')}, IIB={iib}")
 
 def seed_eq_rates(conn):
-    if table_has_rows(conn, "eq_rates"): return
     logger.info("Seeding EQ Rates...")
     prod_map = get_product_map(conn)
     occ_id_map = get_occupancy_id_map(conn)
@@ -286,9 +268,6 @@ def seed_eq_rates(conn):
             logger.warning(f"Skipping eq_rates row: Product={row.get('product_code')}, IIB={iib}")
 
 def seed_terrorism_slabs(conn):
-    if table_has_rows(conn, "terrorism_slabs"): 
-        logger.info("Skipping TerrorismSlabs (Data exists)")
-        return
     logger.info("Seeding TerrorismSlabs (Official Circular Values)...")
     prod_map = get_product_map(conn)
     
@@ -313,7 +292,6 @@ def seed_terrorism_slabs(conn):
                 conn.execute(stmt)
 
 def seed_add_on_master(conn):
-    if table_has_rows(conn, "add_on_master"): return
     logger.info("Seeding AddOnMaster...")
     csv_path = "data/add_on_master.csv"
     data = []
@@ -333,7 +311,6 @@ def seed_add_on_master(conn):
          conn.execute(stmt)
 
 def seed_add_on_product_map(conn):
-    if table_has_rows(conn, "add_on_product_map"): return
     logger.info("Seeding AddOnProductMap...")
     
     prod_map = get_product_map(conn)
@@ -365,9 +342,10 @@ def seed_add_on_product_map(conn):
         if row.get('product_id') and row.get('add_on_id'):
             stmt = pg_insert(AddOnProductMap).values(**row).on_conflict_do_nothing()
             conn.execute(stmt)
+        else:
+            logger.warning(f"Skipping add_on_product_map row. PID={row.get('product_id')} AID={row.get('add_on_id')}")
 
 def seed_add_on_rates(conn):
-    if table_has_rows(conn, "add_on_rates"): return
     logger.info("Seeding AddOnRates...")
     
     prod_map = get_product_map(conn)
@@ -411,6 +389,12 @@ def seed_add_on_rates(conn):
         else:
              logger.warning(f"Skipping add_on_rates row. PID={row.get('product_id')} AID={row.get('add_on_id')}")
 
+def verify_seeding(conn):
+    tables = ["lob_master", "product_master", "occupancies", "product_basic_rates", "bsus_rates", "stfi_rates", "eq_rates", "terrorism_slabs", "add_on_master", "add_on_product_map", "add_on_rates"]
+    logger.info("--- Post-Seeding Validation ---")
+    for t in tables:
+        count = conn.execute(text(f"SELECT COUNT(*) FROM {t}")).scalar()
+        logger.info(f"Table {t}: {count} rows")
 
 def main():
     logger.info("Starting Seeding Process...")
@@ -421,6 +405,11 @@ def main():
     try:
         seed_lob_and_product(conn) # Ensure masters exist first
         seed_occupancies(conn)
+        
+        # Ensure occupancies are flushed/committed so maps work?
+        # Since we are in ONE transaction, previous inserts are visible to subsequent selects in same transaction.
+        # So we don't need intermediate commit.
+
         seed_product_basic_rates(conn)
         seed_bsus_rates(conn)
         seed_stfi_rates(conn)
@@ -430,10 +419,14 @@ def main():
         seed_add_on_product_map(conn)
         seed_add_on_rates(conn)
         
+        verify_seeding(conn)
+
         trans.commit()
         logger.info("✅ Seeding Completed Successfully.")
     except Exception as e:
         logger.error(f"❌ Seeding Failed: {e}")
+        import traceback
+        traceback.print_exc()
         trans.rollback()
         sys.exit(2)
     finally:
