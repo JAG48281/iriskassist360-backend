@@ -1,1 +1,1 @@
-web: bash start.sh
+web: echo "---DEPLOY START---" && pwd && ls -la && echo "---MIGRATIONS---" && alembic upgrade head && echo "---SEEDING---" && python -u seed.py && echo "---APP START---" && uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers
