@@ -410,6 +410,7 @@ def verify_seeding(conn):
         raise Exception("Verification failed: Critical tables are empty.")
 
 def main():
+    print("🚀 SEEDING SCRIPT STARTING... (Standard Output)", flush=True)
     # Debug Info
     import os
     logger.info(f"Current Working Directory: {os.getcwd()}")
