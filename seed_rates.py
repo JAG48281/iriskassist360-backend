@@ -1,13 +1,69 @@
 from sqlalchemy.orm import Session
 from app.database import SessionLocal, engine, Base
 from app.models.rate import Rate
+from app.models.master import LobMaster, ProductMaster
 
 # Ensure tables exist
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine) # Better to rely on Alembic
+
+def seed_lobs(db: Session):
+    lobs = [
+        ("FIRE", "Fire Insurance", "Fire and Special Perils"),
+        ("MOTOR", "Motor Insurance", "Private and Commercial Vehicles"),
+        ("HEALTH", "Health Insurance", "Individual and Floater policies"),
+        ("PA", "Personal Accident", "Individual and Group PA"),
+        ("LIABILITY", "Liability Insurance", "CGL, D&O, WC"),
+        ("ENGINEERING", "Engineering Insurance", "CAR, EAR, MBD"),
+        ("MISC", "Miscellaneous", "Other insurance products"),
+    ]
+    
+    for code, name, desc in lobs:
+        lob = db.query(LobMaster).filter(LobMaster.lob_code == code).first()
+        if not lob:
+            lob = LobMaster(lob_code=code, lob_name=name, description=desc, active=True)
+            db.add(lob)
+            print(f"Added LOB: {code}")
+        else:
+            print(f"LOB exists: {code}")
+    db.commit()
+
+def seed_products(db: Session):
+    # Fetch Fire LOB
+    fire_lob = db.query(LobMaster).filter(LobMaster.lob_code == "FIRE").first()
+    if not fire_lob:
+        print("Error: FIRE LOB not found. Cannot seed products.")
+        return
+
+    # Fire Products
+    fire_products = [
+        ("SFSP", "Standard Fire and Special Perils", "Traditional Fire Policy"),
+        ("IAR", "Industrial All Risk", "Comprehensive Industrial Cover"),
+        ("BGRP", "Bharat Griha Raksha Policy", "Home Insurance"),
+        ("BSUSP", "Bharat Sookshma Udyam Suraksha", "Micro Enterprise"),
+        ("BLUSP", "Bharat Laghu Udyam Suraksha", "Small Enterprise"),
+        ("VUSP", "Value Udyam", "Value Added Product"), # based on existing seed
+        ("UBGR", "Bharat Griha Raksha (UIIC)", "UIIC Specific Home Insurance"), # Mentioned in request metadata context
+    ]
+
+    for code, name, desc in fire_products:
+        prod = db.query(ProductMaster).filter(ProductMaster.product_code == code, ProductMaster.lob_id == fire_lob.id).first()
+        if not prod:
+            prod = ProductMaster(lob_id=fire_lob.id, product_code=code, product_name=name, description=desc, active=True)
+            db.add(prod)
+            print(f"Added Product: {code}")
+        else:
+            print(f"Product exists: {code}")
+
+    # Placeholders for other LOBs can be added here as needed
+    
+    db.commit()
 
 def seed_rates():
     db = SessionLocal()
     
+    seed_lobs(db)
+    seed_products(db)
+
     # Define standard rates for UIIC Fire Products
     # Format: (Product Code, Occupancy Name, Rate Per Mille)
     rates_data = [
@@ -44,7 +100,7 @@ def seed_rates():
         ("IAR", "Plant", 0.75),
     ]
 
-    print("Checking existing rates...")
+    print("Checking existing rates (legacy)...")
     
     count = 0
     for product, occupancy, rate_val in rates_data:
@@ -69,7 +125,7 @@ def seed_rates():
             print(f"Added: {product} - {occupancy} @ {rate_val}")
     
     db.commit()
-    print(f"✅ Successfully added {count} new rates to PostgreSQL!")
+    print(f"✅ Seeding completed. Added legacy rates: {count}")
     db.close()
 
 if __name__ == "__main__":
