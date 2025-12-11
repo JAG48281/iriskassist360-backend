@@ -24,7 +24,7 @@ def upgrade() -> None:
         sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
         sa.Column('add_on_id', sa.Integer(), nullable=False),
         sa.Column('product_code', sa.String(length=50), nullable=False),
-        sa.Column('active', sa.Boolean(), server_default=sa.text('true'), nullable=False),
+        sa.Column('active', sa.Boolean(), server_default=sa.true(), nullable=False),
         sa.Column('created_at', sa.TIMESTAMP(), server_default=sa.func.now(), nullable=True),
         sa.Column('updated_at', sa.TIMESTAMP(), server_default=sa.func.now(), onupdate=sa.func.now(), nullable=True),
         sa.ForeignKeyConstraint(['add_on_id'], ['add_on_master.id'], ),
