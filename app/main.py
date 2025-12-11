@@ -67,6 +67,19 @@ app = create_app()
 
 Base.metadata.create_all(bind=engine)
 
+
 @app.get("/")
 def root():
     return {"brand": "iRiskAssist360", "status": "running"}
+
+@app.get("/api/manual-seed")
+def trigger_manual_seeding():
+    """Manually trigger seeding in case deployment script fails"""
+    try:
+        from seed import main as seed_main
+        seed_main()
+        return {"success": True, "message": "Seeding executed successfully."}
+    except Exception as e:
+        import traceback
+        return {"success": False, "error": str(e), "traceback": traceback.format_exc()}
+
