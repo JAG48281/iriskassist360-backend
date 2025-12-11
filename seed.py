@@ -203,7 +203,7 @@ def seed_stfi_rates(conn):
     csv_path = "data/stfi_rates.csv"
     data = []
     if os.path.exists(csv_path):
-        with open(csv_path, 'r') as f:
+        with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
             reader = csv.DictReader(f)
             data = [row for row in reader]
     else:
