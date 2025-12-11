@@ -423,48 +423,40 @@ def main():
 
     logger.info("Starting Seeding Process...")
     
-    # Wrap in transaction
-    conn = engine.connect()
-    
-    # Check what DB we are connected to
     try:
-        db_name = conn.execute(text("SELECT current_database()")).scalar()
-        logger.info(f"Connected to Database: {db_name}")
-    except Exception as e:
-        logger.error(f"DB Connection check failed: {e}")
+        # Use context manager for automatic transaction handling
+        with engine.begin() as conn:
+            # Check DB (Optional, inside trans is fine)
+            try:
+                db_name = conn.execute(text("SELECT current_database()")).scalar()
+                logger.info(f"Connected to Database: {db_name}")
+            except:
+                pass
 
-    trans = conn.begin()
-    
-    try:
-        seed_lob_and_product(conn)
-        seed_occupancies(conn)
-        seed_product_basic_rates(conn)
-        seed_bsus_rates(conn)
-        seed_stfi_rates(conn)
-        seed_eq_rates(conn)
-        seed_terrorism_slabs(conn)
-        seed_add_on_master(conn)
-        seed_add_on_product_map(conn)
-        seed_add_on_rates(conn)
+            seed_lob_and_product(conn)
+            seed_occupancies(conn)
+            seed_product_basic_rates(conn)
+            seed_bsus_rates(conn)
+            seed_stfi_rates(conn)
+            seed_eq_rates(conn)
+            seed_terrorism_slabs(conn)
+            seed_add_on_master(conn)
+            seed_add_on_product_map(conn)
+            seed_add_on_rates(conn)
+            
+            print("Seeding logic finished, committing...", flush=True)
         
-        print("Committing transaction...", flush=True)
-        trans.commit()
-        print("✅ Transaction Committed.", flush=True)
+        print("✅ Transaction Committed Successfully.", flush=True)
         
-        # Verify AFTER commit to ensure visibility
-        verify_seeding(conn)
+        # Verify in a separate connection to ensure persistence
+        with engine.connect() as verify_conn:
+            verify_seeding(verify_conn)
 
     except Exception as e:
         print(f"❌ Seeding Failed: {e}", flush=True)
         import traceback
         traceback.print_exc()
-        try:
-            trans.rollback()
-        except:
-            pass
         sys.exit(2)
-    finally:
-        conn.close()
 
 if __name__ == "__main__":
     try:
