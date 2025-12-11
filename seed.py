@@ -127,7 +127,7 @@ def seed_product_basic_rates(conn):
     data = []
     
     if os.path.exists(csv_path):
-         with open(csv_path, 'r') as f:
+         with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
             reader = csv.DictReader(f)
             data = [row for row in reader]
     else:
@@ -166,7 +166,7 @@ def seed_bsus_rates(conn):
     data = []
     
     if os.path.exists(csv_path):
-        with open(csv_path, 'r') as f:
+        with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
             reader = csv.DictReader(f)
             data = [row for row in reader]
     else:
@@ -238,7 +238,7 @@ def seed_eq_rates(conn):
     csv_path = "data/eq_rates.csv"
     data = []
     if os.path.exists(csv_path):
-        with open(csv_path, 'r') as f:
+        with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
              reader = csv.DictReader(f)
              data = [row for row in reader]
     else:
@@ -293,7 +293,7 @@ def seed_add_on_master(conn):
     csv_path = "data/add_on_master.csv"
     data = []
     if os.path.exists(csv_path):
-        with open(csv_path, 'r') as f:
+        with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
              reader = csv.DictReader(f)
              data = [row for row in reader]
     else:
@@ -318,7 +318,7 @@ def seed_add_on_product_map(conn):
     csv_path = "data/add_on_product_map.csv"
     data = []
     if os.path.exists(csv_path):
-         with open(csv_path, 'r') as f:
+         with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
              reader = csv.DictReader(f)
              data = [row for row in reader]
     else:
@@ -352,7 +352,7 @@ def seed_add_on_rates(conn):
     csv_path = "data/add_on_rates.csv"
     data = []
     if os.path.exists(csv_path):
-         with open(csv_path, 'r') as f:
+         with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
              reader = csv.DictReader(f)
              data = [row for row in reader]
     else:
