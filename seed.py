@@ -447,18 +447,32 @@ def main():
         seed_add_on_product_map(conn)
         seed_add_on_rates(conn)
         
+        print("Committing transaction...", flush=True)
+        trans.commit()
+        print("✅ Transaction Committed.", flush=True)
+        
+        # Verify AFTER commit to ensure visibility
         verify_seeding(conn)
 
-        trans.commit()
-        logger.info("✅ Seeding Completed Successfully.")
     except Exception as e:
-        logger.error(f"❌ Seeding Failed: {e}")
+        print(f"❌ Seeding Failed: {e}", flush=True)
         import traceback
         traceback.print_exc()
-        trans.rollback()
+        try:
+            trans.rollback()
+        except:
+            pass
         sys.exit(2)
     finally:
         conn.close()
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        print(f"CRITICAL MAIN ERROR: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
+
+
