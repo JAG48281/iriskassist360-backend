@@ -12,3 +12,4 @@ requests
 email-validator
 reportlab
 slowapi
+pytest
