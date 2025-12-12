@@ -404,31 +404,42 @@ def seed_add_on_rates(conn):
     occ_type_map = get_occupancy_type_map(conn)
 
     csv_path = "data/add_on_rates.csv"
-    data = []
+    count = 0
     if not os.path.exists(csv_path):
         logger.warning(f"{csv_path} not found. Skipping AddOnRates seeding.")
         return
 
     with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
         reader = csv.DictReader(f)
-        data = [row for row in reader]
-            
-    for row in data:
-        if 'product_id' not in row and 'product_code' in row:
-             row['product_id'] = prod_map.get(row['product_code'])
-        if 'add_on_id' not in row and 'add_on_code' in row:
-             row['add_on_id'] = ao_map.get(row['add_on_code'])
-             del row['add_on_code']
-        
-        iib = row.get("iib_code")
-        if 'occupancy_type' not in row and iib:
-             row['occupancy_type'] = occ_type_map.get(iib)
-             if 'iib_code' in row: del row['iib_code']
-        
-        if row.get('product_id') and row.get('add_on_id'):
-            upsert(conn, AddOnRate, row)
-        else:
-             logger.warning(f"Skipping add_on_rates row. PID={row.get('product_id')} AID={row.get('add_on_id')}")
+        for row in reader:
+             p_code = row.get("product_code", "").strip()
+             a_code = row.get("add_on_code", "").strip()
+             
+             if not p_code or not a_code:
+                 continue
+                 
+             p_id = prod_map.get(p_code)
+             a_id = ao_map.get(a_code)
+             
+             if p_id and a_id:
+                 data = {
+                     "add_on_id": a_id,
+                     "product_code": p_code,
+                     "product_id": p_id,
+                     "rate_type": row.get("rate_type"),
+                     "rate_value": row.get("rate_value"),
+                     # Remap CSV min_si/max_si to model si_min/si_max
+                     "si_min": row.get("min_si") if row.get("min_si") else None,
+                     "si_max": row.get("max_si") if row.get("max_si") else None,
+                     "occupancy_type": None, # Not in CSV, default to Null
+                     "active": True
+                 }
+                 upsert(conn, AddOnRate, data)
+                 count += 1
+             else:
+                 logger.warning(f"Skipping AddOnRate: PID?{p_id}({p_code}) AID?{a_id}({a_code})")
+    
+    logger.info(f"Seeded {count} rows in AddOnRates.")
 
 def verify_seeding(conn):
     tables = ["lob_master", "product_master", "occupancies", "product_basic_rates", "bsus_rates", "stfi_rates", "eq_rates", "terrorism_slabs", "add_on_master", "add_on_product_map", "add_on_rates"]
