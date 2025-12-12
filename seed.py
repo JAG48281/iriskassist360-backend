@@ -143,6 +143,8 @@ def seed_product_basic_rates(conn):
         if "BSUSP" in prod_map:
             data.append({"product_code": "BSUSP", "iib_code": "201", "basic_rate": 0.20})
 
+    skipped_count = 0
+    inserted_count = 0
     for row in data:
         p_code = row.get("product_code")
         iib = row.get("iib_code")
@@ -159,8 +161,13 @@ def seed_product_basic_rates(conn):
         
         if row.get('product_id') and row.get('occupancy_id'):
             upsert(conn, ProductBasicRate, row)
+            inserted_count += 1
         else:
-            logger.warning(f"Skipping product_basic_rates row due to missing map: Product={p_code}, IIB={iib}")
+            skipped_count += 1
+    
+    if skipped_count > 0:
+        logger.warning(f"Skipped {skipped_count} product_basic_rates rows due to missing mappings")
+    logger.info(f"Seeded {inserted_count} product_basic_rates rows")
 
 def seed_bsus_rates(conn):
     logger.info("Seeding BsusRates...")
@@ -356,6 +363,7 @@ def seed_add_on_product_map(conn):
 
     csv_path = "data/add_on_product_map.csv"
     count = 0
+    skipped_count = 0
     if not os.path.exists(csv_path):
         logger.warning(f"{csv_path} not found. Skipping AddOnProductMap.")
         return
@@ -380,8 +388,10 @@ def seed_add_on_product_map(conn):
                 count += 1
                 mapped_products.add(real_p_code)
             else:
-                logger.warning(f"Skipping AddOnProductMap row due to missing map: Product={p_code}, AddOn={a_code}")
+                skipped_count += 1
 
+    if skipped_count > 0:
+        logger.warning(f"Skipped {skipped_count} AddOnProductMap rows due to missing mappings")
     logger.info(f"Seeded {count} rows in AddOnProductMap.")
     
     # Verify coverage
@@ -410,7 +420,7 @@ def seed_add_on_rates(conn):
         reader = csv.DictReader(f)
         data_rows = list(reader)
 
-    print(f"Loaded rows from add_on_rates.csv: {len(data_rows)}")
+    logger.info(f"Loaded {len(data_rows)} rows from add_on_rates.csv")
 
     # Clean DB
     logger.info("Truncating add_on_rates...")
@@ -424,6 +434,7 @@ def seed_add_on_rates(conn):
          logger.warning(f"Constraint drop ignored: {e}")
 
     count = 0
+    skipped_count = 0
     for row in data_rows:
          p_code = row.get("product_code", "").strip()
          a_code = row.get("add_on_code", "").strip()
@@ -455,8 +466,10 @@ def seed_add_on_rates(conn):
              })
              count += 1
          else:
-             logger.warning(f"Skipping AddOnRate: PID?{p_id}({p_code}) AID?{a_id}({a_code})")
+             skipped_count += 1
     
+    if skipped_count > 0:
+        logger.warning(f"Skipped {skipped_count} AddOnRate rows due to missing mappings")
     logger.info(f"Seeded {count} rows in AddOnRates.")
 
 def verify_seeding(conn):
