@@ -396,43 +396,66 @@ def seed_add_on_rates(conn):
     
     prod_map = get_product_map(conn)
     ao_map = {row[0]: row[1] for row in conn.execute(select(AddOnMaster.add_on_code, AddOnMaster.id)).fetchall()}
-    occ_type_map = get_occupancy_type_map(conn)
-
-    csv_path = "data/add_on_rates.csv"
-    count = 0
+    
+    # Force absolute path
+    csv_path = os.path.join(os.getcwd(), "data", "add_on_rates.csv")
+    
     if not os.path.exists(csv_path):
         logger.warning(f"{csv_path} not found. Skipping AddOnRates seeding.")
         return
 
+    # Read all rows first
+    data_rows = []
     with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
         reader = csv.DictReader(f)
-        for row in reader:
-             p_code = row.get("product_code", "").strip()
-             a_code = row.get("add_on_code", "").strip()
+        data_rows = list(reader)
+
+    print(f"Loaded rows from add_on_rates.csv: {len(data_rows)}")
+
+    # Clean DB
+    logger.info("Truncating add_on_rates...")
+    conn.execute(text("DELETE FROM add_on_rates"))
+    
+    # Drop constraints (Safety)
+    try:
+        conn.execute(text("ALTER TABLE add_on_rates DROP CONSTRAINT IF EXISTS ck_add_on_rates_rate_type"))
+        conn.execute(text("ALTER TABLE add_on_rates DROP CONSTRAINT IF EXISTS uq_add_on_rates_composite"))
+    except Exception as e:
+         logger.warning(f"Constraint drop ignored: {e}")
+
+    count = 0
+    for row in data_rows:
+         p_code = row.get("product_code", "").strip()
+         a_code = row.get("add_on_code", "").strip()
+         
+         if not p_code or not a_code:
+             continue
              
-             if not p_code or not a_code:
-                 continue
-                 
-             p_id = prod_map.get(p_code)
-             a_id = ao_map.get(a_code)
+         p_id = prod_map.get(p_code)
+         a_id = ao_map.get(a_code)
+         
+         if p_id and a_id:
+             # Direct Insert
+             stmt = text("""
+                INSERT INTO add_on_rates (
+                    add_on_id, product_code, product_id, rate_type, rate_value, si_min, si_max, active
+                ) VALUES (
+                    :aid, :pc, :pid, :rt, :rv, :smin, :smax, true
+                )
+             """)
              
-             if p_id and a_id:
-                 data = {
-                     "add_on_id": a_id,
-                     "product_code": p_code,
-                     "product_id": p_id,
-                     "rate_type": row.get("rate_type"),
-                     "rate_value": row.get("rate_value"),
-                     # Remap CSV min_si/max_si to model si_min/si_max
-                     "si_min": row.get("min_si") if row.get("min_si") else None,
-                     "si_max": row.get("max_si") if row.get("max_si") else None,
-                     "occupancy_type": None, # Not in CSV, default to Null
-                     "active": True
-                 }
-                 upsert(conn, AddOnRate, data)
-                 count += 1
-             else:
-                 logger.warning(f"Skipping AddOnRate: PID?{p_id}({p_code}) AID?{a_id}({a_code})")
+             conn.execute(stmt, {
+                 "aid": a_id,
+                 "pc": p_code,
+                 "pid": p_id,
+                 "rt": row.get("rate_type"),
+                 "rv": row.get("rate_value"),
+                 "smin": row.get("min_si") if row.get("min_si") else None,
+                 "smax": row.get("max_si") if row.get("max_si") else None,
+             })
+             count += 1
+         else:
+             logger.warning(f"Skipping AddOnRate: PID?{p_id}({p_code}) AID?{a_id}({a_code})")
     
     logger.info(f"Seeded {count} rows in AddOnRates.")
 
