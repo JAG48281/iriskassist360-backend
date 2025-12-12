@@ -1,0 +1,40 @@
+add_on_code,add_on_name,description,is_percentage,applies_to_product,active
+ACDM,Accidental Damage for building and contents,,FALSE,TRUE,TRUE
+DBRM,Debris Removal (Including Foreign Debris),,FALSE,TRUE,TRUE
+ESCL,Escalation Clause,,FALSE,TRUE,TRUE
+BRMK,Brand and Trade Marks,,FALSE,TRUE,TRUE
+EFLM,Expenses for Loss Minimization / Prevention,,FALSE,TRUE,TRUE
+FFEX,Fire Fighting Expenses,,FALSE,TRUE,TRUE
+OUPI,Waiver of Under Insurance,,FALSE,TRUE,TRUE
+ONAC,On Account Claim Payment Clause,,FALSE,TRUE,TRUE
+H72H,72 Hours Clause,,FALSE,TRUE,TRUE
+LPCL,Loss Payee Clause,,FALSE,TRUE,TRUE
+EXPC,Expiration Clause,,FALSE,TRUE,TRUE
+WAIV,Waivers of Recourse,,FALSE,TRUE,TRUE
+HPLE,Hire Purchase / Lease Agreements / Custody / Control,,FALSE,TRUE,TRUE
+NOIV,Non-Invalidation,,FALSE,TRUE,TRUE
+OEMC,Original Equipment Manufacturer Clause,,FALSE,TRUE,TRUE
+MLIN,Multiple Insured Clause,,FALSE,TRUE,TRUE
+DLBD,Deliberate Damage,,FALSE,TRUE,TRUE
+PLDC,"Plans, Documents & Computer Systems Records",,FALSE,TRUE,TRUE
+RFDB,Removal of Foreign Debris,,FALSE,TRUE,TRUE
+SHSC,Shutdown and Startup Costs,,FALSE,TRUE,TRUE
+CLPC,Claims Preparation Cost,,FALSE,TRUE,TRUE
+CPRA,Capital Additions,,FALSE,TRUE,TRUE
+EXPE,Expediting Expenses,,FALSE,TRUE,TRUE
+VHLC,Vehicle Load Clause,,FALSE,TRUE,TRUE
+DCCC,Decontamination and Clean-Up Cost,,FALSE,TRUE,TRUE
+INVB,Involuntary Betterment,,FALSE,TRUE,TRUE
+OBSP,Obsolete Spare Parts,,FALSE,TRUE,TRUE
+CNSM,Catalyst & Consumable in Process,,FALSE,TRUE,TRUE
+UMPR,Undamaged Property,,FALSE,TRUE,TRUE
+ADDT,Additional Duty,,FALSE,TRUE,TRUE
+CMST,Contamination and Co-Mingling of Stocks,,FALSE,TRUE,TRUE
+LKCT,Leakage and Contamination Cover,,FALSE,TRUE,TRUE
+IMRP,Immediate Repair,,FALSE,TRUE,TRUE
+IAER,Insurance of Additional Expenses of Rent for an Alternative Accommodation,,FALSE,TRUE,TRUE
+LREN,Loss of Rent,,FALSE,TRUE,TRUE
+SPMD,Spoilage Material Damage,,FALSE,TRUE,TRUE
+DSPF,Deterioration of Stocks - Power Failure,,FALSE,TRUE,TRUE
+DSMB,Deterioration of Stocks - Machinery Breakdown,,FALSE,TRUE,TRUE
+MMCL,Molten Metal Spillage Cover,,FALSE,TRUE,TRUE
