@@ -300,22 +300,47 @@ def seed_terrorism_slabs(conn):
                 row = slab.copy()
                 row["product_code"] = code
                 row["product_id"] = pid
+                row["product_id"] = pid
                 upsert(conn, TerrorismSlab, row)
+
+def cleanup_legacy_addons(conn):
+    """
+    Remove EARTHQUAKE, STFI, TERRORISM from add_on_master and add_on_product_map
+    because they are now handled by specific rate tables (eq_rates, stfi_rates, terrorism_slabs).
+    """
+    logger.info("Cleaning up legacy AddOns (EQ, STFI, Terrorism)...")
+    
+    legacy_codes = ('EARTHQUAKE', 'STFI', 'TERRORISM')
+    
+    # 1. Delete from AddOnProductMap
+    # Note: We subquery to get IDs.
+    # Postgres specific delete with using/subquery or standard delete
+    
+    try:
+        # Delete mappings
+        conn.execute(text(f"DELETE FROM add_on_product_map WHERE add_on_id IN (SELECT id FROM add_on_master WHERE add_on_code IN {legacy_codes})"))
+        
+        # Delete rates if any (though we are careful not to touch new rate tables, this is for add_on_rates table)
+        conn.execute(text(f"DELETE FROM add_on_rates WHERE add_on_id IN (SELECT id FROM add_on_master WHERE add_on_code IN {legacy_codes})"))
+
+        # Delete from Master
+        conn.execute(text(f"DELETE FROM add_on_master WHERE add_on_code IN {legacy_codes}"))
+        
+        logger.info("Legacy AddOns Cleanup Complete.")
+    except Exception as e:
+        logger.warning(f"Legacy AddOns Cleanup encountered an error (might be ignored): {e}")
 
 def seed_add_on_master(conn):
     logger.info("Seeding AddOnMaster...")
     csv_path = "data/add_on_master.csv"
     data = []
-    if os.path.exists(csv_path):
-        with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
-             reader = csv.DictReader(f)
-             data = [row for row in reader]
-    else:
-        data = [
-            {"add_on_code": "EARTHQUAKE", "add_on_name": "Earthquake (Fire and Shock)", "is_percentage": True},
-            {"add_on_code": "STFI", "add_on_name": "Storm, Tempest, Flood, Inundation", "is_percentage": True},
-            {"add_on_code": "TERRORISM", "add_on_name": "Terrorism Cover", "is_percentage": True}
-        ]
+    if not os.path.exists(csv_path):
+        logger.warning(f"{csv_path} not found. Skipping AddOnMaster seeding.")
+        return
+
+    with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
+        reader = csv.DictReader(f)
+        data = [row for row in reader]
     
     for row in data:
          upsert(conn, AddOnMaster, row)
@@ -331,16 +356,13 @@ def seed_add_on_product_map(conn):
     
     csv_path = "data/add_on_product_map.csv"
     data = []
-    if os.path.exists(csv_path):
-         with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
-             reader = csv.DictReader(f)
-             data = [row for row in reader]
-    else:
-        # Sample: Link EQ to SFSP
-        pid = prod_map.get("SFSP")
-        aid = ao_map.get("EARTHQUAKE")
-        if pid and aid:
-            data.append({"add_on_code": "EARTHQUAKE", "product_code": "SFSP"})
+    if not os.path.exists(csv_path):
+        logger.warning(f"{csv_path} not found. Skipping AddOnProductMap seeding.")
+        return
+
+    with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
+        reader = csv.DictReader(f)
+        data = [row for row in reader]
             
     for row in data:
         if 'product_id' not in row and 'product_code' in row:
@@ -365,20 +387,13 @@ def seed_add_on_rates(conn):
 
     csv_path = "data/add_on_rates.csv"
     data = []
-    if os.path.exists(csv_path):
-         with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
-             reader = csv.DictReader(f)
-             data = [row for row in reader]
-    else:
-         # Sample
-         if "SFSP" in prod_map and "EARTHQUAKE" in ao_map:
-            data.append({
-                "product_code": "SFSP",
-                "add_on_code": "EARTHQUAKE",
-                "iib_code": "101", # Should resolve to Residential
-                "rate_type": "per_mille",
-                "rate_value": 0.10
-            })
+    if not os.path.exists(csv_path):
+        logger.warning(f"{csv_path} not found. Skipping AddOnRates seeding.")
+        return
+
+    with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
+        reader = csv.DictReader(f)
+        data = [row for row in reader]
             
     for row in data:
         if 'product_id' not in row and 'product_code' in row:
@@ -442,6 +457,7 @@ def main():
                 pass
 
             seed_lob_and_product(conn)
+            cleanup_legacy_addons(conn) # Enforce cleanup of legacy AddOns
             seed_occupancies(conn)
             seed_product_basic_rates(conn)
             seed_bsus_rates(conn)
