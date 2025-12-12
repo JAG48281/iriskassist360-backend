@@ -315,10 +315,23 @@ def seed_add_on_master(conn):
 
     with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
         reader = csv.DictReader(f)
-        data = [row for row in reader]
-    
-    for row in data:
-         upsert(conn, AddOnMaster, row)
+        for row in reader:
+            # Process Booleans
+            for bool_field in ['is_percentage', 'applies_to_product', 'active']:
+                if bool_field in row:
+                    val = str(row[bool_field]).strip().lower()
+                    row[bool_field] = val in ('true', '1', 't', 'yes', 'y')
+            
+            # Process Description
+            if 'description' in row:
+                if not row['description'] or not row['description'].strip():
+                    del row['description'] # Let DB default or handle as null if permitted, or set to None
+
+            # Skip if code is missing
+            if not row.get('add_on_code'):
+                continue
+
+            upsert(conn, AddOnMaster, row)
 
 def seed_add_on_product_map(conn):
     logger.info("Seeding AddOnProductMap...")
