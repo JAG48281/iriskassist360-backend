@@ -22,8 +22,10 @@ def upsert(conn, model, data):
         with conn.begin_nested():
             stmt = insert(model).values(**data)
             conn.execute(stmt)
-    except (IntegrityError, Exception):
-        # Ignore duplicates or subtle dialect issues
+    except (IntegrityError, Exception) as e:
+        if "unique constraint" not in str(e).lower():
+             with open("error_dump_v2.txt", "a") as f:
+                 f.write(f"Upsert Error {model.__tablename__}: {e}\n")
         pass
 
 
@@ -317,49 +319,45 @@ def seed_add_on_master(conn):
     with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
         reader = csv.DictReader(f)
         for row in reader:
-            # Process Booleans
-            for bool_field in ['is_percentage', 'applies_to_product', 'active']:
-                if bool_field in row:
-                    val = str(row[bool_field]).strip().lower()
-                    row[bool_field] = val in ('true', '1', 't', 'yes', 'y')
-            
-            # Process Description
-            if 'description' in row:
-                if not row['description'] or not row['description'].strip():
-                    del row['description'] # Let DB default or handle as null if permitted, or set to None
+             # Basic upsert logic
+             code = row.get("add_on_code", "").strip()
+             if not code: continue
+             
+             # Handle booleans
+             row['is_percentage'] = (str(row.get('is_percentage')).upper() == 'TRUE')
+             row['applies_to_product'] = (str(row.get('applies_to_product')).upper() == 'TRUE')
+             row['active'] = (str(row.get('active')).upper() == 'TRUE')
+             
+             # Removes blank keys so defaults apply or we don't overwrite with empty strings
+             if not row.get("description"):
+                 row.pop("description", None)
+             
+             upsert(conn, AddOnMaster, row)
 
-            # Skip if code is missing
-            if not row.get('add_on_code'):
-                continue
-
-            upsert(conn, AddOnMaster, row)
+    logger.info("Seeded AddOnMaster.")
 
 def seed_add_on_product_map(conn):
     logger.info("Seeding AddOnProductMap...")
-    
+
+    # Load IDs
     prod_map = get_product_map(conn)
-    # Get AddOn IDs
-    ao_q = select(AddOnMaster.add_on_code, AddOnMaster.id)
-    ao_rows = conn.execute(ao_q).fetchall()
-    ao_map = {row[0]: row[1] for row in ao_rows}
+    ao_map = {row[0]: row[1] for row in conn.execute(select(AddOnMaster.add_on_code, AddOnMaster.id)).fetchall()}
     
-    # Alias map for short codes in CSV
+    # Pre-defined map for aliases (CSV code -> DB code)
     alias_map = {
         "BSUS": "BSUSP",
-        "BLUS": "BLUSP",
-        "BGR": "BGRP",
         "UVUS": "VUSP",
-        # SFSP, IAR, UVGS match exactly
+        "BLUS": "BLUSP",
+        "BGR": "BGRP"
     }
-
-    # Validation Set
+    
     required_products = {"SFSP", "IAR", "BLUSP", "BSUSP", "VUSP", "BGRP", "UVGS"}
     mapped_products = set()
 
     csv_path = "data/add_on_product_map.csv"
     count = 0
     if not os.path.exists(csv_path):
-        logger.warning(f"{csv_path} not found. Skipping AddOnProductMap seeding.")
+        logger.warning(f"{csv_path} not found. Skipping AddOnProductMap.")
         return
 
     with open(csv_path, 'r', encoding='utf-8-sig', errors='replace') as f:
@@ -382,8 +380,7 @@ def seed_add_on_product_map(conn):
                 count += 1
                 mapped_products.add(real_p_code)
             else:
-                # Optional: Log missing only if it's not a known ignored case
-                pass
+                logger.warning(f"Skipping AddOnProductMap row due to missing map: Product={p_code}, AddOn={a_code}")
 
     logger.info(f"Seeded {count} rows in AddOnProductMap.")
     
@@ -398,9 +395,7 @@ def seed_add_on_rates(conn):
     logger.info("Seeding AddOnRates...")
     
     prod_map = get_product_map(conn)
-    ao_q = select(AddOnMaster.add_on_code, AddOnMaster.id)
-    ao_rows = conn.execute(ao_q).fetchall()
-    ao_map = {row[0]: row[1] for row in ao_rows}
+    ao_map = {row[0]: row[1] for row in conn.execute(select(AddOnMaster.add_on_code, AddOnMaster.id)).fetchall()}
     occ_type_map = get_occupancy_type_map(conn)
 
     csv_path = "data/add_on_rates.csv"

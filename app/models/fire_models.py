@@ -134,3 +134,7 @@ class AddOnRate(Base):
 
     product = relationship("ProductMaster")
     add_on = relationship("AddOnMaster")
+
+    __table_args__ = (
+        UniqueConstraint('add_on_id', 'product_id', 'occupancy_type', 'si_min', 'si_max', name='uq_add_on_rates_composite'),
+    )
