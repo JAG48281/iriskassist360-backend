@@ -6,8 +6,12 @@ from app.schemas.response import ResponseModel
 
 router = APIRouter(tags=["Common Data"])
 
+from fastapi import Request
+from app.limiter import limiter
+
 @router.get("/api/occupancies", response_model=ResponseModel[list])
-def get_occupancies(db: Session = Depends(get_db)):
+@limiter.limit("60/minute")
+def get_occupancies(request: Request, db: Session = Depends(get_db)):
     """Fetch all occupancies"""
     data = db.query(Occupancy).all()
     # Return with correct field names

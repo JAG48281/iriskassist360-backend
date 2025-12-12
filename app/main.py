@@ -11,6 +11,9 @@ import logging
 import time
 from fastapi import Request
 from fastapi.responses import JSONResponse
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from app.limiter import limiter
 
 # Setup Logging
 logging.basicConfig(level=logging.INFO)
@@ -18,6 +21,10 @@ logger = logging.getLogger("irisk_backend")
 
 def create_app():
     app = FastAPI(title="iRiskAssist360 Backend", description="Backend API for iRiskAssist360 Flutter App", version="1.0.0")
+    
+    # Initialize Rate Limiter
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
     # CORS Configuration
     # In Railway variables, set ALLOWED_ORIGINS to "https://your-netlify-app.netlify.app"
@@ -82,7 +89,8 @@ def root():
     return {"brand": "iRiskAssist360", "status": "running"}
 
 @app.get("/api/manual-seed")
-def trigger_manual_seeding():
+@limiter.limit("1/hour")
+def trigger_manual_seeding(request: Request):
     """Manually trigger seeding in case deployment script fails"""
     try:
         from seed import main as seed_main

@@ -11,8 +11,12 @@ logger = logging.getLogger("irisk_backend")
 
 router = APIRouter(tags=["Premium Calculation"])
 
+from fastapi import Request
+from app.limiter import limiter
+
 @router.post("/uvgs/calculate", response_model=ResponseModel[dict])
-def calculate_uvgs_premium(payload: UVGSRequest, db: Session = Depends(get_db)):
+@limiter.limit("30/minute")
+def calculate_uvgs_premium(request: Request, payload: UVGSRequest, db: Session = Depends(get_db)):
     logger.info(f"Calculating UVGS Premium for: {payload}")
     
     # Placeholder Logic
