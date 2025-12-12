@@ -1,0 +1,58 @@
+name: Rating Engine CI
+
+on:
+  push:
+    branches: [ "feat/rating-engine", "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.13"]
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: iriskassist360_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install pytest httpx ruff
+        
+    - name: Lint with Ruff
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        ruff check . --select=E9,F63,F7,F82 --target-version=py311
+        # exit-zero treats all errors as warnings.
+        ruff check . --exit-zero
+        
+    - name: Run Tests
+      env:
+        DATABASE_URL: postgresql://postgres:password@localhost:5432/iriskassist360_db
+        BASE_URL: http://localhost:8000
+      run: |
+        # Run tests
+        pytest
