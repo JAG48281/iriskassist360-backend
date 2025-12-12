@@ -54,6 +54,10 @@ jobs:
         DATABASE_URL: postgresql://postgres:password@localhost:5432/iriskassist360_db
         BASE_URL: http://localhost:8000
       run: |
+        # Setup DB
+        alembic upgrade head
+        python seed.py
+        
         # Run unit tests
         pytest tests/test_api.py tests/test_rating.py
         
