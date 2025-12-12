@@ -26,6 +26,10 @@ def create_app():
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+    # Trust Proxy Headers (Railway/LoadBalancers)
+    from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
+    app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=["*"])
+
     # CORS Configuration
     # In Railway variables, set ALLOWED_ORIGINS to "https://your-netlify-app.netlify.app"
     # For multiple origins, separate by comma: "https://app.com,https://staging.app.com"
