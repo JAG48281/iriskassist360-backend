@@ -1,0 +1,35 @@
+{
+  "base_url": "https://web-production-afeec.up.railway.app",
+  "total_validations": 2,
+  "passed": 1,
+  "failed": 1,
+  "results": [
+    {
+      "endpoint": "/api/occupancies",
+      "status": "PASSED",
+      "count": 298,
+      "fields": [
+        "id",
+        "iib_code",
+        "section",
+        "description"
+      ],
+      "sample": {
+        "id": 1,
+        "iib_code": "1001",
+        "section": "III",
+        "description": "Dwellings"
+      }
+    },
+    {
+      "endpoint": "/api/add-on-rates",
+      "status": "FAILED",
+      "expected_count": 121,
+      "actual_count": 113,
+      "error": "/api/add-on-rates: Expected exactly 121 rows, got 113"
+    }
+  ],
+  "errors": [
+    "/api/add-on-rates: Expected exactly 121 rows, got 113"
+  ]
+}

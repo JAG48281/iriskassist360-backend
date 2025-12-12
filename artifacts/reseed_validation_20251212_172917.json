@@ -1,0 +1,55 @@
+{
+  "status": "failed",
+  "timestamp": "20251212_172917",
+  "method": "api_triggered_reseed",
+  "pre_reseed_state": {
+    "occupancies_count": 298,
+    "add_on_rates_count": 113,
+    "timestamp": "20251212_172917"
+  },
+  "reseed_result": {
+    "success": true,
+    "result": {
+      "success": true,
+      "message": "Seeding executed successfully."
+    }
+  },
+  "post_validation": {
+    "all_pass": false,
+    "validations": {
+      "occupancies": {
+        "pass": true,
+        "count": 298,
+        "expected": 298,
+        "has_required_fields": true
+      },
+      "add_on_rates": {
+        "pass": false,
+        "count": 113,
+        "expected": 121,
+        "has_required_fields": true
+      },
+      "add_on_master": {
+        "count": 39
+      }
+    }
+  },
+  "add_on_rates_count": 113,
+  "occupancies_count": 298,
+  "artifacts": [
+    "artifacts/pre_reseed_state_20251212_172917.json"
+  ],
+  "audit_log": [
+    "[2025-12-12T17:29:17.927675] [INFO] Checking pre-reseed state...",
+    "[2025-12-12T17:29:20.506186] [INFO] Pre-reseed: Occupancies=298, Add-on Rates=113",
+    "[2025-12-12T17:29:20.508348] [INFO] Triggering production reseed...",
+    "[2025-12-12T17:29:20.508348] [INFO] POST https://web-production-afeec.up.railway.app/api/manual-seed",
+    "[2025-12-12T17:32:45.994111] [INFO] Reseed completed: {'success': True, 'message': 'Seeding executed successfully.'}",
+    "[2025-12-12T17:32:45.995610] [INFO] Waiting 15 seconds for database to stabilize...",
+    "[2025-12-12T17:33:00.997048] [INFO] Validating post-reseed state...",
+    "[2025-12-12T17:33:01.945135] [INFO] Occupancies: 298/298 - PASS",
+    "[2025-12-12T17:33:03.257112] [INFO] Add-on Rates: 113/121 - FAIL",
+    "[2025-12-12T17:33:03.770713] [INFO] Add-on Master: 39 codes"
+  ],
+  "deployment_approved": false
+}

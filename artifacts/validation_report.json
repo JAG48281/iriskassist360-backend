@@ -1,0 +1,85 @@
+{
+    "validation_summary": {
+        "timestamp": "2025-12-12T17:15:00+05:30",
+        "database": "Local PostgreSQL",
+        "all_checks_pass": true,
+        "total_rules": 9,
+        "passed": 9,
+        "failed": 0
+    },
+    "rule_results": {
+        "rule_1_count": {
+            "description": "add_on_rates count == 121",
+            "status": "PASS",
+            "expected": 121,
+            "actual": 121
+        },
+        "rule_2_valid_types": {
+            "description": "rate_type in valid set",
+            "status": "PASS",
+            "valid_types": [
+                "FREE",
+                "POLICY_RATE",
+                "PER_MILLE",
+                "PERCENT_OF_BASIC_RATE",
+                "FLAT",
+                "MIN_PREMIUM"
+            ],
+            "invalid_count": 0
+        },
+        "rule_3_per_mille_range": {
+            "description": "PER_MILLE: 0 < rate_value < 1000",
+            "status": "PASS",
+            "violations": 0
+        },
+        "rule_4_percent_range": {
+            "description": "PERCENT_OF_BASIC_RATE: 0 < rate_value < 100",
+            "status": "PASS",
+            "violations": 0
+        },
+        "rule_5_policy_rate_zero": {
+            "description": "POLICY_RATE: rate_value == 0",
+            "status": "PASS",
+            "violations": 0,
+            "remediation_applied": "Updated 101 rows from 1.0 to 0.0"
+        },
+        "rule_6_bgr_uvgs_occupancy": {
+            "description": "BGR/UVGS: occupancy_rule == ONLY_1001_1001_2",
+            "status": "PASS",
+            "violations": 0
+        },
+        "rule_7_others_occupancy": {
+            "description": "Others: occupancy_rule in [EXCEPT_1001_1001_2, ALL]",
+            "status": "PASS",
+            "violations": 0
+        },
+        "rule_8_no_duplicates": {
+            "description": "No duplicate (add_on_code, product_code, occupancy_rule)",
+            "status": "PASS",
+            "duplicates": 0
+        },
+        "rule_9_master_integrity": {
+            "description": "All add_on_codes exist in add_on_master",
+            "status": "PASS",
+            "orphaned": 0
+        }
+    },
+    "remediation_actions": {
+        "csv_fix": "Updated data/add_on_rates.csv: policy_rate values changed from 1.0 to 0.0",
+        "database_fix": "Applied SQL: UPDATE add_on_rates SET rate_value = 0 WHERE UPPER(rate_type) = 'POLICY_RATE'",
+        "rows_affected": 101
+    },
+    "deployment_readiness": {
+        "local_database": "VALIDATED - All rules pass",
+        "csv_source": "CORRECTED - Ready for production reseed",
+        "production_status": "PENDING - Requires reseed after deployment",
+        "recommendation": "Deploy changes and trigger /api/manual-seed on production"
+    },
+    "test_artifacts": {
+        "validation_script": "tests/validate_addon_rates.py",
+        "remediation_script": "tests/apply_remediation.py",
+        "schema_verifier": "tests/verify_schemas.py",
+        "endpoint_checker": "tests/check_endpoints.py",
+        "db_counter": "tests/check_db_counts.py"
+    }
+}
