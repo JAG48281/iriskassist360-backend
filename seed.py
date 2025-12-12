@@ -88,6 +88,7 @@ def seed_lob_and_product(conn):
         {"lob_id": fire_id, "product_code": "BLUSP", "product_name": "Bharat Laghu Udyam Suraksha", "description": "Small Enterprise", "active": True},
         {"lob_id": fire_id, "product_code": "VUSP", "product_name": "Value Udyam", "description": "Value Added Product", "active": True},
         {"lob_id": fire_id, "product_code": "UBGR", "product_name": "Bharat Griha Raksha (UIIC)", "description": "UIIC Specific Home Insurance", "active": True},
+        {"lob_id": fire_id, "product_code": "UVGS", "product_name": "Udyam Value Griha Suraksha", "description": "Udyam Value Home", "active": True},
     ]
 
     for prod in fire_products:
@@ -342,27 +343,56 @@ def seed_add_on_product_map(conn):
     ao_rows = conn.execute(ao_q).fetchall()
     ao_map = {row[0]: row[1] for row in ao_rows}
     
+    # Alias map for short codes in CSV
+    alias_map = {
+        "BSUS": "BSUSP",
+        "BLUS": "BLUSP",
+        "BGR": "BGRP",
+        "UVUS": "VUSP",
+        # SFSP, IAR, UVGS match exactly
+    }
+
+    # Validation Set
+    required_products = {"SFSP", "IAR", "BLUSP", "BSUSP", "VUSP", "BGRP", "UVGS"}
+    mapped_products = set()
+
     csv_path = "data/add_on_product_map.csv"
-    data = []
+    count = 0
     if not os.path.exists(csv_path):
         logger.warning(f"{csv_path} not found. Skipping AddOnProductMap seeding.")
         return
 
-    with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
+    with open(csv_path, 'r', encoding='utf-8-sig', errors='replace') as f:
         reader = csv.DictReader(f)
-        data = [row for row in reader]
+        for row in reader:
+            p_code = row.get("product_code", "").strip()
+            a_code = row.get("add_on_code", "").strip()
+
+            if not p_code or not a_code:
+                continue
+
+            # Resolve Alias
+            real_p_code = alias_map.get(p_code, p_code)
             
-    for row in data:
-        if 'product_id' not in row and 'product_code' in row:
-             row['product_id'] = prod_map.get(row['product_code'])
-        if 'add_on_id' not in row and 'add_on_code' in row:
-             row['add_on_id'] = ao_map.get(row['add_on_code'])
-             del row['add_on_code'] # remove safe
-             
-        if row.get('product_id') and row.get('add_on_id'):
-            upsert(conn, AddOnProductMap, row)
-        else:
-            logger.warning(f"Skipping add_on_product_map row. PID={row.get('product_id')} AID={row.get('add_on_id')}")
+            p_id = prod_map.get(real_p_code)
+            a_id = ao_map.get(a_code)
+
+            if p_id and a_id:
+                upsert(conn, AddOnProductMap, {"product_id": p_id, "add_on_id": a_id, "product_code": real_p_code})
+                count += 1
+                mapped_products.add(real_p_code)
+            else:
+                # Optional: Log missing only if it's not a known ignored case
+                pass
+
+    logger.info(f"Seeded {count} rows in AddOnProductMap.")
+    
+    # Verify coverage
+    missing = required_products - mapped_products
+    if missing:
+        logger.warning(f"AddOnMap: No mappings found for products: {missing}")
+    else:
+        logger.info("AddOnMap: Confirmed mappings for all target products.")
 
 def seed_add_on_rates(conn):
     logger.info("Seeding AddOnRates...")
