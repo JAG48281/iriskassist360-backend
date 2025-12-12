@@ -59,7 +59,6 @@ def create_app():
     from app.routers.rates import router as rates_router
     
     app.include_router(premium_router, prefix="/api/premium")
-    app.include_router(premium_router, prefix="/api/premium")
     app.include_router(rates_router, prefix="/api/rates")
     
     # Common Data Routers
