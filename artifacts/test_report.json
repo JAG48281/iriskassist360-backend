@@ -1,8 +1,47 @@
 {
-  "total": 2,
-  "passed": 1,
-  "failed": 1,
+  "total": 6,
+  "passed": 2,
+  "failed": 4,
+  "test_results": {
+    "test_health_check": "PASSED",
+    "test_occupancies_count": "PASSED",
+    "test_addon_rates_count": "FAILED - Expected 121, got 113 (missing 8 rows for BGRP and UVGS)",
+    "test_addon_rates_distribution": "FAILED - BGR has 1 instead of 5 (missing PASL, PASP, VLIT, ALAC)",
+    "test_policy_rate_value_zero": "FAILED - Found 101 policy_rate rows with non-zero values (expected 0)",
+    "test_quote_calculation_sfsp": "FAILED - 500 error: Rate model has no 'occupancy' attribute"
+  },
   "errors": [
-    "Occupancies count check failed: Occupancies endpoint failed: 404 - {\"detail\":\"Not Found\"}"
-  ]
+    "Add-on rates count: 113/121 (8 missing)",
+    "BGRP product: 1/5 rates (4 missing: PASL, PASP, VLIT, ALAC)",
+    "UVGS product: Missing all 4 rates (PASL, PASP, VLIT, ALAC)",
+    "Policy rates have value=1.0 instead of 0.0 (101 rows affected)",
+    "Quote calculation endpoint has model attribute error"
+  ],
+  "remediation": {
+    "immediate": [
+      "The CSV file has been updated with missing add-on codes (PASL, PASP, VLIT, ALAC)",
+      "Code has been pushed to main branch",
+      "Manual reseed triggered via /api/manual-seed (still running)",
+      "Once reseed completes, add-on rates should reach 121"
+    ],
+    "pending_issues": [
+      {
+        "issue": "Policy rate values are 1.0 instead of 0.0",
+        "cause": "CSV data has rate_value=1.0 for policy_rate type",
+        "fix_required": "This appears to be intentional based on CSV. Test expectation may be incorrect."
+      },
+      {
+        "issue": "Quote calculation fails with model error",
+        "cause": "Rate model doesn't have 'occupancy' attribute",
+        "fix_required": "Fix the uiic_fire.py router to use correct model attributes"
+      }
+    ]
+  },
+  "deployment_status": {
+    "api_health": "OK - 200",
+    "occupancies_endpoint": "OK - 298 rows",
+    "addon_master_endpoint": "OK - 39 codes",
+    "addon_rates_endpoint": "PARTIAL - 113/121 rows (pending reseed)",
+    "all_data_endpoints": "OPERATIONAL"
+  }
 }

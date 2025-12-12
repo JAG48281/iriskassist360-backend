@@ -10,12 +10,12 @@ router = APIRouter(tags=["Common Data"])
 def get_occupancies(db: Session = Depends(get_db)):
     """Fetch all occupancies"""
     data = db.query(Occupancy).all()
-    # Simple serialization
+    # Return with correct field names
     results = [
         {
             "id": r.id, 
             "iib_code": r.iib_code, 
-            "occupancy_type": r.occupancy_type,
+            "section": r.section_aift,
             "description": r.occupancy_description
         } 
         for r in data
