@@ -223,6 +223,10 @@ def seed_stfi_rates(conn):
             })
             
     for row in data:
+        # Default to SFSP if not provided, assuming standard fire rates
+        if 'product_code' not in row:
+             row['product_code'] = "SFSP"
+             
         if 'product_id' not in row and 'product_code' in row:
              row['product_id'] = prod_map.get(row['product_code'])
         
