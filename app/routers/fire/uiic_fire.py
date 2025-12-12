@@ -62,11 +62,11 @@ def _lookup_rate(db: Session, product_code: str, occupancy: str, fallback: Dict[
         Rate.company == "UIIC",
         Rate.lob == "Fire",
         Rate.product == product_code,
-        Rate.occupancy.ilike(occupancy)
+        Rate.key.ilike(occupancy)
     ).first()
 
     if rate_row:
-        return rate_row.rate_per_mille
+        return rate_row.value
     
     # Fallback logic
     for key, val in fallback.items():
