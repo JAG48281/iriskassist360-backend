@@ -113,6 +113,8 @@ def seed_occupancies(conn):
     for row in data:
         upsert(conn, Occupancy, row)
 
+    # Note: CSV reading is enforced to use UTF-8 with replacement to avoid crashes.
+
 def seed_product_basic_rates(conn):
     logger.info("Seeding ProductBasicRates...")
     
