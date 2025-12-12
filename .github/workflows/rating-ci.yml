@@ -54,5 +54,23 @@ jobs:
         DATABASE_URL: postgresql://postgres:password@localhost:5432/iriskassist360_db
         BASE_URL: http://localhost:8000
       run: |
-        # Run tests
-        pytest
+        # Run unit tests
+        pytest tests/test_api.py tests/test_rating.py
+        
+    - name: Run Integration Tests
+      env:
+        DATABASE_URL: postgresql://postgres:password@localhost:5432/iriskassist360_db
+        BASE_URL: http://localhost:8000
+      run: |
+        # Start server in background
+        uvicorn app.main:app --host 127.0.0.1 --port 8000 &
+        SERVER_PID=$!
+        
+        # Wait for server to start
+        sleep 5
+        
+        # Run Integration Tests
+        pytest tests/integration/test_rate_scenarios.py
+        
+        # Kill server
+        kill $SERVER_PID
