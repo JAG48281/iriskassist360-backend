@@ -64,9 +64,11 @@ def create_app():
     # Common Data Routers
     from app.routers.common.occupancies import router as occ_router
     from app.routers.common.addons import router as addon_router
+    from app.routers.common.data_inspection import router as inspect_router
     
     app.include_router(occ_router)
     app.include_router(addon_router)
+    app.include_router(inspect_router)
 
     return app
 
