@@ -303,32 +303,7 @@ def seed_terrorism_slabs(conn):
                 row["product_id"] = pid
                 upsert(conn, TerrorismSlab, row)
 
-def cleanup_legacy_addons(conn):
-    """
-    Remove EARTHQUAKE, STFI, TERRORISM from add_on_master and add_on_product_map
-    because they are now handled by specific rate tables (eq_rates, stfi_rates, terrorism_slabs).
-    """
-    logger.info("Cleaning up legacy AddOns (EQ, STFI, Terrorism)...")
-    
-    legacy_codes = ('EARTHQUAKE', 'STFI', 'TERRORISM')
-    
-    # 1. Delete from AddOnProductMap
-    # Note: We subquery to get IDs.
-    # Postgres specific delete with using/subquery or standard delete
-    
-    try:
-        # Delete mappings
-        conn.execute(text(f"DELETE FROM add_on_product_map WHERE add_on_id IN (SELECT id FROM add_on_master WHERE add_on_code IN {legacy_codes})"))
-        
-        # Delete rates if any (though we are careful not to touch new rate tables, this is for add_on_rates table)
-        conn.execute(text(f"DELETE FROM add_on_rates WHERE add_on_id IN (SELECT id FROM add_on_master WHERE add_on_code IN {legacy_codes})"))
 
-        # Delete from Master
-        conn.execute(text(f"DELETE FROM add_on_master WHERE add_on_code IN {legacy_codes}"))
-        
-        logger.info("Legacy AddOns Cleanup Complete.")
-    except Exception as e:
-        logger.warning(f"Legacy AddOns Cleanup encountered an error (might be ignored): {e}")
 
 def seed_add_on_master(conn):
     logger.info("Seeding AddOnMaster...")
@@ -457,7 +432,7 @@ def main():
                 pass
 
             seed_lob_and_product(conn)
-            cleanup_legacy_addons(conn) # Enforce cleanup of legacy AddOns
+            # Legacy AddOns (EQ, STFI, Terrorism) are removed via migration and not seeded here.
             seed_occupancies(conn)
             seed_product_basic_rates(conn)
             seed_bsus_rates(conn)
