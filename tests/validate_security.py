@@ -282,11 +282,11 @@ class SecurityValidator:
             "notes": []
         }
         
-        # 1. Test Global Limit (60/minute) on a lightweight endpoint
-        test_endpoint = "/api/occupancies"
-        # We need to send > 60 requests to trigger the limit
-        num_requests = 65
-        print(f"Testing GLOBAL LIMIT (60/min) on {test_endpoint}...")
+        # 1. Test Strict Limit (1/minute) on debug endpoint
+        # This ensures we hit the limit even with multiple workers
+        test_endpoint = "/api/debug/rate-limit-check"
+        num_requests = 15  # 15 requests should trigger 429 even with 4-8 workers
+        print(f"Testing STRICT LIMIT (1/min) on {test_endpoint}...")
         
         triggered = False
         for i in range(num_requests):

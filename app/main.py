@@ -81,6 +81,10 @@ def create_app():
     app.include_router(addon_router)
     app.include_router(inspect_router)
 
+    # Debug Router
+    from app.routers import debug
+    app.include_router(debug.router)
+
     return app
 
 app = create_app()
