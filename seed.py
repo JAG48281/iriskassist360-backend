@@ -185,6 +185,10 @@ def seed_bsus_rates(conn):
         p_code = row.get("product_code")
         iib = row.get("iib_code")
         
+        if 'product_code' not in row:
+            row['product_code'] = "BSUSP"
+            p_code = "BSUSP"
+
         if 'product_id' not in row:
             row['product_id'] = prod_map.get(p_code)
 
