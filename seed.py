@@ -317,7 +317,8 @@ def seed_terrorism_slabs(conn):
 
 def seed_add_on_master(conn):
     logger.info("Seeding AddOnMaster...")
-    csv_path = "data/add_on_master.csv"
+    # Using COMPLETE file with all 43 codes (including PASL, PASP, VLIT, ALAC)
+    csv_path = "data/add_on_master_COMPLETE.csv"
     data = []
     if not os.path.exists(csv_path):
         logger.warning(f"{csv_path} not found. Skipping AddOnMaster seeding.")
