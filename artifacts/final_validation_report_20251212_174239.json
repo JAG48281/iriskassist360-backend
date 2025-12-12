@@ -1,0 +1,75 @@
+{
+  "status": "failed",
+  "deployment_approved": false,
+  "timestamp": "20251212_174239",
+  "final_master_count": 39,
+  "final_add_on_rate_count": 113,
+  "final_occupancies_count": 298,
+  "rules_passed": [
+    "occupancies",
+    "rule_1_count",
+    "rule_5_policy_rate"
+  ],
+  "rules_failed": [
+    "add_on_rates",
+    "add_on_master"
+  ],
+  "snapshot_id": "operation_20251212_174239",
+  "patch_result": {
+    "success": true,
+    "inserted": 0
+  },
+  "reseed_result": {
+    "success": true,
+    "result": {
+      "success": true,
+      "message": "Seeding executed successfully."
+    }
+  },
+  "validation_details": {
+    "all_pass": false,
+    "validations": {
+      "occupancies": {
+        "pass": true,
+        "count": 298,
+        "expected": 298
+      },
+      "add_on_rates": {
+        "pass": false,
+        "count": 113,
+        "expected": 121
+      },
+      "add_on_master": {
+        "pass": false,
+        "count": 39,
+        "expected": 43
+      },
+      "rule_1_count": {
+        "pass": true,
+        "actual": 121
+      },
+      "rule_5_policy_rate": {
+        "pass": true,
+        "violations": 0
+      }
+    }
+  },
+  "artifacts": [
+    "artifacts/sql_patches/master_patch_20251212_174239.sql"
+  ],
+  "audit_log": [
+    "[2025-12-12T17:42:39.579196] [INFO] Fetching canonical master from CSV...",
+    "[2025-12-12T17:42:39.579196] [INFO] CSV contains 39 add-on codes",
+    "[2025-12-12T17:42:39.579196] [INFO] Generating master table diff...",
+    "[2025-12-12T17:42:39.711652] [INFO] Production has 43 codes",
+    "[2025-12-12T17:42:39.711652] [INFO] Missing codes: []",
+    "[2025-12-12T17:42:39.711652] [INFO] SQL patch saved: artifacts/sql_patches/master_patch_20251212_174239.sql",
+    "[2025-12-12T17:42:39.711652] [INFO] No missing codes - production is up to date",
+    "[2025-12-12T17:42:39.711652] [INFO] Waiting for Railway deployment (max 300s)...",
+    "[2025-12-12T17:42:40.259949] [INFO] API Status: {'brand': 'iRiskAssist360', 'status': 'running'}",
+    "[2025-12-12T17:42:50.816062] [INFO] Railway deployment appears stable",
+    "[2025-12-12T17:43:00.819028] [INFO] Triggering production reseed...",
+    "[2025-12-12T17:46:20.389880] [INFO] Reseed completed: {'success': True, 'message': 'Seeding executed successfully.'}",
+    "[2025-12-12T17:46:35.392313] [INFO] Running full validation suite..."
+  ]
+}
