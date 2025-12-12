@@ -1,0 +1,8 @@
+{
+  "total": 2,
+  "passed": 1,
+  "failed": 1,
+  "errors": [
+    "Occupancies count check failed: Occupancies endpoint failed: 404 - {\"detail\":\"Not Found\"}"
+  ]
+}

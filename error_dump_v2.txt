@@ -1,0 +1,1212 @@
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (1, 51, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 51, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (2, 25, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 25, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (3, 42, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 42, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (5, 49, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 49, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (6, 43, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 43, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (7, 46, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 46, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (8, 38, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 38, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (9, 26, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 26, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (10, 32, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 32, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (11, 44, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 44, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (12, 27, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 27, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (13, 30, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 30, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (14, 34, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 34, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (15, 47, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 47, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (16, 53, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 53, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (17, 31, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 31, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (18, 37, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 37, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (20, 35, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 35, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (21, 48, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 48, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (22, 36, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 36, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (23, 29, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 29, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (24, 28, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 28, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (25, 39, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 39, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (26, 40, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 40, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (27, 41, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 41, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (28, 50, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 50, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (29, 45, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 45, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (30, 33, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 33, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (31, 51, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 51, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (32, 25, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 25, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (33, 42, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 42, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (35, 49, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 49, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (36, 43, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 43, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (37, 46, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 46, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (38, 38, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 38, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (39, 26, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 26, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (40, 32, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 32, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (41, 44, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 44, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (42, 27, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 27, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (43, 30, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 30, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (44, 34, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 34, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (45, 47, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 47, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (46, 53, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 53, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (47, 31, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 31, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (48, 37, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 37, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (50, 35, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 35, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (51, 48, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 48, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (52, 36, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 36, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (53, 29, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 29, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (54, 28, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 28, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (55, 39, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 39, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (56, 40, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 40, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (57, 41, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 41, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (58, 50, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 50, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (59, 45, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 45, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (60, 33, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 33, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (62, 25, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 25, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (63, 52, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 52, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (65, 59, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 59, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (66, 58, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 58, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (67, 26, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 26, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (68, 24, BLUSP, null, null, null, policy_rate, 0.500000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 24, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '0.5', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (69, 44, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 44, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (70, 27, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 27, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (71, 55, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 55, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (72, 54, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 54, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (73, 47, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 47, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (74, 53, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 53, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (75, 56, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 56, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (76, 57, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 57, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (77, 45, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 45, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (79, 25, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 25, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (80, 52, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 52, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (82, 59, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 59, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (83, 58, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 58, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (84, 26, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 26, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (85, 24, BSUSP, null, null, null, policy_rate, 0.500000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 24, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '0.5', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (86, 44, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 44, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (87, 27, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 27, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (88, 55, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 55, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (89, 54, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 54, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (90, 47, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 47, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (91, 53, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 53, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (92, 56, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 56, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (93, 57, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 57, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (94, 45, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 45, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (96, 25, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 25, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (97, 52, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 52, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (99, 59, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 59, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (100, 58, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 58, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (101, 26, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 26, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (102, 24, VUSP, null, null, null, policy_rate, 0.500000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 24, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '0.5', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (103, 44, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 44, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (104, 27, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 27, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (105, 55, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 55, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (106, 54, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 54, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (107, 47, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 47, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (108, 53, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 53, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (109, 56, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 56, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (110, 57, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 57, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (111, 45, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 14:58:51.795197, 2025-12-12 14:58:51.795197, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 45, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (1, 51, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 51, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (2, 25, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 25, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (3, 42, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 42, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (5, 49, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 49, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (6, 43, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 43, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (7, 46, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 46, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (8, 38, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 38, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (9, 26, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 26, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (10, 32, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 32, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (11, 44, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 44, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (12, 27, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 27, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (13, 30, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 30, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (14, 34, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 34, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (15, 47, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 47, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (16, 53, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 53, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (17, 31, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 31, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (18, 37, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 37, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (20, 35, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 35, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (21, 48, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 48, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (22, 36, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 36, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (23, 29, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 29, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (24, 28, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 28, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (25, 39, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 39, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (26, 40, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 40, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (27, 41, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 41, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (28, 50, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 50, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (29, 45, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 45, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (30, 33, SFSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 1).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 33, 'product_code': 'SFSP', 'product_id': 1, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (31, 51, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 51, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (32, 25, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 25, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (33, 42, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 42, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (35, 49, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 49, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (36, 43, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 43, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (37, 46, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 46, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (38, 38, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 38, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (39, 26, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 26, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (40, 32, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 32, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (41, 44, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 44, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (42, 27, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 27, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (43, 30, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 30, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (44, 34, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 34, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (45, 47, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 47, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (46, 53, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 53, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (47, 31, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 31, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (48, 37, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 37, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (50, 35, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 35, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (51, 48, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 48, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (52, 36, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 36, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (53, 29, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 29, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (54, 28, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 28, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (55, 39, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 39, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (56, 40, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 40, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (57, 41, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 41, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (58, 50, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 50, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (59, 45, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 45, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (60, 33, IAR, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 2).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 33, 'product_code': 'IAR', 'product_id': 2, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (62, 25, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 25, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (63, 52, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 52, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (65, 59, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 59, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (66, 58, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 58, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (67, 26, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 26, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (68, 24, BLUSP, null, null, null, policy_rate, 0.500000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 24, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '0.5', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (69, 44, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 44, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (70, 27, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 27, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (71, 55, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 55, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (72, 54, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 54, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (73, 47, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 47, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (74, 53, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 53, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (75, 56, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 56, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (76, 57, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 57, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (77, 45, BLUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 5).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 45, 'product_code': 'BLUSP', 'product_id': 5, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (79, 25, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 25, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (80, 52, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 52, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (82, 59, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 59, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (83, 58, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 58, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (84, 26, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 26, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (85, 24, BSUSP, null, null, null, policy_rate, 0.500000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 24, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '0.5', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (86, 44, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 44, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (87, 27, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 27, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (88, 55, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 55, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (89, 54, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 54, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (90, 47, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 47, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (91, 53, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 53, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (92, 56, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 56, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (93, 57, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 57, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (94, 45, BSUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 4).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 45, 'product_code': 'BSUSP', 'product_id': 4, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (96, 25, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 25, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (97, 52, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 52, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (99, 59, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 59, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (100, 58, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 58, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (101, 26, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 26, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (102, 24, VUSP, null, null, null, policy_rate, 0.500000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 24, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '0.5', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (103, 44, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 44, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (104, 27, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 27, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (105, 55, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 55, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (106, 54, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 54, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (107, 47, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 47, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (108, 53, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 53, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (109, 56, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 56, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (110, 57, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 57, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Upsert Error add_on_rates: (psycopg2.errors.CheckViolation) new row for relation "add_on_rates" violates check constraint "ck_add_on_rates_rate_type"
+DETAIL:  Failing row contains (111, 45, VUSP, null, null, null, policy_rate, 1.000000, t, 2025-12-12 15:00:50.335722, 2025-12-12 15:00:50.335722, 6).
+
+[SQL: INSERT INTO add_on_rates (add_on_id, product_code, product_id, occupancy_type, si_min, si_max, rate_type, rate_value, active) VALUES (%(add_on_id)s, %(product_code)s, %(product_id)s, %(occupancy_type)s, %(si_min)s, %(si_max)s, %(rate_type)s, %(rate_value)s, %(active)s) RETURNING add_on_rates.id]
+[parameters: {'add_on_id': 45, 'product_code': 'VUSP', 'product_id': 6, 'occupancy_type': None, 'si_min': None, 'si_max': None, 'rate_type': 'policy_rate', 'rate_value': '1.0', 'active': True}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)

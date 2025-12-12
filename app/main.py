@@ -59,7 +59,15 @@ def create_app():
     from app.routers.rates import router as rates_router
     
     app.include_router(premium_router, prefix="/api/premium")
+    app.include_router(premium_router, prefix="/api/premium")
     app.include_router(rates_router, prefix="/api/rates")
+    
+    # Common Data Routers
+    from app.routers.common.occupancies import router as occ_router
+    from app.routers.common.addons import router as addon_router
+    
+    app.include_router(occ_router)
+    app.include_router(addon_router)
 
     return app
 
