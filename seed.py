@@ -142,9 +142,13 @@ def seed_product_basic_rates(conn):
         # Sample using iib_code
         data = []
         if "BGRP" in prod_map:
-            data.append({"product_code": "BGRP", "iib_code": "101", "basic_rate": 0.15})
+            data.append({"product_code": "BGRP", "iib_code": "1001", "basic_rate": 0.15})
+            data.append({"product_code": "BGRP", "iib_code": "1001_2", "basic_rate": 0.15})
         if "BSUSP" in prod_map:
             data.append({"product_code": "BSUSP", "iib_code": "201", "basic_rate": 0.20})
+        if "UVGS" in prod_map:
+            data.append({"product_code": "UVGS", "iib_code": "1001", "basic_rate": 0.15})
+            data.append({"product_code": "UVGS", "iib_code": "1001_2", "basic_rate": 0.15})
 
     skipped_count = 0
     inserted_count = 0
@@ -313,7 +317,11 @@ def seed_terrorism_slabs(conn):
                 row = slab.copy()
                 row["product_code"] = code
                 row["product_id"] = pid
-                row["product_id"] = pid
+                
+                # Special override for BGRP Residential
+                if code == "BGRP" and row["occupancy_type"] == "Residential":
+                    row["rate_per_mille"] = 0.07
+                    
                 upsert(conn, TerrorismSlab, row)
 
 
