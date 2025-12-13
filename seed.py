@@ -91,6 +91,8 @@ def seed_lob_and_product(conn):
         {"lob_id": fire_id, "product_code": "VUSP", "product_name": "Value Udyam", "description": "Value Added Product", "active": True},
 
         {"lob_id": fire_id, "product_code": "UVGS", "product_name": "Udyam Value Griha Suraksha", "description": "Udyam Value Home", "active": True},
+        {"lob_id": fire_id, "product_code": "UBGR", "product_name": "United Bharat Griha Raksha", "description": "United Home Insurance", "active": True},
+        {"lob_id": fire_id, "product_code": "UVGR", "product_name": "United Value Griha Raksha", "description": "United Value Home Insurance", "active": True},
     ]
 
     for prod in fire_products:
@@ -149,6 +151,12 @@ def seed_product_basic_rates(conn):
         if "UVGS" in prod_map:
             data.append({"product_code": "UVGS", "iib_code": "1001", "basic_rate": 0.15})
             data.append({"product_code": "UVGS", "iib_code": "1001_2", "basic_rate": 0.15})
+        if "UBGR" in prod_map:
+            data.append({"product_code": "UBGR", "iib_code": "1001", "basic_rate": 0.15})
+            data.append({"product_code": "UBGR", "iib_code": "1001_2", "basic_rate": 0.15})
+        if "UVGR" in prod_map:
+            data.append({"product_code": "UVGR", "iib_code": "1001", "basic_rate": 0.15})
+            data.append({"product_code": "UVGR", "iib_code": "1001_2", "basic_rate": 0.15})
 
     skipped_count = 0
     inserted_count = 0
@@ -308,7 +316,7 @@ def seed_terrorism_slabs(conn):
         {"occupancy_type": "Industrial", "si_min": 20000000000, "si_max": None, "rate_per_mille": 0.15},
     ]
 
-    fire_products = ["SFSP", "IAR", "BSUSP", "BLUSP", "BGRP"] 
+    fire_products = ["SFSP", "IAR", "BSUSP", "BLUSP", "BGRP", "UBGR", "UVGR"] 
     
     for code in fire_products:
         pid = prod_map.get(code)
@@ -318,8 +326,8 @@ def seed_terrorism_slabs(conn):
                 row["product_code"] = code
                 row["product_id"] = pid
                 
-                # Special override for BGRP Residential
-                if code == "BGRP" and row["occupancy_type"] == "Residential":
+                # Special override for BGRP/UBGR/UVGR Residential
+                if code in ["BGRP", "UBGR", "UVGR"] and row["occupancy_type"] == "Residential":
                     row["rate_per_mille"] = 0.07
                     
                 upsert(conn, TerrorismSlab, row)
