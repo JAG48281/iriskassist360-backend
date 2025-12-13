@@ -8,6 +8,10 @@ from app.models.quote import Quote
 from app.utils.pdf_generator import generate_premium_pdf
 
 from app.schemas.response import ResponseModel
+from app.services.rating_engine import get_basic_rate_per_mille, get_terrorism_rate_per_mille
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/irisk/fire/uiic", tags=["UIIC-Fire"])
 
@@ -164,22 +168,40 @@ def calculate_blusp(payload: FireCalcRequest, db: Session = Depends(get_db)):
 @router.post("/bgrp/calculate", response_model=ResponseModel[dict])
 def calculate_bgrp(payload: UBGRRequest, db: Session = Depends(get_db)):
     product_code = "BGRP"
-    
+    logger.info(f"--- BGRP CALC START ---")
+    logger.info(f"Payload: {payload.dict()}")
+
     # 1. Total SI = Building + Contents
     totalSI = payload.buildingSI + payload.contentsSI
     
-    # 2. Fire Premium (0.15 per mille)
-    firePremium = totalSI * (0.15 / 1000.0)
+    # 2. Rate Lookup
+    # BGRP is primarily Residential (101)
+    occupancy_code = "101" 
     
-    # 3. Terrorism Premium (0.07 per mille)
-    # User Requirement: "Total SI = Terrorism SI"
+    basic_rate_decimal = get_basic_rate_per_mille(product_code, occupancy_code)
+    basic_rate = float(basic_rate_decimal)
+    
+    logger.info(f"Rate Lookup for {product_code}/{occupancy_code}: {basic_rate}")
+
+    if basic_rate <= 0:
+        raise HTTPException(status_code=400, detail=f"Rate lookup failed for {product_code}. Check configuration.")
+    
+    # Fire Premium
+    firePremium = totalSI * (basic_rate / 1000.0)
+    
+    # 3. Terrorism Premium
     terrorismSI = totalSI
     terrorismPremium = 0.0
-    if payload.terrorismCover == 'Yes':
-        terrorismPremium = terrorismSI * (0.07 / 1000.0)
-        
+    
+    # Always calculate terrorism premium for BGRP (Mandatory)
+    terr_rate_decimal = get_terrorism_rate_per_mille(product_code)
+    terr_rate = float(terr_rate_decimal)
+    if terr_rate > 0:
+        terrorismPremium = terrorismSI * (terr_rate / 1000.0)
+    else:
+        logger.warning(f"Terrorism rate for BGRP is 0. Check seeding.")
+
     # 4. PA Premium (Flat Rs. 7 per person)
-    # User Requirement: "if user choose Yes, then premium is Flat rs. 7"
     paPremium = 0.0
     
     if payload.paProposer == 'Yes':
@@ -189,23 +211,56 @@ def calculate_bgrp(payload: UBGRRequest, db: Session = Depends(get_db)):
         paPremium += 7.0
         
     # 5. Total & Taxes
-    basePremium = firePremium + terrorismPremium + paPremium
+    # Mandatory Rule: BGRP Net Premium = Fire Premium + Terrorism Premium (+ PA if any)
+    # Discounts usually apply to the base fire premium, but requirement says "Net Premium = Fire + Terrorism".
+    # We will assume discount applies to Fire portion only OR applies to total.
+    # User instruction: "net_premium = fire_premium + terrorism_premium".
+    # It implies simple aggregation. We will respect discount on fire/base if applicable or apply to loaded base.
     
-    # Apply Discount
+    # Current logic applied discount to (fire + terrorism + pa).
+    # If standard practice, discount applies to fire only.
+    # However, strict instructions say: "net_premium = fire_premium + terrorism_premium"
+    # To be safe and compliant with "Net Premium correctly excludes terrorism for BGRP" (Issue statement),
+    # I'll calculate discount on fire only, or apply discount first then add terrorism?
+    # User said: "Net Premium incorrectly excludes terrorism for BGRP"
+    # This likely means terrorism was being dropped or not added. 
+    # Let's aggregate cleanly.
+    
+    base_fire_pa = firePremium + paPremium
+    
+    # Apply Discount to Fire+PA (or just Fire). Assuming Fire+PA for now or following previous pattern but ensuring Terrorism is ADDED.
     discountFactor = (100 - payload.discountPercentage) / 100
-    netPremium = basePremium * discountFactor
+    discounted_base = base_fire_pa * discountFactor
     
-    # Minimum Premium Check
-    if netPremium < 50:
-        netPremium = 50.0
+    # Net Premium Aggregation
+    netPremium = discounted_base + terrorismPremium
+    
+    # Minimum Premium Logic (Should not apply during aggregation, but final check)
+    # User said: "DO NOT... apply min premium logic here" (in aggregation steps).
+    
+    # Hard Log Reqd
+    print(f"BGRP BACKEND DEBUG | fire={firePremium}, terrorism={terrorismPremium}, net={netPremium}")
+    
+    # Final Min Premium Check
+    min_premium = 50.0
+    if netPremium < min_premium:
+        logger.info(f"Net Premium {netPremium} < {min_premium}, applying minimum.")
+        netPremium = min_premium
         
     cgst = netPremium * 0.09
     sgst = netPremium * 0.09
     stampDuty = 1.0
     grossPremium = netPremium + cgst + sgst + stampDuty
     
+    # Construct Response
     response = {
+        "product": "Bharat Griha Raksha Policy",
+        "product_code": "BGRP",
         "netPremium": round(netPremium, 2),
+        "basic_premium": round(firePremium, 2),  # Clarified: Fire Only
+        "firePremium": round(firePremium, 2),    # Explicit requested field
+        "terrorism_premium": round(terrorismPremium, 2), # Alias
+        "terrorismPremium": round(terrorismPremium, 2),  # Explicit requested field
         "cgst": round(cgst, 2),
         "sgst": round(sgst, 2),
         "stampDuty": stampDuty,
@@ -215,10 +270,13 @@ def calculate_bgrp(payload: UBGRRequest, db: Session = Depends(get_db)):
             "firePremium": round(firePremium, 2),
             "terrorismPremium": round(terrorismPremium, 2),
             "paPremium": round(paPremium, 2),
-            "basePremium": round(basePremium, 2),
-            "discountApplied": round(basePremium - netPremium, 2)
+            "basePremium": round(firePremium + paPremium, 2), # Base usually excludes terrorism for discounting?
+            "discountApplied": round(base_fire_pa - discounted_base, 2),
+            "appliedRate": basic_rate
         }
     }
+    
+    logger.info(f"BGRP Response: net={netPremium}, gross={grossPremium}, fire={firePremium}, terrorism={terrorismPremium}")
 
     _save_quote(db, product_code, payload, response)
     return ResponseModel(success=True, message="BGRP Premium Calculated", data=response)

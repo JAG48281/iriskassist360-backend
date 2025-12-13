@@ -89,7 +89,7 @@ def seed_lob_and_product(conn):
         {"lob_id": fire_id, "product_code": "BSUSP", "product_name": "Bharat Sookshma Udyam Suraksha", "description": "Micro Enterprise", "active": True},
         {"lob_id": fire_id, "product_code": "BLUSP", "product_name": "Bharat Laghu Udyam Suraksha", "description": "Small Enterprise", "active": True},
         {"lob_id": fire_id, "product_code": "VUSP", "product_name": "Value Udyam", "description": "Value Added Product", "active": True},
-        {"lob_id": fire_id, "product_code": "UBGR", "product_name": "Bharat Griha Raksha (UIIC)", "description": "UIIC Specific Home Insurance", "active": True},
+
         {"lob_id": fire_id, "product_code": "UVGS", "product_name": "Udyam Value Griha Suraksha", "description": "Udyam Value Home", "active": True},
     ]
 
@@ -301,7 +301,7 @@ def seed_terrorism_slabs(conn):
         {"occupancy_type": "Industrial", "si_min": 20000000000, "si_max": None, "rate_per_mille": 0.15},
     ]
 
-    fire_products = ["SFSP", "IAR", "BSUSP", "BLUSP"] 
+    fire_products = ["SFSP", "IAR", "BSUSP", "BLUSP", "BGRP"] 
     
     for code in fire_products:
         pid = prod_map.get(code)

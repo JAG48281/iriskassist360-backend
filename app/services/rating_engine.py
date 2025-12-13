@@ -5,62 +5,68 @@ from typing import Optional, Tuple
 from sqlalchemy import create_engine, text
 from app.schemas.rating_engine import RatingRequest, RatingResponse
 from app.utils.rating_engine import round_currency
+from app.database import engine
 
 logger = logging.getLogger(__name__)
 
-# Database Connection
-# Ensure DATABASE_URL is set in environment or .env
-DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    logger.warning("DATABASE_URL not set, rating engine DB functions may fail.")
-    # Fallback/Placeholder
-    DATABASE_URL = "postgresql://postgres:user@localhost/dbname"
-
-engine = create_engine(DATABASE_URL)
-
 def get_basic_rate_per_mille(product_code: str, occupancy_code: str, period_years: int = 1) -> Decimal:
     """
-    Fetches the basic rate per mille for a given product and occupancy.
+    Fetches the basic rate per mille for a given product and occupancy code (iib_code).
     """
     stmt = text("""
-        SELECT rate_per_mille 
-        FROM product_basic_rates 
-        WHERE product_code = :p 
-          AND occupancy_code = :o 
-          AND period_years = :y 
+        SELECT r.basic_rate 
+        FROM product_basic_rates r
+        JOIN occupancies o ON r.occupancy_id = o.id
+        WHERE r.product_code = :p 
+          AND o.iib_code = :o 
         LIMIT 1
     """)
     try:
         with engine.connect() as conn:
-            result = conn.execute(stmt, {"p": product_code, "o": occupancy_code, "y": period_years}).scalar()
+            # Note: period_years removed as it's not in the schema currently
+            result = conn.execute(stmt, {"p": product_code, "o": occupancy_code}).scalar()
             if result is not None:
                 return Decimal(str(result))
             
-            logger.warning(f"No basic rate found: Product={product_code}, Occ={occupancy_code}, Years={period_years}")
+            logger.warning(f"No basic rate found: Product={product_code}, Occ={occupancy_code}")
             return Decimal("0.0")
     except Exception as e:
         logger.error(f"DB Error (get_basic_rate_per_mille): {e}")
         return Decimal("0.0")
 
-def get_terrorism_rate_per_mille(product_code: str) -> Decimal:
+def get_terrorism_rate_per_mille(product_code: str, occupancy_code: Optional[str] = "101") -> Decimal:
     """
-    Fetches the terrorism rate. Falls back to a default if not found.
+    Fetches the terrorism rate. 
+    Matches mechanism in seed: Join with Occupancy to get type if needed, or just match product.
+    If product-specific slabs exist, use them.
+    The current schema uses (product_code, occupancy_type, si_min/max).
+    Assuming 'Residential' for BGRP if code is 101.
     """
+    # First get occupancy type for the code
+    occ_type = "Residential" # Default
+    if occupancy_code:
+        # Resolve type
+        stmt_type = text("SELECT occupancy_type FROM occupancies WHERE iib_code = :c")
+        with engine.connect() as conn:
+             res = conn.execute(stmt_type, {"c": occupancy_code}).scalar()
+             if res:
+                 occ_type = res
+
     stmt = text("""
         SELECT rate_per_mille 
         FROM terrorism_slabs 
         WHERE product_code = :p 
-        ORDER BY effective_date DESC 
+          AND occupancy_type = :ot
+        ORDER BY rate_per_mille DESC 
         LIMIT 1
     """)
     try:
         with engine.connect() as conn:
-            result = conn.execute(stmt, {"p": product_code}).scalar()
+            result = conn.execute(stmt, {"p": product_code, "ot": occ_type}).scalar()
             if result is not None:
                 return Decimal(str(result))
             
-            # Fallback for known products if table is empty
-            logger.warning(f"No terrorism rate found for Product={product_code}. Returning 0.0.")
+            logger.warning(f"No terrorism rate found for Product={product_code}, Type={occ_type}. Returning 0.0.")
             return Decimal("0.0")
     except Exception as e:
         logger.error(f"DB Error (get_terrorism_rate_per_mille): {e}")
