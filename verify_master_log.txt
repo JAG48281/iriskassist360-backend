@@ -1,0 +1,13 @@
+--- Starting Verification ---
+
+[CHECK 1] BGRP (Residential)
+Success. Items returned: 2
+Sample: {'riskDescription': 'Dwellings', 'iibCode': '1001', 'aiftSection': 'III', 'occupancyType': 'Residential'}
+Validation Passed: iibCode is 1001 or 1001_2
+
+[CHECK 2] BSUS (Commercial)
+Success. Items returned: 297
+Validation Passed: No Residential codes found in sample.
+
+[CHECK 3] Invalid Code
+Success. Got 400 Bad Request as expected.

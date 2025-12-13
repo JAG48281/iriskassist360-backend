@@ -10,7 +10,7 @@ class Occupancy(Base):
     iib_code = Column(String(length=20), nullable=False, unique=True)
     section_aift = Column(String(length=20), nullable=False)
     occupancy_type = Column(String(length=100), nullable=False)
-    occupancy_description = Column(Text, nullable=False)
+    risk_description = Column(Text, nullable=False)
 
 class AddOnMaster(Base):
     __tablename__ = "add_on_master"

@@ -20,7 +20,7 @@ def get_occupancies(request: Request, db: Session = Depends(get_db)):
             "id": r.id, 
             "iib_code": r.iib_code, 
             "section": r.section_aift,
-            "description": r.occupancy_description
+            "description": r.risk_description
         } 
         for r in data
     ]

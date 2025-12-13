@@ -76,11 +76,13 @@ def create_app():
     from app.routers.common.occupancies import router as occ_router
     from app.routers.common.addons import router as addon_router
     from app.routers.common.data_inspection import router as inspect_router
+    from app.routers.master import risk_master
     
 
     app.include_router(occ_router)
     app.include_router(addon_router)
     app.include_router(inspect_router)
+    app.include_router(risk_master.router, prefix="/api")
 
     # Rating Engine
     from app.routers.rating_engine import router as rating_router

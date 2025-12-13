@@ -108,12 +108,15 @@ def seed_occupancies(conn):
     else:
         # Minimal Sample
         data = [
-            {"iib_code": "101", "section_aift": "1", "occupancy_type": "Residential", "occupancy_description": "Residential Buildings"},
-            {"iib_code": "201", "section_aift": "2", "occupancy_type": "Non-Industrial", "occupancy_description": "Offices"},
-            {"iib_code": "301", "section_aift": "3", "occupancy_type": "Industrial", "occupancy_description": "General Manufacturing"}
+            {"iib_code": "101", "section_aift": "1", "occupancy_type": "Residential", "risk_description": "Residential Buildings"},
+            {"iib_code": "201", "section_aift": "2", "occupancy_type": "Non-Industrial", "risk_description": "Offices"},
+            {"iib_code": "301", "section_aift": "3", "occupancy_type": "Industrial", "risk_description": "General Manufacturing"}
         ]
         
     for row in data:
+        # Remap or ensure risk_description key exists
+        if 'occupancy_description' in row:
+            row['risk_description'] = row.pop('occupancy_description')
         upsert(conn, Occupancy, row)
 
     # Note: CSV reading is enforced to use UTF-8 with replacement to avoid crashes.
