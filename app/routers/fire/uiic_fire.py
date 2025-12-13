@@ -25,7 +25,7 @@ class FireCalcRequest(BaseModel):
 
 class UBGRRequest(BaseModel):
     buildingSI: float
-    contentsSI: float
+    contentsSI: Optional[float] = 0.0
     terrorismCover: Optional[str] = None
     terrorismSI: Optional[float] = None
     paProposer: Optional[str] = None

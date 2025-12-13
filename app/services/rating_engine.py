@@ -53,7 +53,7 @@ def get_terrorism_rate_per_mille(product_code: str, occupancy_code: Optional[str
 
     logger.info(f"Looking up Terrorism Rate: Product={product_code}, OccType={occ_type}, TSI={tsi}")
 
-    # Query with TSI range check
+    # Query with TSI range check & Deterministic Ordering
     stmt = text("""
         SELECT rate_per_mille 
         FROM terrorism_slabs 
@@ -61,7 +61,7 @@ def get_terrorism_rate_per_mille(product_code: str, occupancy_code: Optional[str
           AND occupancy_type = :ot
           AND si_min <= :tsi
           AND (si_max IS NULL OR si_max >= :tsi)
-        ORDER BY rate_per_mille DESC
+        ORDER BY si_min DESC  -- Deterministic: Pick strict match if multiple ranges overlap (unlikely but safe)
         LIMIT 1
     """)
     
@@ -71,7 +71,7 @@ def get_terrorism_rate_per_mille(product_code: str, occupancy_code: Optional[str
             
             if result is not None:
                 rate = Decimal(str(result))
-                logger.info(f"✅ Selected terrorism rate: {rate} per mille") # Task: Log Selected terrorism rate
+                logger.info(f"✅ Selected terrorism rate: {rate} per mille") 
                 return rate
             
             # Explicit failure if no slab matches

@@ -94,6 +94,21 @@ def create_app():
 
 app = create_app()
 
+@app.on_event("startup")
+async def verify_bgrp_configuration():
+    """Ensure BGRP rates are correctly configured before traffic is accepted."""
+    try:
+        from app.services.rating_engine import get_terrorism_rate_per_mille
+        rate = float(get_terrorism_rate_per_mille("BGRP", occupancy_code="1001", tsi=10000000.0))
+        if abs(rate - 0.07) > 0.00001:
+            logger.critical(f"STARTUP FAILURE: BGRP Terrorism Rate is {rate}, expected 0.07")
+            raise RuntimeError("Invalid BGRP Terrorism Rate Configuration")
+        logger.info("✅ Startup Check: BGRP Terrorism Rate verified as 0.07")
+    except Exception as e:
+        logger.critical(f"STARTUP CHECK FAILED: {e}")
+        # In production, this exception will prevent the app from starting
+        raise e
+
 Base.metadata.create_all(bind=engine)
 
 
