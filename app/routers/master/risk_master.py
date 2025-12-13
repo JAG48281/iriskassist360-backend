@@ -11,6 +11,16 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
+def _to_roman_safe(val: str) -> str:
+    """Ensure Section is Roman Numeral. Handles '1'->'I', etc."""
+    val = val.replace('Section', '').replace('section', '').strip()
+    
+    mapping = {
+        "1": "I", "2": "II", "3": "III", "4": "IV", "5": "V",
+        "6": "VI", "7": "VII", "8": "VIII"
+    }
+    return mapping.get(val, val)
+
 @router.get("/master/risk-descriptions", response_model=List[RiskDescriptionResponse])
 def get_risk_descriptions(
     productCode: str = Query(..., description="Product Code to filter risks"),
@@ -20,16 +30,23 @@ def get_risk_descriptions(
     Get Risk Descriptions (Occupancies) filtered by Product Code.
     
     Business Rules:
-    - BGRP, UBGR, UVGR: Return Dwellings (1001) and Co-op (1001_2) ONLY.
+    - BGRP, UVGR: Return Dwellings (1001) and Co-op (1001_2) ONLY.
     - BSUS, BLUS, UVUS, SFSP, IAR: Return ALL remaining risks (Non-Residential).
+    
+    Includes aliases (e.g. BSUSP, BLUSP) for robustness.
     """
     
-    # Valid Product Codes
-    GROUP_A = {'BGRP', 'UBGR', 'UVGR'} # Residential
-    GROUP_B = {'BSUS', 'BLUS', 'UVUS', 'SFSP', 'IAR'} # Commercial/Others
+    # Valid Product Codes & Aliases
+    # Group A: Residential
+    GROUP_A = {'BGRP', 'UBGR', 'UVGR', 'UVGS'} 
+    
+    # Group B: Commercial / Others
+    # Added BSUSP, BLUSP, VUSP (Value Udyam) to match DB realities
+    GROUP_B = {'BSUS', 'BLUS', 'UVUS', 'SFSP', 'IAR', 'BSUSP', 'BLUSP', 'VUSP'} 
     
     product_code_upper = productCode.upper()
     
+    # Validation
     if product_code_upper not in GROUP_A and product_code_upper not in GROUP_B:
         raise HTTPException(
             status_code=400, 
@@ -49,15 +66,10 @@ def get_risk_descriptions(
         
     results = []
     for r in risks:
-        # Clean up AIFT Section (defensive coding)
-        # Expected: "I", "II", "III"
-        # Stored might be "Section III"
-        aift_cleaned = r.section_aift.replace('Section', '').replace('section', '').strip()
-        
         results.append(RiskDescriptionResponse(
             riskDescription=r.risk_description,
             iibCode=r.iib_code,
-            aiftSection=aift_cleaned,
+            aiftSection=_to_roman_safe(r.section_aift),
             occupancyType=r.occupancy_type
         ))
         
