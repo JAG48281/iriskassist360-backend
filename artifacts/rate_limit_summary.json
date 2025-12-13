@@ -1,0 +1,9 @@
+{
+    "status": "rate_limiting_added",
+    "global_limit": "60 req/min",
+    "manual_seed_limit": "1/hr",
+    "quote_limit": "30/min",
+    "test_updates": true,
+    "docs_updated": true,
+    "proxy_middleware_added": true
+}

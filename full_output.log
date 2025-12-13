@@ -1,0 +1,28 @@
+
+=================================== ERRORS ====================================
+______________________ ERROR collecting test_output.txt _______________________
+C:\Program Files\Python311\Lib\pathlib.py:1059: in read_text
+    return f.read()
+           ^^^^^^^^
+<frozen codecs>:322: in decode
+    ???
+E   UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte
+============================== warnings summary ===============================
+app\schemas\user_schema.py:11
+  D:\iriskassist360_backend\app\schemas\user_schema.py:11: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class UserOut(BaseModel):
+
+.venv\Lib\site-packages\pydantic\_internal\_config.py:383
+  D:\iriskassist360_backend\.venv\Lib\site-packages\pydantic\_internal\_config.py:383: UserWarning: Valid config keys have changed in V2:
+  * 'orm_mode' has been renamed to 'from_attributes'
+    warnings.warn(message, UserWarning)
+
+app\schemas\response.py:3
+  D:\iriskassist360_backend\app\schemas\response.py:3: PydanticDeprecatedSince20: `pydantic.generics:GenericModel` has been moved to `pydantic.BaseModel`. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    from pydantic.generics import GenericModel
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+ERROR test_output.txt - UnicodeDecodeError: 'utf-8' codec can't decode byte 0...
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+3 warnings, 1 error in 1.21s

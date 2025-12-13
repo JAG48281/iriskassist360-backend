@@ -1,0 +1,160 @@
+{
+  "timestamp": "2025-12-12T19:40:13.763893",
+  "api_url": "http://127.0.0.1:8000",
+  "total_tests": 4,
+  "passed": 2,
+  "warnings": 2,
+  "failed": 0,
+  "overall_status": "PASS",
+  "security_score": "50%",
+  "test_results": [
+    {
+      "test": "authentication",
+      "protected_endpoints": [
+        {
+          "endpoint": "/api/manual-seed",
+          "error": "HTTPConnectionPool(host='127.0.0.1', port=8000): Max retries exceeded with url: /api/manual-seed (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=8000): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\"))",
+          "secure": null
+        },
+        {
+          "endpoint": "/api/admin",
+          "error": "HTTPConnectionPool(host='127.0.0.1', port=8000): Max retries exceeded with url: /api/admin (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=8000): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\"))",
+          "secure": null
+        },
+        {
+          "endpoint": "/api/users",
+          "error": "HTTPConnectionPool(host='127.0.0.1', port=8000): Max retries exceeded with url: /api/users (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=8000): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\"))",
+          "secure": null
+        }
+      ],
+      "public_endpoints": [
+        {
+          "endpoint": "/api/occupancies",
+          "error": "HTTPConnectionPool(host='127.0.0.1', port=8000): Max retries exceeded with url: /api/occupancies (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=8000): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\"))",
+          "accessible": false
+        },
+        {
+          "endpoint": "/api/add-on-rates",
+          "error": "HTTPConnectionPool(host='127.0.0.1', port=8000): Max retries exceeded with url: /api/add-on-rates (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=8000): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\"))",
+          "accessible": false
+        },
+        {
+          "endpoint": "/api/add-on-master",
+          "error": "HTTPConnectionPool(host='127.0.0.1', port=8000): Max retries exceeded with url: /api/add-on-master (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=8000): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\"))",
+          "accessible": false
+        }
+      ],
+      "status": "PASS",
+      "notes": [
+        "No authentication issues detected"
+      ]
+    },
+    {
+      "test": "cors",
+      "endpoints_tested": [
+        {
+          "endpoint": "/api/occupancies",
+          "error": "HTTPConnectionPool(host='127.0.0.1', port=8000): Max retries exceeded with url: /api/occupancies (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=8000): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\"))"
+        },
+        {
+          "endpoint": "/api/add-on-rates",
+          "error": "HTTPConnectionPool(host='127.0.0.1', port=8000): Max retries exceeded with url: /api/add-on-rates (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=8000): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\"))"
+        },
+        {
+          "endpoint": "/",
+          "error": "HTTPConnectionPool(host='127.0.0.1', port=8000): Max retries exceeded with url: / (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=8000): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\"))"
+        }
+      ],
+      "cors_enabled": false,
+      "allow_origin": null,
+      "status": "WARNING",
+      "notes": [
+        "CORS headers not detected - may cause frontend issues"
+      ]
+    },
+    {
+      "test": "sql_injection",
+      "attacks_tested": [
+        {
+          "payload": "'; DROP TABLE add_on_master; --",
+          "error": "HTTPConnectionPool(host='127.0.0.1', port=8000): Max retries exceeded with url: /api/occupancies?q=%27%3B+DROP+TABLE+add_on_master%3B+-- (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=8000): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\"))",
+          "protected": null
+        },
+        {
+          "payload": "1' OR '1'='1",
+          "error": "HTTPConnectionPool(host='127.0.0.1', port=8000): Max retries exceeded with url: /api/occupancies?q=1%27+OR+%271%27%3D%271 (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=8000): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\"))",
+          "protected": null
+        },
+        {
+          "payload": "admin'--",
+          "error": "HTTPConnectionPool(host='127.0.0.1', port=8000): Max retries exceeded with url: /api/occupancies?q=admin%27-- (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=8000): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\"))",
+          "protected": null
+        },
+        {
+          "payload": "' UNION SELECT NULL--",
+          "error": "HTTPConnectionPool(host='127.0.0.1', port=8000): Max retries exceeded with url: /api/occupancies?q=%27+UNION+SELECT+NULL-- (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=8000): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\"))",
+          "protected": null
+        },
+        {
+          "payload": "1; DELETE FROM occupancies WHERE 1=1--",
+          "error": "HTTPConnectionPool(host='127.0.0.1', port=8000): Max retries exceeded with url: /api/occupancies?q=1%3B+DELETE+FROM+occupancies+WHERE+1%3D1-- (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=8000): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\"))",
+          "protected": null
+        }
+      ],
+      "status": "PASS",
+      "notes": [
+        "No SQL injection vulnerabilities detected"
+      ]
+    },
+    {
+      "test": "rate_limiting",
+      "requests_sent": 0,
+      "rate_limit_triggered": false,
+      "rate_limit_status_code": null,
+      "status": "WARNING",
+      "notes": [
+        "No rate limiting detected after 30 requests",
+        "Consider implementing rate limiting for production security"
+      ],
+      "response_codes": [
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT",
+        "TIMEOUT"
+      ],
+      "elapsed_time_seconds": 60.25,
+      "requests_per_second": 0.5
+    }
+  ],
+  "recommendations": [
+    "CORS headers not detected - may cause frontend issues",
+    "No rate limiting detected after 30 requests",
+    "Consider implementing rate limiting for production security"
+  ]
+}

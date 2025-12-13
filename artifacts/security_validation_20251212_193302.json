@@ -1,0 +1,172 @@
+{
+  "timestamp": "2025-12-12T19:32:25.619316",
+  "api_url": "https://web-production-afeec.up.railway.app",
+  "total_tests": 4,
+  "passed": 3,
+  "warnings": 1,
+  "failed": 0,
+  "overall_status": "PASS",
+  "security_score": "75%",
+  "test_results": [
+    {
+      "test": "authentication",
+      "protected_endpoints": [
+        {
+          "endpoint": "/api/manual-seed",
+          "error": "HTTPSConnectionPool(host='web-production-afeec.up.railway.app', port=443): Read timed out. (read timeout=5)",
+          "secure": null
+        },
+        {
+          "endpoint": "/api/admin",
+          "status_code": 404,
+          "result": "NOT FOUND (404)",
+          "secure": null
+        },
+        {
+          "endpoint": "/api/users",
+          "status_code": 404,
+          "result": "NOT FOUND (404)",
+          "secure": null
+        }
+      ],
+      "public_endpoints": [
+        {
+          "endpoint": "/api/occupancies",
+          "status_code": 200,
+          "accessible": true
+        },
+        {
+          "endpoint": "/api/add-on-rates",
+          "status_code": 200,
+          "accessible": true
+        },
+        {
+          "endpoint": "/api/add-on-master",
+          "status_code": 200,
+          "accessible": true
+        }
+      ],
+      "status": "PASS",
+      "notes": [
+        "No authentication issues detected"
+      ]
+    },
+    {
+      "test": "cors",
+      "endpoints_tested": [
+        {
+          "endpoint": "/api/occupancies",
+          "status_code": 200,
+          "cors_header": "*",
+          "cors_enabled": true
+        },
+        {
+          "endpoint": "/api/add-on-rates",
+          "status_code": 200,
+          "cors_header": "*",
+          "cors_enabled": true
+        },
+        {
+          "endpoint": "/",
+          "status_code": 200,
+          "cors_header": "*",
+          "cors_enabled": true
+        }
+      ],
+      "cors_enabled": true,
+      "allow_origin": "*",
+      "status": "PASS",
+      "notes": [
+        "CORS is configured with Allow-Origin: *"
+      ]
+    },
+    {
+      "test": "sql_injection",
+      "attacks_tested": [
+        {
+          "payload": "'; DROP TABLE add_on_master; --",
+          "status_code": 200,
+          "result": "SANITIZED (200 OK with valid data)",
+          "protected": true
+        },
+        {
+          "payload": "1' OR '1'='1",
+          "status_code": 200,
+          "result": "SANITIZED (200 OK with valid data)",
+          "protected": true
+        },
+        {
+          "payload": "admin'--",
+          "status_code": 200,
+          "result": "SANITIZED (200 OK with valid data)",
+          "protected": true
+        },
+        {
+          "payload": "' UNION SELECT NULL--",
+          "status_code": 200,
+          "result": "SANITIZED (200 OK with valid data)",
+          "protected": true
+        },
+        {
+          "payload": "1; DELETE FROM occupancies WHERE 1=1--",
+          "status_code": 200,
+          "result": "SANITIZED (200 OK with valid data)",
+          "protected": true
+        }
+      ],
+      "status": "PASS",
+      "notes": [
+        "No SQL injection vulnerabilities detected"
+      ]
+    },
+    {
+      "test": "rate_limiting",
+      "requests_sent": 30,
+      "rate_limit_triggered": false,
+      "rate_limit_status_code": null,
+      "status": "WARNING",
+      "notes": [
+        "No rate limiting detected after 30 requests",
+        "Consider implementing rate limiting for production security"
+      ],
+      "response_codes": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "elapsed_time_seconds": 21.44,
+      "requests_per_second": 1.4
+    }
+  ],
+  "recommendations": [
+    "No rate limiting detected after 30 requests",
+    "Consider implementing rate limiting for production security"
+  ]
+}

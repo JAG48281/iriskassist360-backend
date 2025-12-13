@@ -34,16 +34,15 @@ def get_basic_rate_per_mille(product_code: str, occupancy_code: str, period_year
         logger.error(f"DB Error (get_basic_rate_per_mille): {e}")
         return Decimal("0.0")
 
-def get_terrorism_rate_per_mille(product_code: str, occupancy_code: Optional[str] = "101") -> Decimal:
+def get_terrorism_rate_per_mille(product_code: str, occupancy_code: Optional[str] = "1001", tsi: float = 0.0) -> Decimal:
     """
-    Fetches the terrorism rate. 
-    Matches mechanism in seed: Join with Occupancy to get type if needed, or just match product.
-    If product-specific slabs exist, use them.
-    The current schema uses (product_code, occupancy_type, si_min/max).
-    Assuming 'Residential' for BGRP if code is 101.
+    Fetches the terrorism rate based on TSI slabs.
+    Matches product, occupancy type, and TSI range.
     """
     # First get occupancy type for the code
     occ_type = "Residential" # Default
+    logger.info(f"Using Occupancy Code: {occupancy_code}") # Task: Log Selected occupancy_code
+    
     if occupancy_code:
         # Resolve type
         stmt_type = text("SELECT occupancy_type FROM occupancies WHERE iib_code = :c")
@@ -52,25 +51,37 @@ def get_terrorism_rate_per_mille(product_code: str, occupancy_code: Optional[str
              if res:
                  occ_type = res
 
+    logger.info(f"Looking up Terrorism Rate: Product={product_code}, OccType={occ_type}, TSI={tsi}")
+
+    # Query with TSI range check
     stmt = text("""
         SELECT rate_per_mille 
         FROM terrorism_slabs 
         WHERE product_code = :p 
           AND occupancy_type = :ot
-        ORDER BY rate_per_mille DESC 
+          AND si_min <= :tsi
+          AND (si_max IS NULL OR si_max >= :tsi)
+        ORDER BY rate_per_mille DESC
         LIMIT 1
     """)
+    
     try:
         with engine.connect() as conn:
-            result = conn.execute(stmt, {"p": product_code, "ot": occ_type}).scalar()
-            if result is not None:
-                return Decimal(str(result))
+            result = conn.execute(stmt, {"p": product_code, "ot": occ_type, "tsi": tsi}).scalar()
             
-            logger.warning(f"No terrorism rate found for Product={product_code}, Type={occ_type}. Returning 0.0.")
-            return Decimal("0.0")
+            if result is not None:
+                rate = Decimal(str(result))
+                logger.info(f"✅ Selected terrorism rate: {rate} per mille") # Task: Log Selected terrorism rate
+                return rate
+            
+            # Explicit failure if no slab matches
+            error_msg = f"No terrorism slab found for Product={product_code}, Type={occ_type}, TSI={tsi}"
+            logger.error(error_msg)
+            raise ValueError(error_msg)
+            
     except Exception as e:
         logger.error(f"DB Error (get_terrorism_rate_per_mille): {e}")
-        return Decimal("0.0")
+        raise e
 
 def get_add_on_rate(product_code: str, add_on_code: str, occupancy_code: Optional[str] = None) -> Tuple[str, Decimal]:
     """

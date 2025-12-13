@@ -1,0 +1,28 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.0, pytest-9.0.2, pluggy-1.6.0
+rootdir: D:\iriskassist360_backend
+plugins: anyio-4.12.0
+collected 6 items
+
+tests\test_api.py ......                                                 [100%]
+
+============================== warnings summary ===============================
+app\schemas\user_schema.py:11
+  D:\iriskassist360_backend\app\schemas\user_schema.py:11: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class UserOut(BaseModel):
+
+.venv\Lib\site-packages\pydantic\_internal\_config.py:383
+  D:\iriskassist360_backend\.venv\Lib\site-packages\pydantic\_internal\_config.py:383: UserWarning: Valid config keys have changed in V2:
+  * 'orm_mode' has been renamed to 'from_attributes'
+    warnings.warn(message, UserWarning)
+
+app\schemas\response.py:3
+  D:\iriskassist360_backend\app\schemas\response.py:3: PydanticDeprecatedSince20: `pydantic.generics:GenericModel` has been moved to `pydantic.BaseModel`. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    from pydantic.generics import GenericModel
+
+tests/test_api.py::test_quote_calculation_sfsp
+  D:\iriskassist360_backend\app\routers\fire\uiic_fire.py:86: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    request_data=payload.dict(),
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 6 passed, 4 warnings in 1.33s ========================

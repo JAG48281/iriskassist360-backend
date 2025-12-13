@@ -175,8 +175,8 @@ def calculate_bgrp(payload: UBGRRequest, db: Session = Depends(get_db)):
     totalSI = payload.buildingSI + payload.contentsSI
     
     # 2. Rate Lookup
-    # BGRP is primarily Residential (101)
-    occupancy_code = "101" 
+    # BGRP is primarily Residential (1001) - Critical Logic Update
+    occupancy_code = "1001" 
     
     basic_rate_decimal = get_basic_rate_per_mille(product_code, occupancy_code)
     basic_rate = float(basic_rate_decimal)
@@ -193,13 +193,25 @@ def calculate_bgrp(payload: UBGRRequest, db: Session = Depends(get_db)):
     terrorismSI = totalSI
     terrorismPremium = 0.0
     
-    # Always calculate terrorism premium for BGRP (Mandatory)
-    terr_rate_decimal = get_terrorism_rate_per_mille(product_code)
-    terr_rate = float(terr_rate_decimal)
-    if terr_rate > 0:
-        terrorismPremium = terrorismSI * (terr_rate / 1000.0)
-    else:
-        logger.warning(f"Terrorism rate for BGRP is 0. Check seeding.")
+    try:
+        if occupancy_code != "1001":
+            raise ValueError(f"CRITICAL: BGRP must use occupancy 1001, got {occupancy_code}")
+
+        terr_rate_decimal = get_terrorism_rate_per_mille(product_code, occupancy_code="1001", tsi=totalSI)
+        terr_rate = float(terr_rate_decimal)
+        
+        # Hard Assertion: Rate must be 0.07 (or configured valid rate, but user requests strict 0.07 check)
+        # User requirement: "If terrorismRate != 0.07 -> throw error"
+        if abs(terr_rate - 0.07) > 0.00001:
+             error_msg = f"CRITICAL VALIDATION FAILED: Terrorism Rate is {terr_rate}, expected 0.07"
+             logger.error(error_msg)
+             raise ValueError(error_msg)
+             
+        terrorismPremium = round(terrorismSI * (terr_rate / 1000.0), 2)
+        logger.info(f"Terrorism Calc: SI={terrorismSI} * Rate={terr_rate}‰ = {terrorismPremium}")
+    except Exception as e:
+        logger.error(f"Terrorism Rate Lookup/Validation Failed: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
 
     # 4. PA Premium (Flat Rs. 7 per person)
     paPremium = 0.0
@@ -239,7 +251,7 @@ def calculate_bgrp(payload: UBGRRequest, db: Session = Depends(get_db)):
     # User said: "DO NOT... apply min premium logic here" (in aggregation steps).
     
     # Hard Log Reqd
-    print(f"BGRP BACKEND DEBUG | fire={firePremium}, terrorism={terrorismPremium}, net={netPremium}")
+    print(f"BGRP BACKEND DEBUG | fire={firePremium}, terrorism={terrorismPremium}, net={netPremium} (Slab Rate: {terr_rate})")
     
     # Final Min Premium Check
     min_premium = 50.0
@@ -257,10 +269,11 @@ def calculate_bgrp(payload: UBGRRequest, db: Session = Depends(get_db)):
         "product": "Bharat Griha Raksha Policy",
         "product_code": "BGRP",
         "netPremium": round(netPremium, 2),
-        "basic_premium": round(firePremium, 2),  # Clarified: Fire Only
-        "firePremium": round(firePremium, 2),    # Explicit requested field
-        "terrorism_premium": round(terrorismPremium, 2), # Alias
-        "terrorismPremium": round(terrorismPremium, 2),  # Explicit requested field
+        "basicFirePremium": round(firePremium, 2), # Explicit REQUIRED key
+        "basic_premium": round(firePremium, 2),    # Legacy
+        "firePremium": round(firePremium, 2),      # Legacy
+        "terrorismPremium": round(terrorismPremium, 2), # Explicit requested field
+        "terrorism_premium": round(terrorismPremium, 2), # Legacy
         "cgst": round(cgst, 2),
         "sgst": round(sgst, 2),
         "stampDuty": stampDuty,
@@ -270,9 +283,12 @@ def calculate_bgrp(payload: UBGRRequest, db: Session = Depends(get_db)):
             "firePremium": round(firePremium, 2),
             "terrorismPremium": round(terrorismPremium, 2),
             "paPremium": round(paPremium, 2),
-            "basePremium": round(firePremium + paPremium, 2), # Base usually excludes terrorism for discounting?
+            "basePremium": round(firePremium + paPremium, 2),
             "discountApplied": round(base_fire_pa - discounted_base, 2),
-            "appliedRate": basic_rate
+            "appliedRate": basic_rate,
+            "terrorismRate": terr_rate,
+            "fireRate": basic_rate,  # Explicit as per strict contract
+            "occupancyCode": 1001    # Explicit as per strict contract
         }
     }
     

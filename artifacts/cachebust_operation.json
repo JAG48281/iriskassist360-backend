@@ -1,0 +1,41 @@
+{
+    "operation": "cachebust_patch",
+    "timestamp": "2025-12-12T17:58:41+05:30",
+    "status": "applied_and_pushed",
+    "patch": "diff --git a/data/add_on_rates.csv b/data/add_on_rates.csv\nindex 9dee692..900c48b 100644\n--- a/data/add_on_rates.csv\n+++ b/data/add_on_rates.csv\n@@ -120,3 +120,4 @@ LREN,UVGS,per_mille,0.15,,,,\n PASL,UVGS,flat,7.0,,,,\n PASP,UVGS,flat,7.0,,,,\n VLIT,UVGS,per_mille,0.15,,,,\n+# CACHEBUST-20251212_175841",
+    "files_modified": [
+        "data/add_on_rates.csv"
+    ],
+    "modification_type": "harmless_comment",
+    "breaking_change": false,
+    "idempotent": true,
+    "git_operations": {
+        "commit_sha": "b1aa728",
+        "commit_message": "chore: cachebust to force Railway rebuild with fresh CSV files",
+        "pushed_to": "origin/main",
+        "push_timestamp": "2025-12-12T17:58:50+05:30"
+    },
+    "apply_instructions": "Already applied and pushed. Railway rebuild triggered automatically.",
+    "summary": "Cachebust patch created and applied successfully. Added harmless comment '# CACHEBUST-20251212_175841' to data/add_on_rates.csv. This modification forces Railway to invalidate its build cache and rebuild the container with fresh CSV files. The change is non-breaking and does not affect any functional logic.",
+    "expected_outcome": {
+        "railway_action": "Detects new commit, triggers fresh build",
+        "build_cache": "Invalidated due to data/ directory change",
+        "csv_files": "Fresh copies loaded into container",
+        "seed_script": "Will use updated CSV with 43 add-on codes",
+        "expected_result": "121 add-on rates after reseed"
+    },
+    "next_steps": [
+        "Wait 2-3 minutes for Railway deployment",
+        "Monitor Railway build logs",
+        "Verify 'Seeded AddOnMaster: 43 rows' in logs",
+        "Trigger reseed: curl .../api/manual-seed",
+        "Validate: python tests/validate_production_schema.py",
+        "Expected: 121/121 add-on rates"
+    ],
+    "monitoring": {
+        "railway_dashboard": "Check deployment status",
+        "build_logs": "Verify CSV files loaded",
+        "deploy_logs": "Verify seed execution",
+        "eta_completion": "2025-12-12T18:02:00+05:30"
+    }
+}
