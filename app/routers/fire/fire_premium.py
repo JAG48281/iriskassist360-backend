@@ -22,7 +22,7 @@ router = APIRouter(
 @router.post("/ubgr/calculate", response_model=UBGRUVGRResponse)
 @limiter.limit("30/minute")
 def calculate_ubgr_premium(
-    request_obj: Request,
+    request: Request,
     payload: UBGRUVGRRequest,
     db: Session = Depends(get_db)
 ):
@@ -69,7 +69,7 @@ def calculate_ubgr_premium(
 @router.post("/uvgr/calculate", response_model=UBGRUVGRResponse)
 @limiter.limit("30/minute")
 def calculate_uvgr_premium(
-    request_obj: Request,
+    request: Request,
     payload: UBGRUVGRRequest,
     db: Session = Depends(get_db)
 ):
@@ -103,7 +103,7 @@ def calculate_uvgr_premium(
 @router.post("/uvgs/calculate", response_model=UBGRUVGRResponse)
 @limiter.limit("30/minute")
 def calculate_uvgs_premium(
-    request_obj: Request,
+    request: Request,
     payload: UBGRUVGRRequest,
     db: Session = Depends(get_db)
 ):
