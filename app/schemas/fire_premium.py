@@ -51,7 +51,7 @@ class UBGRUVGRRequest(BaseModel):
         }
 
 class PremiumBreakdown(BaseModel):
-    """Detailed breakdown of premium calculation"""
+    """Detailed breakdown of premium calculation - Monetary Values ONLY"""
     basic_premium: float
     add_on_premium: float
     discount_amount: float
@@ -63,16 +63,28 @@ class PremiumBreakdown(BaseModel):
     sgst: float
     stamp_duty: float
     gross_premium: float
-    
-    # Additional details for transparency
-    total_si: float
-    basic_rate: float
+
+class CalculationMeta(BaseModel):
+    """Metadata for transparency"""
+    applied_rate: float
     terrorism_rate: Optional[float] = None
-    add_on_details: List[Dict] = Field(default_factory=list)
-    
+    occupancy_code: str
+    product_code: str
+
 class UBGRUVGRResponse(BaseModel):
     """Response schema for UBGR/UVGR premium calculation"""
     success: bool
     message: str
-    productCode: str
+    product_code: str = Field(..., alias="productCode") # Alias to maintain backward compat if needed? User said clean. I'll stick to snake_case if user didn't specify. 
+    # User requirement: "Return a structured JSON... Expose ONLY the canonical snake_case fields".
+    # User also listed "product_code" in meta.
+    # The top level response has `productCode` in camelCase in the previous file.
+    # The user mandated: "Expose ONLY the canonical snake_case fields" - this likely applies to the breakdown mostly.
+    # But "productCode" vs "product_code" in root?
+    # I'll use `product_code` in root to be safe, but alias it if I fear breaking frontend immediate.
+    # The user said "Ensure frontend needs ZERO interpretation". Snake case is usually preferred in Python backends but camelCase in JS.
+    # Whatever I choose, I must be consistent. The prompt explicitly used snake_case in the JSON example: `{ basic_premium, ... }`.
+    # I will use snake_case for everything.
+    
     breakdown: PremiumBreakdown
+    meta: CalculationMeta

@@ -51,13 +51,14 @@ def calculate_ubgr_premium(
         # Override product code to ensure UBGR
         payload.productCode = "UBGR"
         
-        breakdown = FirePremiumCalculator.calculate_ubgr_uvgr(payload)
+        result = FirePremiumCalculator.calculate_ubgr_uvgr(payload)
         
         return UBGRUVGRResponse(
             success=True,
             message="UBGR Premium Calculated Successfully",
             productCode="UBGR",
-            breakdown=breakdown
+            breakdown=result["breakdown"],
+            meta=result["meta"]
         )
     except ValueError as e:
         logger.error(f"Validation Error: {e}")
@@ -85,13 +86,14 @@ def calculate_uvgr_premium(
         # Override product code to ensure UVGR
         payload.productCode = "UVGR"
         
-        breakdown = FirePremiumCalculator.calculate_ubgr_uvgr(payload)
+        result = FirePremiumCalculator.calculate_ubgr_uvgr(payload)
         
         return UBGRUVGRResponse(
             success=True,
             message="UVGR Premium Calculated Successfully",
             productCode="UVGR",
-            breakdown=breakdown
+            breakdown=result["breakdown"],
+            meta=result["meta"]
         )
     except ValueError as e:
         logger.error(f"Validation Error: {e}")
@@ -120,7 +122,8 @@ def calculate_uvgs_premium(
         # Override product code to ensure UVGS
         payload.productCode = "UVGS"
         
-        breakdown = FirePremiumCalculator.calculate_ubgr_uvgr(payload)
+        result = FirePremiumCalculator.calculate_ubgr_uvgr(payload)
+        breakdown = result["breakdown"]
         
         # Validate terrorism is not present
         if breakdown.terrorism_premium is not None and breakdown.terrorism_premium != 0:
@@ -130,7 +133,8 @@ def calculate_uvgs_premium(
             success=True,
             message="UVGS Premium Calculated Successfully",
             productCode="UVGS",
-            breakdown=breakdown
+            breakdown=breakdown,
+            meta=result["meta"]
         )
     except ValueError as e:
         logger.error(f"Validation Error: {e}")

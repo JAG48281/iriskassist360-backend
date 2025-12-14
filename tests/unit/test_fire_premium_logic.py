@@ -32,7 +32,8 @@ def test_ubgr_calculation_standard(mock_rates):
         loadingPercentage=0
     )
     
-    breakdown = FirePremiumCalculator.calculate_ubgr_uvgr(request)
+    result = FirePremiumCalculator.calculate_ubgr_uvgr(request)
+    breakdown = result['breakdown']
     
     # 1.5M * 0.15 / 1000 = 225
     assert breakdown.basic_premium == 225.0
@@ -57,7 +58,8 @@ def test_uvgr_calculation_no_terrorism(mock_rates):
         loadingPercentage=0
     )
     
-    breakdown = FirePremiumCalculator.calculate_ubgr_uvgr(request)
+    result = FirePremiumCalculator.calculate_ubgr_uvgr(request)
+    breakdown = result['breakdown']
     
     # 1M * 0.15 / 1000 = 150
     assert breakdown.basic_premium == 150.0
@@ -88,7 +90,8 @@ def test_loading_logic(mock_rates):
     # Terrorism: 1M * 0.07/1000 = 70
     # Net: 150 + 15 + 70 = 235
     
-    breakdown = FirePremiumCalculator.calculate_ubgr_uvgr(request)
+    result = FirePremiumCalculator.calculate_ubgr_uvgr(request)
+    breakdown = result['breakdown']
     
     assert breakdown.basic_premium == 150.0
     assert breakdown.loading_amount == 15.0
@@ -115,7 +118,8 @@ def test_discount_logic(mock_rates):
     # Terrorism: 70
     # Net: 135 + 70 = 205
     
-    breakdown = FirePremiumCalculator.calculate_ubgr_uvgr(request)
+    result = FirePremiumCalculator.calculate_ubgr_uvgr(request)
+    breakdown = result['breakdown']
     
     assert breakdown.discount_amount == 15.0
     assert breakdown.sub_total == 135.0
@@ -143,7 +147,8 @@ def test_uvgr_with_addons_and_discount(mock_rates):
     # Subtotal: 650 - 65 = 585.0
     # Net: 585.0 (UVGR -> No Terrorism)
     
-    breakdown = FirePremiumCalculator.calculate_ubgr_uvgr(request)
+    result = FirePremiumCalculator.calculate_ubgr_uvgr(request)
+    breakdown = result['breakdown']
     
     assert breakdown.basic_premium == 150.0
     assert breakdown.add_on_premium == 500.0
@@ -163,7 +168,8 @@ def test_addons_disabled_integration(mock_rates):
         addOns=[AddOnItem(addOnCode="ADD1", sumInsured=100000.0)]
     )
     
-    breakdown = FirePremiumCalculator.calculate_ubgr_uvgr(request)
+    result = FirePremiumCalculator.calculate_ubgr_uvgr(request)
+    breakdown = result['breakdown']
     
     # Addon should be 0 despite request
     assert breakdown.add_on_premium == 0.0

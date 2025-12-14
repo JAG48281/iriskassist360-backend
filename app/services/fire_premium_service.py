@@ -14,6 +14,7 @@ from app.services.rating_engine import (
 from app.schemas.fire_premium import (
     UBGRUVGRRequest,
     PremiumBreakdown,
+    CalculationMeta,
     AddOnItem
 )
 from app.utils.rating_engine import round_currency
@@ -228,20 +229,29 @@ class FirePremiumCalculator:
         
         # Construct response
         # Construct response
-        return PremiumBreakdown(
+        # Construct response
+        breakdown = PremiumBreakdown(
             basic_premium=float(basic_fire_premium),
             add_on_premium=float(add_on_premium),
             discount_amount=float(discount_amount),
             sub_total=float(subtotal),
             loading_amount=float(loading_amount),
-            terrorism_premium=float(terrorism_premium),
+            terrorism_premium=float(terrorism_premium) if terrorism_premium is not None else 0.0,
             net_premium=float(net_premium),
             cgst=float(cgst),
             sgst=float(sgst),
             stamp_duty=float(stamp_duty),
-            gross_premium=float(gross_premium),
-            total_si=float(total_si),
-            basic_rate=float(basic_rate),
-            terrorism_rate=float(terrorism_rate),
-            add_on_details=add_on_details
+            gross_premium=float(gross_premium)
         )
+        
+        meta = CalculationMeta(
+            applied_rate=float(basic_rate),
+            terrorism_rate=float(terrorism_rate) if terrorism_rate is not None else None,
+            occupancy_code=request.occupancyCode,
+            product_code=product_code
+        )
+        
+        return {
+            "breakdown": breakdown,
+            "meta": meta
+        }
