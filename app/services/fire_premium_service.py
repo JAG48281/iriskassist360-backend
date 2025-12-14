@@ -8,7 +8,8 @@ from typing import List, Dict, Tuple
 from app.services.rating_engine import (
     get_basic_rate_per_mille,
     get_terrorism_rate_per_mille,
-    get_add_on_rate
+    get_add_on_rate,
+    get_occupancy_details
 )
 from app.schemas.fire_premium import (
     UBGRUVGRRequest,
@@ -136,19 +137,27 @@ class FirePremiumCalculator:
         logger.info(f"Basic Fire Premium: {basic_fire_premium} (Rate: {basic_rate}‰)")
         
         # 2. Add-On Premium
-        # Rule: Dwelling Co-operative Society → Add-ons DISABLED
-        # Assuming "Co-operative" in occupancy name triggers this or specific code.
-        # Since I don't have the exact code mapping for "Dwelling Co-operative Society", 
-        # I will check if occupancyCode matches known patterns or valid codes.
-        # For now, I will proceed with standard calc but add a placeholder validation.
+        # 2. Add-On Premium
+        add_on_premium = Decimal("0")
+        add_on_details = []
         
-        add_on_premium, add_on_details = FirePremiumCalculator._calculate_add_on_premium(
-            product_code=product_code,
-            occupancy_code=request.occupancyCode,
-            add_ons=request.addOns,
-            pa_proposer=request.paSelection.proposer,
-            pa_spouse=request.paSelection.spouse
-        )
+        occ_details = get_occupancy_details(request.occupancyCode)
+        allow_addons = True
+        if occ_details and not occ_details.get("allow_addons", True):
+            allow_addons = False
+            logger.warning(f"Add-ons disabled for occupancy: {request.occupancyCode}")
+        
+        if allow_addons:
+            add_on_premium, add_on_details = FirePremiumCalculator._calculate_add_on_premium(
+                product_code=product_code,
+                occupancy_code=request.occupancyCode,
+                add_ons=request.addOns,
+                pa_proposer=request.paSelection.proposer,
+                pa_spouse=request.paSelection.spouse
+            )
+        else:
+            logger.info("Skipping add-on calculation (restricted by occupancy rules)")
+            
         logger.info(f"Add-On Premium: {add_on_premium}")
         
         # 3. Discount (applies ONLY to Basic Fire + Add-On)

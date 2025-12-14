@@ -34,6 +34,31 @@ def get_basic_rate_per_mille(product_code: str, occupancy_code: str, period_year
         logger.error(f"DB Error (get_basic_rate_per_mille): {e}")
         return Decimal("0.0")
 
+def get_occupancy_details(occupancy_code: str) -> dict:
+    """
+    Fetches full occupancy details including allow_addons flag.
+    Returns dict with keys: id, iib_code, occupancy_type, allow_addons
+    """
+    stmt = text("""
+        SELECT id, iib_code, occupancy_type, allow_addons 
+        FROM occupancies 
+        WHERE iib_code = :code
+    """)
+    try:
+        with engine.connect() as conn:
+            row = conn.execute(stmt, {"code": occupancy_code}).fetchone()
+            if row:
+                return {
+                    "id": row.id,
+                    "iib_code": row.iib_code,
+                    "occupancy_type": row.occupancy_type,
+                    "allow_addons": row.allow_addons
+                }
+            return None
+    except Exception as e:
+        logger.error(f"DB Error (get_occupancy_details): {e}")
+        return None
+
 def get_terrorism_rate_per_mille(product_code: str, occupancy_code: Optional[str] = "1001", tsi: float = 0.0) -> Decimal:
     """
     Fetches the terrorism rate based on TSI slabs.

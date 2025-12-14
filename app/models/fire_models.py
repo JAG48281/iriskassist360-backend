@@ -11,6 +11,7 @@ class Occupancy(Base):
     section_aift = Column(String(length=20), nullable=False)
     occupancy_type = Column(String(length=100), nullable=False)
     risk_description = Column(Text, nullable=False)
+    allow_addons = Column(Boolean, server_default='true', nullable=False)
 
 class AddOnMaster(Base):
     __tablename__ = "add_on_master"
