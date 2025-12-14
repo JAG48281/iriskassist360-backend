@@ -261,6 +261,8 @@ class FirePremiumCalculator:
         
         meta = CalculationMeta(
             applied_rate=float(basic_rate),
+            risk_rate=float(basic_rate),  # Same as applied_rate for UI clarity
+            rate_source="product_basic_rates",
             terrorism_rate=float(terrorism_rate) if terrorism_rate is not None else None,
             occupancy_code=request.occupancyCode,
             product_code=product_code

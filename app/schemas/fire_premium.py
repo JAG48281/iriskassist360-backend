@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List, Dict
 from decimal import Decimal
 
@@ -17,6 +17,23 @@ class UBGRUVGRRequest(BaseModel):
     Request schema for UBGR/UVGR premium calculation.
     Supports both products with identical calculation logic.
     """
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "productCode": "UBGR",
+                "occupancyCode": "1001",
+                "buildingSI": 1000000,
+                "contentsSI": 200000,
+                "addOns": [
+                    {"addOnCode": "EQ", "sumInsured": 1200000}
+                ],
+                "paSelection": {"proposer": True, "spouse": False},
+                "discountPercentage": 5,
+                "loadingPercentage": 10
+            }
+        }
+    )
+    
     productCode: str = Field(..., description="UBGR or UVGR")
     occupancyCode: str = Field(..., description="IIB Code (e.g., 1001, 1001_2)")
     
@@ -37,22 +54,7 @@ class UBGRUVGRRequest(BaseModel):
     
     # Policy Details
     policyPeriod: int = Field(default=1, ge=1, le=20, description="Policy Period in Years")
-    
-    class Config:
-        schema_extra = {
-            "example": {
-                "productCode": "UBGR",
-                "occupancyCode": "1001",
-                "buildingSI": 1000000,
-                "contentsSI": 200000,
-                "addOns": [
-                    {"addOnCode": "EQ", "sumInsured": 1200000}
-                ],
-                "paSelection": {"proposer": True, "spouse": False},
-                "discountPercentage": 5,
-                "loadingPercentage": 10
-            }
-        }
+
 
 class PremiumBreakdown(BaseModel):
     """Detailed breakdown of premium calculation - Monetary Values ONLY"""
@@ -70,10 +72,13 @@ class PremiumBreakdown(BaseModel):
 
 class CalculationMeta(BaseModel):
     """Metadata for transparency"""
-    applied_rate: float
+    applied_rate: float  # Basic fire rate per mille
+    risk_rate: float  # Same as applied_rate (for clarity in UI)
+    rate_source: str = "product_basic_rates"  # Source of the rate
     terrorism_rate: Optional[float] = None
     occupancy_code: str
     product_code: str
+
 
 class UBGRUVGRResponse(BaseModel):
     """Response schema for UBGR/UVGR premium calculation"""

@@ -1,5 +1,5 @@
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional, Dict, Any
 
 class RateCreate(BaseModel):
@@ -12,7 +12,7 @@ class RateCreate(BaseModel):
     metadata: Optional[Dict[str, Any]] = None
 
 class RateOut(RateCreate):
+    model_config = ConfigDict(from_attributes=True)
+    
     id: int
 
-    class Config:
-        orm_mode = True

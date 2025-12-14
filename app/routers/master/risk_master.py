@@ -73,6 +73,7 @@ def get_risk_descriptions(
         for r in risks:
             if not r: continue
             results.append(RiskDescriptionResponse(
+                occupancyId=r.id,  # PRIMARY KEY
                 riskDescription=r.risk_description,
                 iibCode=r.iib_code,
                 aiftSection=_to_roman_safe(r.section_aift),

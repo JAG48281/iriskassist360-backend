@@ -1,5 +1,5 @@
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 from typing import Optional
 
 class UserCreate(BaseModel):
@@ -9,10 +9,10 @@ class UserCreate(BaseModel):
     full_name: Optional[str] = None
 
 class UserOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    
     id: int
     email: Optional[EmailStr] = None
     mobile: Optional[str] = None
     full_name: Optional[str] = None
 
-    class Config:
-        orm_mode = True

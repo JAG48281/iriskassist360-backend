@@ -1,5 +1,5 @@
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Dict, Any, Optional
 
 class QuoteCreate(BaseModel):
@@ -9,6 +9,8 @@ class QuoteCreate(BaseModel):
     request_data: Dict[str, Any]
 
 class QuoteOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    
     id: int
     user_id: Optional[int]
     company: str
@@ -17,5 +19,3 @@ class QuoteOut(BaseModel):
     request_data: Dict[str, Any]
     response_data: Dict[str, Any]
 
-    class Config:
-        orm_mode = True

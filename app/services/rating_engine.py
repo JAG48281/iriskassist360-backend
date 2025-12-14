@@ -12,10 +12,25 @@ logger = logging.getLogger(__name__)
 def get_basic_rate_per_mille(product_code: str, occupancy_code: str, period_years: int = 1) -> Decimal:
     """
     Fetches the basic rate per mille for a given product and occupancy code (iib_code).
+    
+    IMPORTANT: Uses occupancy_id (PRIMARY KEY) for lookup, NOT iib_code.
+    The iib_code is only used to resolve the occupancy record.
+    
     STRICT MODE: Raises ValueError if no rate found.
+    
+    Args:
+        product_code: Product code (e.g., 'UBGR', 'BGRP')
+        occupancy_code: IIB code (e.g., '1001')
+        period_years: Policy period (not currently used in schema)
+    
+    Returns:
+        Decimal: Basic rate per mille
+        
+    Raises:
+        ValueError: If no rate is configured for the product + occupancy combination
     """
     stmt = text("""
-        SELECT r.basic_rate, o.id as occ_id
+        SELECT r.basic_rate, o.id as occ_id, o.occupancy_type
         FROM product_basic_rates r
         JOIN occupancies o ON r.occupancy_id = o.id
         WHERE r.product_code = :p 
@@ -24,29 +39,39 @@ def get_basic_rate_per_mille(product_code: str, occupancy_code: str, period_year
     """)
     try:
         with engine.connect() as conn:
-            # Note: period_years removed as it's not in the schema currently
             row = conn.execute(stmt, {"p": product_code, "o": occupancy_code}).fetchone()
             
             if row:
                 rate = Decimal(str(row.basic_rate))
-                logger.info(f"Using Basic Rate for {product_code}/{occupancy_code} (OccID: {row.occ_id}): {rate}")
+                logger.info(f"✅ Basic Rate Lookup: {product_code}/{occupancy_code} (OccID: {row.occ_id}, Type: {row.occupancy_type}) → {rate}‰")
                 return rate
             
-            error_msg = f"CRITICAL: No basic rate found for Product={product_code}, Occ={occupancy_code}"
-            logger.error(error_msg)
+            # Explicit error message as per requirements
+            error_msg = f"Base risk rate not configured for product '{product_code}' + occupancy '{occupancy_code}'. Please configure in product_basic_rates table."
+            logger.error(f"❌ {error_msg}")
             raise ValueError(error_msg)
             
+    except ValueError:
+        # Re-raise ValueError as-is
+        raise
     except Exception as e:
         logger.error(f"DB Error (get_basic_rate_per_mille): {e}")
-        raise e
+        raise ValueError(f"Database error while fetching basic rate: {str(e)}")
 
 def get_occupancy_details(occupancy_code: str) -> dict:
     """
-    Fetches full occupancy details including allow_addons flag.
-    Returns dict with keys: id, iib_code, occupancy_type, allow_addons
+    Fetches full occupancy details including all required fields.
+    
+    Returns dict with keys: id, iib_code, occupancy_type, section_aift, allow_addons
+    
+    Args:
+        occupancy_code: IIB code (e.g., '1001')
+        
+    Returns:
+        dict: Occupancy details or None if not found
     """
     stmt = text("""
-        SELECT id, iib_code, occupancy_type, allow_addons 
+        SELECT id, iib_code, occupancy_type, section_aift, allow_addons 
         FROM occupancies 
         WHERE iib_code = :code
     """)
@@ -54,12 +79,17 @@ def get_occupancy_details(occupancy_code: str) -> dict:
         with engine.connect() as conn:
             row = conn.execute(stmt, {"code": occupancy_code}).fetchone()
             if row:
-                return {
+                details = {
                     "id": row.id,
                     "iib_code": row.iib_code,
                     "occupancy_type": row.occupancy_type,
+                    "section_aift": row.section_aift,
                     "allow_addons": row.allow_addons
                 }
+                logger.info(f"📋 Occupancy Details: {occupancy_code} → ID={row.id}, Type={row.occupancy_type}, Section={row.section_aift}")
+                return details
+            
+            logger.warning(f"⚠️ Occupancy not found: {occupancy_code}")
             return None
     except Exception as e:
         logger.error(f"DB Error (get_occupancy_details): {e}")
