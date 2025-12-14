@@ -258,7 +258,47 @@ def test_policy_period_multiplier(mock_rates):
     assert breakdown.net_premium == 2200.0
     
     # Tax on 2200
-    expected_cgst = 2200 * 0.09 # 198
     assert breakdown.cgst == 198.0
     assert breakdown.gross_premium == 2200 + 198 + 198 + 1.0 # 2597
+
+def test_terrorism_isolation_with_discount_and_loading(mock_rates):
+    """
+    STRICTLY verify that Terrorism Premium is TOTALLY UNAFFECTED by Discount and Loading.
+    """
+    mock_basic, mock_terr, mock_occ, mock_addon = mock_rates
+    mock_terr.return_value = Decimal("0.07")
+    mock_occ.return_value = {"allow_addons": True}
+
+    request = UBGRUVGRRequest(
+        productCode="UBGR",
+        occupancyCode="1001",
+        buildingSI=1000000.0,
+        terrorismSI=1000000.0,
+        discountPercentage=10, # 10% Discount
+        loadingPercentage=10,  # 10% Loading
+        policyPeriod=1
+    )
+
+    result = FirePremiumCalculator.calculate_ubgr_uvgr(request)
+    breakdown = result['breakdown']
+
+    # 1. Basic: 1M * 0.15 / 1000 = 150.0
+    assert breakdown.basic_premium == 150.0
+
+    # 2. Discount is 10% of Basic (150) = 15.0
+    assert breakdown.discount_amount == 15.0
+
+    # 3. Subtotal = 150 - 15 = 135.0
+    assert breakdown.sub_total == 135.0
+
+    # 4. Loading is 10% of Subtotal (135) = 13.5
+    assert breakdown.loading_amount == 13.5
+
+    # 5. Terrorism: 1M * 0.07 / 1000 = 70.0 (MUST BE PURE)
+    # CRITICAL: If discount applied, it would be 63. If loading applied, it would vary.
+    # It MUST be exactly 70.0.
+    assert breakdown.terrorism_premium == 70.0
+
+    # 6. Net: 135 (Sub) + 13.5 (Load) + 70 (Terr) = 218.5
+    assert breakdown.net_premium == 218.5
 
