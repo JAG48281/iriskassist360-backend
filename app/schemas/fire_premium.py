@@ -52,23 +52,23 @@ class UBGRUVGRRequest(BaseModel):
 
 class PremiumBreakdown(BaseModel):
     """Detailed breakdown of premium calculation"""
-    basicFirePremium: float
-    addOnPremium: float
-    discountAmount: float
-    subtotal: float
-    loadingAmount: float
-    terrorismPremium: Optional[float]
-    netPremium: float
+    basic_premium: float
+    add_on_premium: float
+    discount_amount: float
+    sub_total: float
+    loading_amount: float
+    terrorism_premium: Optional[float] = None
+    net_premium: float
     cgst: float
     sgst: float
-    stampDuty: float
-    grossPremium: float
+    stamp_duty: float
+    gross_premium: float
     
     # Additional details for transparency
-    totalSI: float
-    basicFireRate: float
-    terrorismRate: Optional[float]
-    addOnDetails: List[Dict] = Field(default_factory=list)
+    total_si: float
+    basic_rate: float
+    terrorism_rate: Optional[float] = None
+    add_on_details: List[Dict] = Field(default_factory=list)
     
 class UBGRUVGRResponse(BaseModel):
     """Response schema for UBGR/UVGR premium calculation"""

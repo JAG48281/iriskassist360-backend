@@ -123,8 +123,8 @@ def calculate_uvgs_premium(
         breakdown = FirePremiumCalculator.calculate_ubgr_uvgr(payload)
         
         # Validate terrorism is not present
-        if breakdown.terrorismPremium is not None and breakdown.terrorismPremium != 0:
-            logger.warning(f"UVGS returned non-zero terrorism premium: {breakdown.terrorismPremium}")
+        if breakdown.terrorism_premium is not None and breakdown.terrorism_premium != 0:
+            logger.warning(f"UVGS returned non-zero terrorism premium: {breakdown.terrorism_premium}")
         
         return UBGRUVGRResponse(
             success=True,
