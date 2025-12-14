@@ -53,10 +53,15 @@ def _calculate_premium(building_si: int, rate_per_mille: float, pa_selected: boo
 
     return {
         "basic_premium": round(basic, 2),
+        "add_on_premium": float(pa),
+        "discount_amount": 0.0,
+        "sub_total": round(basic + pa, 2), # simplified subtotal
+        "loading_amount": 0.0,
         "terrorism_premium": round(terrorism, 2),
-        "pa_premium": pa,
         "net_premium": round(net, 2),
-        "gst": gst,
+        "cgst": gst,
+        "sgst": 0.0, # Helper only calc 18% total as 'gst'. Splitting for schema.
+        "stamp_duty": 0.0,
         "gross_premium": gross
     }
 
@@ -106,14 +111,24 @@ def calculate_vusp(payload: FireCalcRequest, db: Session = Depends(get_db)):
     occ = payload.occupancy.strip().title()
     rate = _lookup_rate(db, product_code, occ, fallback)
     result = _calculate_premium(payload.building_si, rate, payload.pa_selected)
+    
+    # Split GST for schema compliance (18% total -> 9% CGST, 9% SGST)
+    total_gst = result["gst"]
+    result["cgst"] = round(total_gst / 2, 2)
+    result["sgst"] = round(total_gst / 2, 2)
+    del result["gst"] # Remove non-compliant key
+    
     response = {
-        "brand": "iRiskAssist360",
-        "company": "UIIC",
-        "lob": "Fire",
-        "product": "Value Udyam Suraksha Policy (VUSP)",
-        "rate_applied": rate,
-        "building_si": payload.building_si,
-        **result
+        **result,
+        "meta": {
+            "brand": "iRiskAssist360",
+            "company": "UIIC",
+            "lob": "Fire",
+            "product": "Value Udyam Suraksha Policy (VUSP)",
+            "product_code": product_code,
+            "applied_rate": rate,
+            "building_si": payload.building_si
+        }
     }
     _save_quote(db, product_code, payload, response)
     return ResponseModel(success=True, message="VUSP Premium Calculated", data=response)
@@ -128,14 +143,23 @@ def calculate_bsusp(payload: FireCalcRequest, db: Session = Depends(get_db)):
     occ = payload.occupancy.strip().title()
     rate = _lookup_rate(db, product_code, occ, fallback)
     result = _calculate_premium(payload.building_si, rate, payload.pa_selected)
+    
+    total_gst = result["gst"]
+    result["cgst"] = round(total_gst / 2, 2)
+    result["sgst"] = round(total_gst / 2, 2)
+    del result["gst"]
+    
     response = {
-        "brand": "iRiskAssist360",
-        "company": "UIIC",
-        "lob": "Fire",
-        "product": "Bharat Sookshma Udyam Suraksha (BSUSP)",
-        "rate_applied": rate,
-        "building_si": payload.building_si,
-        **result
+        **result,
+        "meta": {
+            "brand": "iRiskAssist360",
+            "company": "UIIC",
+            "lob": "Fire",
+            "product": "Bharat Sookshma Udyam Suraksha (BSUSP)",
+            "product_code": product_code,
+            "applied_rate": rate,
+            "building_si": payload.building_si
+        }
     }
     _save_quote(db, product_code, payload, response)
     return ResponseModel(success=True, message="BSUSP Premium Calculated", data=response)
@@ -150,14 +174,23 @@ def calculate_blusp(payload: FireCalcRequest, db: Session = Depends(get_db)):
     occ = payload.occupancy.strip().title()
     rate = _lookup_rate(db, product_code, occ, fallback)
     result = _calculate_premium(payload.building_si, rate, payload.pa_selected)
+    
+    total_gst = result["gst"]
+    result["cgst"] = round(total_gst / 2, 2)
+    result["sgst"] = round(total_gst / 2, 2)
+    del result["gst"]
+
     response = {
-        "brand": "iRiskAssist360",
-        "company": "UIIC",
-        "lob": "Fire",
-        "product": "Bharat Laghu Udyam Suraksha Policy (BLUSP)",
-        "rate_applied": rate,
-        "building_si": payload.building_si,
-        **result
+        **result,
+        "meta": {
+            "brand": "iRiskAssist360",
+            "company": "UIIC",
+            "lob": "Fire",
+            "product": "Bharat Laghu Udyam Suraksha Policy (BLUSP)",
+            "product_code": product_code,
+            "applied_rate": rate,
+            "building_si": payload.building_si
+        }
     }
     _save_quote(db, product_code, payload, response)
     return ResponseModel(success=True, message="BLUSP Premium Calculated", data=response)
@@ -265,30 +298,26 @@ def calculate_bgrp(payload: UBGRRequest, db: Session = Depends(get_db)):
     grossPremium = netPremium + cgst + sgst + stampDuty
     
     # Construct Response
+    # Construct Response
     response = {
-        "product": "Bharat Griha Raksha Policy",
-        "product_code": "BGRP",
-        "netPremium": round(netPremium, 2),
-        "basicFirePremium": round(firePremium, 2), # Explicit REQUIRED key
-        "basic_premium": round(firePremium, 2),    # Legacy
-        "firePremium": round(firePremium, 2),      # Legacy
-        "terrorismPremium": round(terrorismPremium, 2), # Explicit requested field
-        "terrorism_premium": round(terrorismPremium, 2), # Legacy
+        "basic_premium": round(firePremium, 2),
+        "add_on_premium": round(paPremium, 2),
+        "discount_amount": round(base_fire_pa - discounted_base, 2),
+        "sub_total": round(discounted_base, 2), # Assuming subtotal is post-discount base
+        "loading_amount": 0.0,
+        "terrorism_premium": round(terrorismPremium, 2),
+        "net_premium": round(netPremium, 2),
         "cgst": round(cgst, 2),
         "sgst": round(sgst, 2),
-        "stampDuty": stampDuty,
-        "grossPremium": round(grossPremium, 2),
-        "breakdown": {
-            "totalSI": totalSI,
-            "firePremium": round(firePremium, 2),
-            "terrorismPremium": round(terrorismPremium, 2),
-            "paPremium": round(paPremium, 2),
-            "basePremium": round(firePremium + paPremium, 2),
-            "discountApplied": round(base_fire_pa - discounted_base, 2),
-            "appliedRate": basic_rate,
-            "terrorismRate": terr_rate,
-            "fireRate": basic_rate,  # Explicit as per strict contract
-            "occupancyCode": 1001    # Explicit as per strict contract
+        "stamp_duty": stampDuty,
+        "gross_premium": round(grossPremium, 2),
+        "meta": {
+            "product": "Bharat Griha Raksha Policy",
+            "product_code": "BGRP",
+            "total_si": totalSI,
+            "applied_rate": basic_rate,
+            "terrorism_rate": terr_rate,
+            "occupancy_code": "1001"
         }
     }
     
@@ -307,14 +336,23 @@ def calculate_sfsp(payload: FireCalcRequest, db: Session = Depends(get_db)):
     occ = payload.occupancy.strip().title()
     rate = _lookup_rate(db, product_code, occ, fallback)
     result = _calculate_premium(payload.building_si, rate, payload.pa_selected)
+    
+    total_gst = result["gst"]
+    result["cgst"] = round(total_gst / 2, 2)
+    result["sgst"] = round(total_gst / 2, 2)
+    del result["gst"]
+
     response = {
-        "brand": "iRiskAssist360",
-        "company": "UIIC",
-        "lob": "Fire",
-        "product": "Standard Fire & Special Perils Policy (SFSP)",
-        "rate_applied": rate,
-        "building_si": payload.building_si,
-        **result
+        **result,
+        "meta": {
+            "brand": "iRiskAssist360",
+            "company": "UIIC",
+            "lob": "Fire",
+            "product": "Standard Fire & Special Perils Policy (SFSP)",
+            "product_code": product_code,
+            "applied_rate": rate,
+            "building_si": payload.building_si
+        }
     }
     _save_quote(db, product_code, payload, response)
     return ResponseModel(success=True, message="SFSP Premium Calculated", data=response)
@@ -329,14 +367,23 @@ def calculate_iar(payload: FireCalcRequest, db: Session = Depends(get_db)):
     occ = payload.occupancy.strip().title()
     rate = _lookup_rate(db, product_code, occ, fallback)
     result = _calculate_premium(payload.building_si, rate, payload.pa_selected)
+    
+    total_gst = result["gst"]
+    result["cgst"] = round(total_gst / 2, 2)
+    result["sgst"] = round(total_gst / 2, 2)
+    del result["gst"]
+
     response = {
-        "brand": "iRiskAssist360",
-        "company": "UIIC",
-        "lob": "Fire",
-        "product": "Industrial All Risks Policy (IAR)",
-        "rate_applied": rate,
-        "building_si": payload.building_si,
-        **result
+        **result,
+        "meta": {
+            "brand": "iRiskAssist360",
+            "company": "UIIC",
+            "lob": "Fire",
+            "product": "Industrial All Risks Policy (IAR)",
+            "product_code": product_code,
+            "applied_rate": rate,
+            "building_si": payload.building_si
+        }
     }
     _save_quote(db, product_code, payload, response)
     return ResponseModel(success=True, message="IAR Premium Calculated", data=response)
