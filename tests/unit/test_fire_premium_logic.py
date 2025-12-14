@@ -302,3 +302,65 @@ def test_terrorism_isolation_with_discount_and_loading(mock_rates):
     # 6. Net: 135 (Sub) + 13.5 (Load) + 70 (Terr) = 218.5
     assert breakdown.net_premium == 218.5
 
+def test_policy_period_scales_net_premium_only(mock_rates):
+    """
+    Verify that policy period multiplier:
+    1. Scales net premium correctly
+    2. GST is calculated on scaled net premium
+    3. Stamp duty does NOT scale
+    """
+    mock_basic, mock_terr, mock_occ, mock_addon = mock_rates
+    mock_terr.return_value = Decimal("0.07")
+    mock_occ.return_value = {"allow_addons": True}
+
+    # Test 1-year policy
+    request_1yr = UBGRUVGRRequest(
+        productCode="UBGR",
+        occupancyCode="1001",
+        buildingSI=1000000.0,
+        terrorismSI=1000000.0,
+        discountPercentage=0,
+        loadingPercentage=0,
+        policyPeriod=1
+    )
+
+    result_1yr = FirePremiumCalculator.calculate_ubgr_uvgr(request_1yr)
+    breakdown_1yr = result_1yr['breakdown']
+
+    # Test 3-year policy
+    request_3yr = UBGRUVGRRequest(
+        productCode="UBGR",
+        occupancyCode="1001",
+        buildingSI=1000000.0,
+        terrorismSI=1000000.0,
+        discountPercentage=0,
+        loadingPercentage=0,
+        policyPeriod=3
+    )
+
+    result_3yr = FirePremiumCalculator.calculate_ubgr_uvgr(request_3yr)
+    breakdown_3yr = result_3yr['breakdown']
+
+    # Annual calculation:
+    # Basic: 150, Terrorism: 70, Annual Net: 220
+
+    # 1-year policy
+    assert breakdown_1yr.net_premium == 220.0
+    assert breakdown_1yr.cgst == 19.8  # 220 * 0.09
+    assert breakdown_1yr.sgst == 19.8
+    assert breakdown_1yr.stamp_duty == 1.0
+    assert breakdown_1yr.gross_premium == 220.0 + 19.8 + 19.8 + 1.0  # 260.6
+
+    # 3-year policy
+    assert breakdown_3yr.net_premium == 660.0  # 220 * 3
+    assert breakdown_3yr.cgst == 59.4  # 660 * 0.09 (GST scales with net)
+    assert breakdown_3yr.sgst == 59.4
+    assert breakdown_3yr.stamp_duty == 1.0  # FIXED, does NOT scale
+    assert breakdown_3yr.gross_premium == 660.0 + 59.4 + 59.4 + 1.0  # 779.8
+
+    # Verify scaling relationship
+    assert breakdown_3yr.net_premium == pytest.approx(breakdown_1yr.net_premium * 3)
+    assert breakdown_3yr.cgst == pytest.approx(breakdown_1yr.cgst * 3)
+    assert breakdown_3yr.stamp_duty == breakdown_1yr.stamp_duty  # NO scaling
+
+
