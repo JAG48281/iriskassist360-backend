@@ -263,8 +263,6 @@ class FirePremiumCalculator:
             applied_rate=float(basic_rate),
             terrorism_rate=float(terrorism_rate) if terrorism_rate is not None else None,
             occupancy_code=request.occupancyCode,
-            terrorism_rate=float(terrorism_rate) if terrorism_rate is not None else None,
-            occupancy_code=request.occupancyCode,
             product_code=product_code
         )
         
