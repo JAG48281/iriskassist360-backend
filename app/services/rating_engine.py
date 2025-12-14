@@ -12,9 +12,10 @@ logger = logging.getLogger(__name__)
 def get_basic_rate_per_mille(product_code: str, occupancy_code: str, period_years: int = 1) -> Decimal:
     """
     Fetches the basic rate per mille for a given product and occupancy code (iib_code).
+    STRICT MODE: Raises ValueError if no rate found.
     """
     stmt = text("""
-        SELECT r.basic_rate 
+        SELECT r.basic_rate, o.id as occ_id
         FROM product_basic_rates r
         JOIN occupancies o ON r.occupancy_id = o.id
         WHERE r.product_code = :p 
@@ -24,15 +25,20 @@ def get_basic_rate_per_mille(product_code: str, occupancy_code: str, period_year
     try:
         with engine.connect() as conn:
             # Note: period_years removed as it's not in the schema currently
-            result = conn.execute(stmt, {"p": product_code, "o": occupancy_code}).scalar()
-            if result is not None:
-                return Decimal(str(result))
+            row = conn.execute(stmt, {"p": product_code, "o": occupancy_code}).fetchone()
             
-            logger.warning(f"No basic rate found: Product={product_code}, Occ={occupancy_code}")
-            return Decimal("0.0")
+            if row:
+                rate = Decimal(str(row.basic_rate))
+                logger.info(f"Using Basic Rate for {product_code}/{occupancy_code} (OccID: {row.occ_id}): {rate}")
+                return rate
+            
+            error_msg = f"CRITICAL: No basic rate found for Product={product_code}, Occ={occupancy_code}"
+            logger.error(error_msg)
+            raise ValueError(error_msg)
+            
     except Exception as e:
         logger.error(f"DB Error (get_basic_rate_per_mille): {e}")
-        return Decimal("0.0")
+        raise e
 
 def get_occupancy_details(occupancy_code: str) -> dict:
     """
