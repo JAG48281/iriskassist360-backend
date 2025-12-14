@@ -211,14 +211,24 @@ class FirePremiumCalculator:
         else:
             logger.info(f"{product_code} does not require terrorism premium")
         
-        # 7. Net Premium
-        net_premium = subtotal + loading_amount
+        # 7. Net Premium (Annual)
+        annual_net_premium = subtotal + loading_amount
         if terrorism_premium is not None:
-            net_premium += terrorism_premium
+            annual_net_premium += terrorism_premium
+        annual_net_premium = Decimal(str(round_currency(float(annual_net_premium))))
+        logger.info(f"Annual Net Premium: {annual_net_premium}")
+
+        # 8. Apply Policy Period Multiplier
+        policy_period = request.policyPeriod
+        if policy_period < 1: 
+            policy_period = 1 # Safety
+            
+        net_premium = annual_net_premium * Decimal(str(policy_period))
         net_premium = Decimal(str(round_currency(float(net_premium))))
-        logger.info(f"Net Premium: {net_premium}")
         
-        # 8. Taxes
+        logger.info(f"Final Net Premium ({policy_period} Years): {net_premium}")
+        
+        # 9. Taxes
         cgst = net_premium * Decimal("0.09")
         cgst = Decimal(str(round_currency(float(cgst))))
         
@@ -251,6 +261,8 @@ class FirePremiumCalculator:
         
         meta = CalculationMeta(
             applied_rate=float(basic_rate),
+            terrorism_rate=float(terrorism_rate) if terrorism_rate is not None else None,
+            occupancy_code=request.occupancyCode,
             terrorism_rate=float(terrorism_rate) if terrorism_rate is not None else None,
             occupancy_code=request.occupancyCode,
             product_code=product_code

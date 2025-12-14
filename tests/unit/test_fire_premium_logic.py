@@ -230,3 +230,35 @@ def test_zero_terrorism_si(mock_rates):
     assert breakdown.basic_premium == 150.0
     assert breakdown.terrorism_premium == 0.0
 
+def test_policy_period_multiplier(mock_rates):
+    """Verify Policy Multiplier applies to Net Premium"""
+    mock_basic, mock_terr, mock_occ, mock_addon = mock_rates
+    mock_terr.return_value = Decimal("0.07")
+    mock_occ.return_value = {"allow_addons": True}
+    
+    request = UBGRUVGRRequest(
+        productCode="UBGR",
+        occupancyCode="1001",
+        buildingSI=1000000.0,
+        terrorismSI=1000000.0,
+        discountPercentage=0,
+        loadingPercentage=0,
+        policyPeriod=10 # 10 Years
+    )
+    
+    result = FirePremiumCalculator.calculate_ubgr_uvgr(request)
+    breakdown = result['breakdown']
+    
+    # Annual Calculation:
+    # Basic = 150
+    # Terrorism = 70
+    # Annual Net = 220
+    
+    # Multiplier: 220 * 10 = 2200
+    assert breakdown.net_premium == 2200.0
+    
+    # Tax on 2200
+    expected_cgst = 2200 * 0.09 # 198
+    assert breakdown.cgst == 198.0
+    assert breakdown.gross_premium == 2200 + 198 + 198 + 1.0 # 2597
+

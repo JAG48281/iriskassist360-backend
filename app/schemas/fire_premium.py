@@ -35,6 +35,9 @@ class UBGRUVGRRequest(BaseModel):
     discountPercentage: float = Field(default=0, ge=0, le=100, description="Discount %")
     loadingPercentage: float = Field(default=0, ge=0, le=100, description="Loading %")
     
+    # Policy Details
+    policyPeriod: int = Field(default=1, ge=1, le=20, description="Policy Period in Years")
+    
     class Config:
         schema_extra = {
             "example": {
