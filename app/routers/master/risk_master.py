@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
+import logging
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -10,6 +11,8 @@ router = APIRouter(
     tags=["Master Data"],
     responses={404: {"description": "Not found"}},
 )
+
+logger = logging.getLogger(__name__)
 
 def _to_roman_safe(val: str) -> str:
     """Ensure Section is Roman Numeral. Handles '1'->'I', etc."""
@@ -35,42 +38,49 @@ def get_risk_descriptions(
     
     Includes aliases (e.g. BSUSP, BLUSP) for robustness.
     """
-    
-    # Valid Product Codes & Aliases
-    # Group A: Residential
-    GROUP_A = {'BGRP', 'UBGR', 'UVGR', 'UVGS'} 
-    
-    # Group B: Commercial / Others
-    # Added BSUSP, BLUSP, VUSP (Value Udyam) to match DB realities
-    GROUP_B = {'BSUS', 'BLUS', 'UVUS', 'SFSP', 'IAR', 'BSUSP', 'BLUSP', 'VUSP'} 
-    
-    product_code_upper = productCode.upper()
-    
-    # Validation
-    if product_code_upper not in GROUP_A and product_code_upper not in GROUP_B:
-        raise HTTPException(
-            status_code=400, 
-            detail=f"Invalid productCode: {productCode}. Allowed: {', '.join(sorted(GROUP_A | GROUP_B))}"
-        )
+    try:
+        product_code_upper = productCode.upper().strip()
         
-    query = db.query(Occupancy)
-    
-    if product_code_upper in GROUP_A:
-        # Residential: Only Dwellings and Co-op Housing Society
-        # iib_code = 1001, 1001_2
-        risks = query.filter(Occupancy.iib_code.in_(['1001', '1001_2'])).all()
+        # 1. Normalize BGRP -> UBGR
+        if product_code_upper == "BGRP":
+            product_code_upper = "UBGR"
+            
+        # Valid Product Codes & Aliases
+        # Group A: Residential
+        GROUP_A = {'UBGR', 'UVGR', 'UVGS'} 
         
-    else:
-        # Commercial: All except 1001 and 1001_2
-        risks = query.filter(Occupancy.iib_code.notin_(['1001', '1001_2'])).all()
+        # Group B: Commercial / Others
+        GROUP_B = {'BSUS', 'BLUS', 'UVUS', 'SFSP', 'IAR', 'BSUSP', 'BLUSP', 'VUSP'} 
         
-    results = []
-    for r in risks:
-        results.append(RiskDescriptionResponse(
-            riskDescription=r.risk_description,
-            iibCode=r.iib_code,
-            aiftSection=_to_roman_safe(r.section_aift),
-            occupancyType=r.occupancy_type
-        ))
+        query = db.query(Occupancy)
+        risks = []
         
-    return results
+        if product_code_upper in GROUP_A:
+            # Residential: Only Dwellings and Co-op Housing Society
+            # iib_code = 1001, 1001_2
+            risks = query.filter(Occupancy.iib_code.in_(['1001', '1001_2'])).all()
+            
+        elif product_code_upper in GROUP_B:
+             # Commercial: All except 1001 and 1001_2
+             risks = query.filter(Occupancy.iib_code.notin_(['1001', '1001_2'])).all()
+             
+        else:
+            # Unknown product code -> Return empty list as per strict requirement
+            logger.warning(f"Unknown productCode received: {productCode}")
+            return []
+            
+        results = []
+        for r in risks:
+            if not r: continue
+            results.append(RiskDescriptionResponse(
+                riskDescription=r.risk_description,
+                iibCode=r.iib_code,
+                aiftSection=_to_roman_safe(r.section_aift),
+                occupancyType=r.occupancy_type
+            ))
+            
+        return results
+        
+    except Exception as e:
+        logger.error(f"Error serving risk descriptions for {productCode}: {e}", exc_info=True)
+        return []
