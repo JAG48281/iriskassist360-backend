@@ -183,22 +183,27 @@ class FirePremiumCalculator:
         terrorism_rate = None
         
         if product_code in ['UBGR', 'BGR']:
-            try:
-                terrorism_rate = get_terrorism_rate_per_mille(
-                    product_code=product_code,
-                    occupancy_code=request.occupancyCode,
-                    tsi=float(total_si)
-                )
-                terrorism_premium = total_si * terrorism_rate / Decimal("1000")
-                terrorism_premium = Decimal(str(round_currency(float(terrorism_premium))))
-                logger.info(f"Terrorism Premium: {terrorism_premium} (Rate: {terrorism_rate}‰)")
-            except Exception as e:
-                logger.error(f"Terrorism rate lookup failed: {e}")
-                # For UBGR, we might want to default to 0.07 or strict fail.
-                # Given strict reqs, let's fail or handle gracefully.
-                # Assuming 0.07 if lookup fails but ideally should be in DB.
-                # raise ValueError(f"Terrorism rate not configured for {product_code}/{request.occupancyCode}")
-                pass
+            terr_si = Decimal(str(request.terrorismSI))
+            
+            if terr_si > 0:
+                try:
+                    terrorism_rate = get_terrorism_rate_per_mille(
+                        product_code=product_code,
+                        occupancy_code=request.occupancyCode,
+                        tsi=float(terr_si) # Rate might depend on TSI slab
+                    )
+                    terrorism_premium = terr_si * terrorism_rate / Decimal("1000")
+                    terrorism_premium = Decimal(str(round_currency(float(terrorism_premium))))
+                    logger.info(f"Terrorism Premium: {terrorism_premium} (Rate: {terrorism_rate}‰ on SI: {terr_si})")
+                except Exception as e:
+                    logger.error(f"Terrorism rate lookup failed: {e}")
+                    # Fail safe defaults? 
+                    pass
+            else:
+                logger.info("Terrorism SI is 0. Calc skipped.")
+                terrorism_premium = Decimal("0")
+                terrorism_rate = Decimal("0")
+
         elif product_code in ['UVGR', 'UVGS']:
              logger.info(f"{product_code} -> Terrorism Premium NOT applicable")
              terrorism_premium = Decimal("0")

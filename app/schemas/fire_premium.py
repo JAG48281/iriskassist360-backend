@@ -23,6 +23,7 @@ class UBGRUVGRRequest(BaseModel):
     # Sum Insured Components
     buildingSI: float = Field(..., ge=0, description="Building Sum Insured")
     contentsSI: float = Field(default=0, ge=0, description="Contents Sum Insured")
+    terrorismSI: float = Field(default=0, ge=0, description="Terrorism Sum Insured (Mandatory for Terrorism calc)")
     
     # Add-Ons
     addOns: List[AddOnItem] = Field(default_factory=list, description="Selected Add-Ons with SI")
