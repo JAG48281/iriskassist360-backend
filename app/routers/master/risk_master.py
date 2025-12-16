@@ -25,63 +25,59 @@ def _to_roman_safe(val: str) -> str:
     }
     return mapping.get(val, val)
 
+def normalize_fire_product_code(code: str) -> str:
+    code = code.upper().strip()
+    mapping = {
+        "UBGR": "BGRP",
+        "UVGR": "UVUS",
+        "BLGR": "BLUS"
+    }
+    return mapping.get(code, code)
+
 @router.get("/master/risk-descriptions")
 def get_risk_descriptions(
-    productCode: str = Query(..., description="Product Code to filter risks"),
+    productCode: str = Query(..., description="Product Code"),
     db: Session = Depends(get_db)
 ):
-    """
-    Get Risk Descriptions (Occupancies) filtered by Product Code.
-    Returns standard API response: { "success": true, "data": [...] }
-    """
     try:
-        product_code_input = productCode
-        product_code_upper = productCode.upper().strip()
-        
-        # 1. Normalize Aliases to Canonical Codes
-        if product_code_upper == "UBGR":
-            normalized_code = "BGRP"
-        elif product_code_upper == "UVGR":
-            normalized_code = "UVUS"
-        elif product_code_upper == "BLGR":
-            normalized_code = "BLUS"
-        else:
-            normalized_code = product_code_upper
-            
-        # 2. Define Groups based on CANONICAL codes
-        GROUP_A = {'BGRP', 'UVGS'} 
-        GROUP_B = {'BSUS', 'BLUS', 'UVUS', 'SFSP', 'IAR', 'BSUSP', 'BLUSP', 'VUSP'} 
-        
+        # Normalize product code
+        normalized = normalize_fire_product_code(productCode)
+
         query = db.query(Occupancy)
-        risks = []
-        
-        if normalized_code in GROUP_A:
-            # Residential: Only Dwellings and Co-op Housing Society
-            risks = query.filter(Occupancy.iib_code.in_(['1001', '1001_2'])).all()
-        elif normalized_code in GROUP_B:
-             # Commercial: All except 1001 and 1001_2
-             risks = query.filter(Occupancy.iib_code.notin_(['1001', '1001_2'])).all()
+        # Note: Occupancy table does not have is_active column, skipping filter.
+        # query = query.filter(Occupancy.is_active == True)
+
+        # UBGR / BGRP → ONLY residential dwellings
+        if normalized == "BGRP":
+            query = query.filter(
+                Occupancy.iib_code.in_(["1001", "1001_2"])
+            )
+
+        # ALL OTHER FIRE PRODUCTS
         else:
-            logger.warning(f"Unknown productCode: {productCode} (normalized: {normalized_code})")
-            return {"success": True, "data": []}
-            
-        results = []
-        for r in risks:
-            if not r: continue
-            results.append({
-                "id": r.id,
-                "description": r.risk_description,
-                "iib_code": r.iib_code,
-                "aift_section": _to_roman_safe(r.section_aift),
-                "occupancy_type": r.occupancy_type
-            })
-            
-        logger.info("Fetched risks for productCode=%s (norm=%s), count=%d", product_code_input, normalized_code, len(results))
-        return {"success": True, "data": results}
-        
+            query = query.filter(
+                Occupancy.iib_code.notin_(["1001", "1001_2"])
+            )
+
+        risks = query.order_by(Occupancy.risk_description).all()
+
+        return {
+            "success": True,
+            "data": [
+                {
+                    "id": r.id,
+                    "description": r.risk_description,
+                    "occupancy_type": r.occupancy_type,
+                    "aift_section": _to_roman_safe(r.section_aift),
+                    "iib_code": r.iib_code,
+                }
+                for r in risks
+            ]
+        }
+
     except Exception as e:
         logger.error(f"Error serving risk descriptions: {e}", exc_info=True)
         return JSONResponse(
             status_code=500,
-            content={"success": False, "message": "Internal Server Error", "error": str(e)}
+            content={"success": False, "message": str(e)}
         )

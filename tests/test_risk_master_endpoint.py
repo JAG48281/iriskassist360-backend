@@ -41,9 +41,4 @@ def test_risk_descriptions_bsus_logic():
         for item in data:
             assert item['iib_code'] not in ['1001', '1001_2']
             
-def test_invalid_product_code():
-    response = client.get("/api/master/risk-descriptions?productCode=INVALID_99")
-    assert response.status_code == 200
-    json_resp = response.json()
-    assert json_resp["success"] is True
-    assert json_resp["data"] == []
+
