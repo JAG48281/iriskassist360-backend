@@ -39,15 +39,22 @@ def get_risk_descriptions(
     Includes aliases (e.g. BSUSP, BLUSP) for robustness.
     """
     try:
+        product_code_input = productCode
         product_code_upper = productCode.upper().strip()
         
-        # 1. Normalize BGRP -> UBGR
-        if product_code_upper == "BGRP":
-            product_code_upper = "UBGR"
+        # 1. Normalize Aliases to Canonical Codes
+        if product_code_upper == "UBGR":
+            normalized_code = "BGRP"
+        elif product_code_upper == "UVGR":
+            normalized_code = "UVUS"
+        elif product_code_upper == "BLGR":
+            normalized_code = "BLUS"
+        else:
+            normalized_code = product_code_upper
             
-        # Valid Product Codes & Aliases
-        # Group A: Residential
-        GROUP_A = {'UBGR', 'UVGR', 'UVGS'} 
+        # 2. Define Groups based on CANONICAL codes
+        # Group A: Residential (Dwellings)
+        GROUP_A = {'BGRP', 'UVGS'} 
         
         # Group B: Commercial / Others
         GROUP_B = {'BSUS', 'BLUS', 'UVUS', 'SFSP', 'IAR', 'BSUSP', 'BLUSP', 'VUSP'} 
@@ -55,31 +62,32 @@ def get_risk_descriptions(
         query = db.query(Occupancy)
         risks = []
         
-        if product_code_upper in GROUP_A:
+        if normalized_code in GROUP_A:
             # Residential: Only Dwellings and Co-op Housing Society
-            # iib_code = 1001, 1001_2
+            # occupancy_code (iib_code) = 1001, 1001_2
             risks = query.filter(Occupancy.iib_code.in_(['1001', '1001_2'])).all()
             
-        elif product_code_upper in GROUP_B:
+        elif normalized_code in GROUP_B:
              # Commercial: All except 1001 and 1001_2
              risks = query.filter(Occupancy.iib_code.notin_(['1001', '1001_2'])).all()
              
         else:
             # Unknown product code -> Return empty list as per strict requirement
-            logger.warning(f"Unknown productCode received: {productCode}")
+            logger.warning(f"Unknown productCode received: {productCode} (normalized: {normalized_code})")
             return []
             
         results = []
         for r in risks:
             if not r: continue
             results.append(RiskDescriptionResponse(
-                occupancyId=r.id,  # PRIMARY KEY
-                riskDescription=r.risk_description,
-                iibCode=r.iib_code,
+                occupancyId=r.id,
+                occupancyCode=r.iib_code,
+                occupancyDescription=r.risk_description,
                 aiftSection=_to_roman_safe(r.section_aift),
                 occupancyType=r.occupancy_type
             ))
             
+        logger.info("Risk descriptions fetched for productCode=%s (normalized=%s), count=%d", product_code_input, normalized_code, len(results))
         return results
         
     except Exception as e:
