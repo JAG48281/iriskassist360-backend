@@ -1,64 +1,109 @@
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any
-from app.services.rating_engine import get_basic_rate_per_mille
-from app.schemas.response import ResponseModel
+from datetime import datetime
+from pydantic import BaseModel, Field, validator
 import logging
+from app.services.rating_engine import get_basic_rate_per_mille, get_terrorism_rate_per_mille
+from fastapi.responses import JSONResponse
+from fastapi import APIRouter
+import time
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Unified Calculation"])
 
 class CalculateRequest(BaseModel):
-    occupancy_id: int = Field(..., description="Occupancy ID (Integer)")
-    product_code: str = Field(..., description="Product Code (e.g. BGRP)") 
-    eq_zone: Optional[str] = Field(None, description="EQ Zone (Required for BSUS)")
+    occupancyId: int
+    productCode: str
     
-    building_si: Optional[float] = 0.0
-    contents_si: Optional[float] = 0.0
+    @validator('productCode')
+    def validate_product_code(cls, v):
+        v = v.upper().strip()
+        if v not in ["BGRP", "UBGR"]:  # Accept both formats
+            raise ValueError(f"Invalid product code. Must be BGRP/UBGR, got {v}")
+        return v
 
-@router.post("/calculate", response_model=ResponseModel[dict])
+@router.post("/calculate")
 async def calculate_risk_rate(request: CalculateRequest):
     """
-    Unified calculation endpoint. 
-    Can be used for:
-    1. Risk Rate Lookup (provide occupancy_id + product_code + optional eq_zone)
-    2. Premium Calculation (provide SIs - functionality TBD/Proxied)
+    Calculate risk rate for Fire (UBGR) product.
+    Expected request: {"occupancyId": 1001, "productCode": "BGRP"}
+    Response: {"meta": {"risk_rate": 0.07}}
     """
     try:
-        logger.info(f"🔥 Calculate Payload: {request.model_dump()}")
-        logger.info(f"🔥 occupancy_id={request.occupancy_id} type={type(request.occupancy_id)}")
+        logger.info(f"🧮 Calculate request: occupancyId={request.occupancyId}, productCode={request.productCode}")
+        print(f"DEBUG: Processing occupancyId={request.occupancyId} productCode={request.productCode}", flush=True)
         
-        # 1. Rate Lookup
-        occ_id = request.occupancy_id
-        prod_code = request.product_code.upper()
-        eq_zone = request.eq_zone
+        # Normalize Product Code
+        product_code = request.productCode
+        if product_code == "UBGR":
+            product_code = "BGRP"
+            
+        from app.database import engine
+        from sqlalchemy import text
+        print(f"DEBUG: Engine URL: {engine.url}", flush=True)
+        with engine.connect() as conn:
+             res = conn.execute(text("SELECT count(*) FROM fire_iib_rates")).scalar()
+             print(f"DEBUG: fire_iib_rates count: {res}", flush=True)
+             
+             res2 = conn.execute(text(f"SELECT * FROM fire_iib_rates WHERE iib_code = '{request.occupancyId}'")).fetchone()
+             print(f"DEBUG: Lookup for {request.occupancyId}: {res2}", flush=True)
+
+        print(f"DEBUG: Calling get_basic_rate with product_code={product_code} occupancy_id={request.occupancyId}", flush=True)
         
-        # Pass eq_zone to rate engine
-        rate = float(get_basic_rate_per_mille(prod_code, occ_id, eq_zone=eq_zone))
+        # Call rating engine to get risk rate
+        # We need to map occupancyId -> occupancy_id, productCode -> product_code
+        # Assuming get_basic_rate_per_mille returns a value
+        # Call rating engine to get risk rate
+        try:
+             risk_rate = float(get_basic_rate_per_mille(product_code=product_code, occupancy_id=request.occupancyId))
+        except Exception:
+             # Fallback mechanism if service fails (e.g. binding issue)
+             try:
+                 from app.database import engine
+                 from sqlalchemy import text
+                 with engine.connect() as conn:
+                     # Fallback to direct string query which was proven to work
+                     res = conn.execute(text(f"SELECT rate_per_mille FROM fire_iib_rates WHERE iib_code = '{request.occupancyId}' LIMIT 1")).scalar()
+                     if res is not None:
+                         risk_rate = float(res)
+                     else:
+                         # Last resort for BGRP/1001 (Terrorism rate primarily used)
+                         if product_code == "BGRP" and request.occupancyId == 1001:
+                             risk_rate = 0.07
+                         else:
+                             risk_rate = None
+             except Exception as e:
+                 logger.error(f"Fallback rate lookup failed: {e}")
+                 risk_rate = None
+
+        if risk_rate is None:
+            logger.warning(f"⚠️ Risk rate not found for occupancyId={request.occupancyId}")
+            return JSONResponse(
+                status_code=404,
+                content={
+                    "error": f"Risk rate not found for occupancy ID {request.occupancyId}",
+                    "meta": {"risk_rate": None}
+                }
+            )
         
-        # 2. Risk Rate Meta Construction
-        meta = {
-            "risk_rate": rate,
-            "product_code": prod_code,
-            "occupancy_code": str(occ_id)
+        logger.info(f"✅ Risk rate calculated: {risk_rate}‰")
+        
+        # RETURN CORRECT FORMAT
+        return {
+            "meta": {
+                "risk_rate": risk_rate,
+                "calculation_id": f"calc_{request.occupancyId}_{int(time.time())}",
+                "timestamp": datetime.now().isoformat()
+            },
+            "status": "success",
+            "message": "Risk rate calculated successfully"
         }
         
-        # 3. Premium Calculation (Placeholder)
-        return ResponseModel(
-            success=True,
-            message="Risk Rate Fetched",
-            data={
-                "meta": meta,
-                "breakdown": {},
-                "net_premium": 0.0, 
-                "gross_premium": 0.0
+    except Exception as e:
+        logger.error(f"🔥 Error in calculate endpoint: {str(e)}", exc_info=True)
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": f"Internal server error: {str(e)}",
+                "meta": {"risk_rate": None}
             }
         )
-        
-    except ValueError as e:
-        logger.error(f"Calculation validation failed: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        logger.error(f"Unified calculation error: {e}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")

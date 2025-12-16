@@ -33,10 +33,20 @@ def create_app():
     # CORS Configuration
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],   # For now (can restrict later)
+        allow_origins=[
+            "http://localhost:3000",
+            "http://localhost:8080",      # Flutter web default
+            "http://localhost:8000",
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:8080",
+            "http://127.0.0.1:8000",
+            "http://localhost",           # Additional common origins
+        ],
         allow_credentials=True,
-        allow_methods=["*"],   # MUST include OPTIONS
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
         allow_headers=["*"],
+        expose_headers=["*"],
+        max_age=600,  # 10 minutes for preflight cache
     )
 
     @app.options("/{full_path:path}")
@@ -49,24 +59,19 @@ def create_app():
         return Response(status_code=200)
 
     @app.middleware("http")
-    async def log_requests(request: Request, call_next):
-        if request.method == "OPTIONS":
-            logger.info("CORS preflight handled for %s", request.url.path)
-            
-        start_time = time.time()
-        logger.info(f"Incoming Request: {request.method} {request.url}")
+    async def log_requests(request, call_next):
+        logger.info(f"📥 Request: {request.method} {request.url.path}")
+        logger.info(f"📥 Origin header: {request.headers.get('origin')}")
         
-        try:
-            response = await call_next(request)
-        except Exception as e:
-            logger.error(f"Request Failed: {e}")
-            return JSONResponse(
-                status_code=500,
-                content={"success": False, "message": "Internal Server Error", "data": str(e)}
-            )
-            
-        process_time = time.time() - start_time
-        logger.info(f"Request Completed: {response.status_code} in {process_time:.4f}s")
+        if request.method == "OPTIONS":
+            logger.info("🔄 Handling OPTIONS preflight request")
+        
+        response = await call_next(request)
+        
+        logger.info(f"📤 Response: {response.status_code}")
+        if hasattr(response, 'headers'):
+            logger.info(f"📤 CORS Headers: {dict(response.headers)}")
+        
         return response
 
     app.include_router(auth.router)
