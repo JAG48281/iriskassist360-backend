@@ -9,7 +9,8 @@ from app.services.rating_engine import (
     get_basic_rate_per_mille,
     get_terrorism_rate_per_mille,
     get_add_on_rate,
-    get_occupancy_details
+    get_occupancy_details,
+    get_fire_eq_rate_per_mille
 )
 from app.schemas.fire_premium import (
     UBGRUVGRRequest,
@@ -194,14 +195,12 @@ class FirePremiumCalculator:
                 terr_si = Decimal(str(request.terrorismSI or 0.0))
                 if terr_si > 0:
                     try:
-                        # Fetch and default to 0.0 if failed? No, strict requirement says NEVER allow None.
-                        # Service raises error if not found.
-                        t_rate = get_terrorism_rate_per_mille(
+                        t_rate_val = get_terrorism_rate_per_mille(
                              product_code=product_code,
                              occupancy_code=request.occupancyCode,
                              tsi=float(terr_si)
                         )
-                        terrorism_rate = t_rate if t_rate is not None else Decimal("0.0")
+                        terrorism_rate = t_rate_val if t_rate_val is not None else Decimal("0.0")
                         
                         terrorism_premium = terr_si * terrorism_rate / Decimal("1000")
                         terrorism_premium = Decimal(str(round_currency(float(terrorism_premium))))
@@ -209,68 +208,60 @@ class FirePremiumCalculator:
                         logger.warning(f"Terrorism calc skipped due to lookup error: {e}")
                         terrorism_premium = Decimal("0")
             
+            # --- EARTHQUAKE (EQ) PREMIUM CALCULATION ---
+            # Rules:
+            # - UBGR, BSUS: EQ Not applicable (0.0)
+            # - Others (SFSP, UVGR, UVUS, BLUS, IAR): Applicable, Key = (IIB, Zone)
+            
+            eq_premium = Decimal("0")
+            eq_rate = Decimal("0")
+            
+            # Whitelist products that REQUIRE EQ (or blacklist UBGR/BSUS)
+            # Prompt says "EQ is NOT applicable to UBGR and BSUS"
+            if product_code not in ["UBGR", "BSUS", "BGRP"]: # BGRP is alias for UBGR often
+                 # Assume applicable for all others (SFSP, etc)
+                 # Validate Zone
+                 if not request.eqZone:
+                      raise ValueError(f"EQ Zone is required for product {product_code}")
+                 
+                 # Fetch Rate
+                 try:
+                      eq_rate = get_fire_eq_rate_per_mille(request.occupancyCode, request.eqZone)
+                      # Calc Premium
+                      eq_si = total_si # Usually EQ SI = Total SI unless specified otherwise
+                      eq_premium = eq_si * eq_rate / Decimal("1000")
+                      eq_premium = Decimal(str(round_currency(float(eq_premium))))
+                 except Exception as e:
+                      logger.error(f"EQ Rate Lookup Failed: {e}")
+                      # If logic is strict, we should raise. Prompt: "ERROR: If EQ required ... return HTTP 400" (handled by ValueError prop)
+                      raise ValueError(f"Failed to calculate EQ Premium: {e}")
+            
             # 9. Net Premium Aggregation
-            # net = (subtotal - discount + loading + terr) ???
-            # Wait, subtotal ALREADY includes discount deduction.
-            # Formula in prompt: (subtotal - discount_amount + loading_amount + terrorism_premium)
-            # Incorrect math in prompt? "Subtotal = (Basic + AddOn) - Discount".
-            # If subtotal already deducted discount, we shouldn't deduct it again.
-            # Prompt Step 3 says: 
-            # subtotal = base + add_on + pa [WRONG - prompt says subtotal = base+addon+pa ??? NO]
-            # Prompt says: "subtotal = base_premium + add_on_premium + pa_premium"
-            # THEN "discount_amount = subtotal * discount_pct / 100"
-            # THEN "loading_amount = subtotal * loading_pct / 100"
-            # THEN "net_premium = (subtotal - discount_amount + loading_amount + terrorism_premium)"
-            # OK, I will follow the PROMPT'S formula structure rigidly.
-            
-            # Re-evaluating structure based on "Enforce calculation order (STRICT)" in Prompt
-            # Base = (Basic + AddlStructure) * Rate
-            # AddOn = AddOnSI * Rate
-            # PA = Flat
-            
-            # Prompt formula: "subtotal = base_premium + add_on_premium + pa_premium"
-            # (Wait, my previous code included PA in add_on_premium. I need to be careful).
-            # I will trust proper aggregation.
-            
-            # Let's align with:
-            # Subtotal (Gross before discount/loading) = Base + AddOns (inc PA)
-            # Then apply discount, loading.
-            # Then Net = Subtotal - Discount + Loading + Terrorism.
-            
-            # My calculated `subtotal` above was `(Base + AddOn) - Discount`.
-            # This doesn't match the prompt's request Step 3 variable naming exactly but matches the logic "Net = Subtotal - Discount...".
-            # Wait, PROMPT Step 3 says:
-            # "subtotal = base_premium + add_on_premium + pa_premium" (i.e. Pre-Discount Total)
-            # "discount_amount = subtotal * discount_pct / 100"
-            # "net_premium = (subtotal - discount_amount + ...)"
-            # So `subtotal` in prompt means "Total Basic Premium".
-            # In my code `subtotal` usually meant "Post-Discount".
-            # I will adjust variable names to be safe or just implement the MATH correctly.
-            
-            # Implementation:
-            total_before_adjustments = base_premium + add_on_premium # add_on_premium includes PA
-            
-            # Redo Discount
-            discount_amount = total_before_adjustments * discount_pct / Decimal("100")
-            discount_amount = Decimal(str(round_currency(float(discount_amount))))
-            
-            post_discount = total_before_adjustments - discount_amount
-            
-            # Loading (Prompt says: "loading_amount = subtotal * loading_pct / 100")
-            # Usually loading is on post-discount or pre-discount?
-            # Prompt says "loading_amount = subtotal * loading_pct". If subtotal is pre-discount (as per prompt list), then loading is on gross?
             # Prompt Step 3:
             # subtotal = base + add_on + pa
             # discount = subtotal * pct
             # loading = subtotal * pct
             # net = subtotal - discount + loading + terr
             
-            # I will follow this EXACTLY. Loading on Pre-Discount Subtotal.
+            # 9. Net Premium Aggregation
+            # Define Subtotal (Excluding Terrorism)
+            # Typically includes Base + AddOns + EQ (if applicable)
+            total_before_adjustments = base_premium + add_on_premium + eq_premium
+            
+            # Recalculate Discount/Loading on this valid subtotal
+            # Discount
+            discount_amount = total_before_adjustments * discount_pct / Decimal("100")
+            discount_amount = Decimal(str(round_currency(float(discount_amount))))
+            
+            # Loading
             loading_amount = total_before_adjustments * loading_pct / Decimal("100")
             loading_amount = Decimal(str(round_currency(float(loading_amount))))
             
-            # Net Premium Calculation
-            annual_net = total_before_adjustments - discount_amount + loading_amount + terrorism_premium
+            # Net Excl Terrorism
+            net_premium_excl_terrorism = total_before_adjustments - discount_amount + loading_amount
+            
+            # Final Net
+            annual_net = net_premium_excl_terrorism + terrorism_premium
             annual_net = Decimal(str(round_currency(float(annual_net))))
             
             # Policy Period

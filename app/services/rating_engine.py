@@ -9,6 +9,7 @@ from app.database import engine
 
 logger = logging.getLogger(__name__)
 
+
 def get_basic_rate_per_mille(product_code: str, occupancy_code: Union[str, int], eq_zone: Optional[str] = None, period_years: int = 1) -> Decimal:
     """
     Fetches the basic rate per mille for a given product and occupancy code (iib_code).
@@ -78,6 +79,32 @@ def get_basic_rate_per_mille(product_code: str, occupancy_code: Union[str, int],
     except Exception as e:
         logger.error(f"DB Error (get_basic_rate_per_mille): {e}")
         raise ValueError(f"Database error while fetching basic rate: {str(e)}")
+
+def get_fire_eq_rate_per_mille(iib_code: str, eq_zone: str) -> Decimal:
+    """
+    Fetches Earthquake (EQ) rate from fire_eq_rates.
+    Key: iib_code + eq_zone
+    """
+    stmt = text("""
+        SELECT eq_rate 
+        FROM fire_eq_rates 
+        WHERE iib_code = :iib 
+          AND eq_zone = :zone
+    """)
+    try:
+        with engine.connect() as conn:
+            row = conn.execute(stmt, {"iib": iib_code, "zone": eq_zone}).fetchone()
+            if row:
+                rate = Decimal(str(row.eq_rate))
+                logger.info(f"✅ EQ Rate Lookup: IIB={iib_code} Zone={eq_zone} -> {rate}‰")
+                return rate
+            
+            error_msg = f"EQ Rate not found for IIB={iib_code} Zone={eq_zone}"
+            logger.error(f"❌ {error_msg}")
+            raise ValueError(error_msg)
+    except Exception as e:
+        logger.error(f"DB Error (get_fire_eq_rate_per_mille): {e}")
+        raise ValueError(f"EQ Rate Fetch Error: {str(e)}")
 
 def get_occupancy_details(occupancy_code: str) -> dict:
     """
