@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import JSONResponse
 import logging
 from sqlalchemy.orm import Session
 from typing import List
@@ -24,19 +25,14 @@ def _to_roman_safe(val: str) -> str:
     }
     return mapping.get(val, val)
 
-@router.get("/master/risk-descriptions", response_model=List[RiskDescriptionResponse])
+@router.get("/master/risk-descriptions")
 def get_risk_descriptions(
     productCode: str = Query(..., description="Product Code to filter risks"),
     db: Session = Depends(get_db)
 ):
     """
     Get Risk Descriptions (Occupancies) filtered by Product Code.
-    
-    Business Rules:
-    - BGRP, UVGR: Return Dwellings (1001) and Co-op (1001_2) ONLY.
-    - BSUS, BLUS, UVUS, SFSP, IAR: Return ALL remaining risks (Non-Residential).
-    
-    Includes aliases (e.g. BSUSP, BLUSP) for robustness.
+    Returns standard API response: { "success": true, "data": [...] }
     """
     try:
         product_code_input = productCode
@@ -53,10 +49,7 @@ def get_risk_descriptions(
             normalized_code = product_code_upper
             
         # 2. Define Groups based on CANONICAL codes
-        # Group A: Residential (Dwellings)
         GROUP_A = {'BGRP', 'UVGS'} 
-        
-        # Group B: Commercial / Others
         GROUP_B = {'BSUS', 'BLUS', 'UVUS', 'SFSP', 'IAR', 'BSUSP', 'BLUSP', 'VUSP'} 
         
         query = db.query(Occupancy)
@@ -64,32 +57,31 @@ def get_risk_descriptions(
         
         if normalized_code in GROUP_A:
             # Residential: Only Dwellings and Co-op Housing Society
-            # occupancy_code (iib_code) = 1001, 1001_2
             risks = query.filter(Occupancy.iib_code.in_(['1001', '1001_2'])).all()
-            
         elif normalized_code in GROUP_B:
              # Commercial: All except 1001 and 1001_2
              risks = query.filter(Occupancy.iib_code.notin_(['1001', '1001_2'])).all()
-             
         else:
-            # Unknown product code -> Return empty list as per strict requirement
-            logger.warning(f"Unknown productCode received: {productCode} (normalized: {normalized_code})")
-            return []
+            logger.warning(f"Unknown productCode: {productCode} (normalized: {normalized_code})")
+            return {"success": True, "data": []}
             
         results = []
         for r in risks:
             if not r: continue
-            results.append(RiskDescriptionResponse(
-                occupancyId=r.id,
-                occupancyCode=r.iib_code,
-                occupancyDescription=r.risk_description,
-                aiftSection=_to_roman_safe(r.section_aift),
-                occupancyType=r.occupancy_type
-            ))
+            results.append({
+                "id": r.id,
+                "description": r.risk_description,
+                "iib_code": r.iib_code,
+                "aift_section": _to_roman_safe(r.section_aift),
+                "occupancy_type": r.occupancy_type
+            })
             
-        logger.info("Risk descriptions fetched for productCode=%s (normalized=%s), count=%d", product_code_input, normalized_code, len(results))
-        return results
+        logger.info("Fetched risks for productCode=%s (norm=%s), count=%d", product_code_input, normalized_code, len(results))
+        return {"success": True, "data": results}
         
     except Exception as e:
-        logger.error(f"Error serving risk descriptions for {productCode}: {e}", exc_info=True)
-        return []
+        logger.error(f"Error serving risk descriptions: {e}", exc_info=True)
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "message": "Internal Server Error", "error": str(e)}
+        )
