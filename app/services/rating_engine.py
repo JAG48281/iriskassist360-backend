@@ -1,7 +1,7 @@
 import os
 import logging
 from decimal import Decimal
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 from sqlalchemy import create_engine, text
 from app.schemas.rating_engine import RatingRequest, RatingResponse
 from app.utils.rating_engine import round_currency
@@ -9,7 +9,7 @@ from app.database import engine
 
 logger = logging.getLogger(__name__)
 
-def get_basic_rate_per_mille(product_code: str, occupancy_code: str, period_years: int = 1) -> Decimal:
+def get_basic_rate_per_mille(product_code: str, occupancy_code: Union[str, int], period_years: int = 1) -> Decimal:
     """
     Fetches the basic rate per mille for a given product and occupancy code (iib_code).
     
@@ -20,7 +20,7 @@ def get_basic_rate_per_mille(product_code: str, occupancy_code: str, period_year
     
     Args:
         product_code: Product code (e.g., 'UBGR', 'BGRP')
-        occupancy_code: IIB code (e.g., '1001')
+        occupancy_code: IIB code (e.g., '1001' or 1001)
         period_years: Policy period (not currently used in schema)
     
     Returns:
@@ -38,8 +38,11 @@ def get_basic_rate_per_mille(product_code: str, occupancy_code: str, period_year
         LIMIT 1
     """)
     try:
+        # Cast to string for DB lookup if it's an int, as iib_code is text
+        code_str = str(occupancy_code)
+        
         with engine.connect() as conn:
-            row = conn.execute(stmt, {"p": product_code, "o": occupancy_code}).fetchone()
+            row = conn.execute(stmt, {"p": product_code, "o": code_str}).fetchone()
             
             if row:
                 rate = Decimal(str(row.basic_rate))

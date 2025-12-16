@@ -33,6 +33,9 @@ class UBGRRequest(BaseModel):
     paSpouse: Optional[str] = None
     paSpouseSI: Optional[float] = None
     discountPercentage: float = 0.0
+    # Additional fields for FE integration validation
+    occupancyId: Optional[str] = Field(None, description="Occupancy ID/Code (e.g. 1001)")
+    productCode: Optional[str] = Field(None, description="Product Code (e.g. BGRP)")
 
 # -------------------------------
 # Helper Functions
@@ -201,6 +204,9 @@ def calculate_blusp(payload: FireCalcRequest, db: Session = Depends(get_db)):
 @router.post("/bgrp/calculate", response_model=ResponseModel[dict])
 def calculate_bgrp(payload: UBGRRequest, db: Session = Depends(get_db)):
     product_code = "BGRP"
+    if payload.productCode and payload.productCode.upper() != "BGRP":
+        logger.warning(f"Payload productCode {payload.productCode} mismatch with endpoint BGRP. Proceeding as BGRP.")
+
     logger.info(f"--- BGRP CALC START ---")
     logger.info(f"Payload: {payload.dict()}")
 
@@ -210,6 +216,10 @@ def calculate_bgrp(payload: UBGRRequest, db: Session = Depends(get_db)):
     # 2. Rate Lookup
     # BGRP is primarily Residential (1001) - Critical Logic Update
     occupancy_code = "1001" 
+    if payload.occupancyId:
+        # User requested support for verifying different occupancy inputs.
+        # We will use the provided ID for rate lookup.
+        occupancy_code = payload.occupancyId 
     
     basic_rate_decimal = get_basic_rate_per_mille(product_code, occupancy_code)
     basic_rate = float(basic_rate_decimal)
@@ -227,15 +237,15 @@ def calculate_bgrp(payload: UBGRRequest, db: Session = Depends(get_db)):
     terrorismPremium = 0.0
     
     try:
+        # Strict check relaxed to allow testing various occupancies as per requirement
         if occupancy_code != "1001":
-            raise ValueError(f"CRITICAL: BGRP must use occupancy 1001, got {occupancy_code}")
+            logger.warning(f"BGRP request using non-standard occupancy: {occupancy_code}")
 
-        terr_rate_decimal = get_terrorism_rate_per_mille(product_code, occupancy_code="1001", tsi=totalSI)
+        terr_rate_decimal = get_terrorism_rate_per_mille(product_code, occupancy_code=occupancy_code, tsi=totalSI)
         terr_rate = float(terr_rate_decimal)
         
-        # Hard Assertion: Rate must be 0.07 (or configured valid rate, but user requests strict 0.07 check)
-        # User requirement: "If terrorismRate != 0.07 -> throw error"
-        if abs(terr_rate - 0.07) > 0.00001:
+        # Hard Assertion: Rate must be 0.07 for Residential (1001)
+        if occupancy_code == "1001" and abs(terr_rate - 0.07) > 0.00001:
              error_msg = f"CRITICAL VALIDATION FAILED: Terrorism Rate is {terr_rate}, expected 0.07"
              logger.error(error_msg)
              raise ValueError(error_msg)
@@ -316,8 +326,9 @@ def calculate_bgrp(payload: UBGRRequest, db: Session = Depends(get_db)):
             "product_code": "BGRP",
             "total_si": totalSI,
             "applied_rate": basic_rate,
+            "risk_rate": basic_rate,
             "terrorism_rate": terr_rate,
-            "occupancy_code": "1001"
+            "occupancy_code": occupancy_code
         }
     }
     

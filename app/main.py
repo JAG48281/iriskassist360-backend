@@ -92,6 +92,10 @@ def create_app():
     from app.routers.rating_engine import router as rating_router
     app.include_router(rating_router, prefix="/api/rating")
 
+    # Unified Calculation Endpoint
+    from app.routers import unified_calculate
+    app.include_router(unified_calculate.router, prefix="/api")
+
     # Debug Router
     from app.routers import debug
     app.include_router(debug.router)

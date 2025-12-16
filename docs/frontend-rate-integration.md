@@ -35,6 +35,11 @@ All endpoints return a standardized `ResponseModel` structure:
     "net_premium": 220.0,
     "gst": 39.6,
     "gross_premium": 259.6,
+    "meta": {
+        "product_code": "BGRP",
+        "risk_rate": 0.15,
+        "applied_rate": 0.15
+    },
     "breakdown": { ... } // (Optional extra details)
   }
 }
@@ -57,6 +62,8 @@ All endpoints return a standardized `ResponseModel` structure:
 | Proposer PA Cover? | `paProposer` | String | "Yes" or "No" |
 | Spouse PA Cover? | `paSpouse` | String | "Yes" or "No" |
 | Discount % | `discountPercentage` | Float | 0 to 100 |
+| Occupancy ID | `occupancyId` | String | (Optional) e.g. "1001" |
+| Product Code | `productCode` | String | (Optional) Must be "BGRP" |
 
 *   **Example Body:**
 
@@ -67,7 +74,9 @@ All endpoints return a standardized `ResponseModel` structure:
   "terrorismCover": "Yes",
   "paProposer": "Yes",
   "paSpouse": "No",
-  "discountPercentage": 10
+  "discountPercentage": 10,
+  "occupancyId": "1001",
+  "productCode": "BGRP"
 }
 ```
 
@@ -119,6 +128,37 @@ All endpoints return a standardized `ResponseModel` structure:
 }
 ```
 *   **Note**: Rate is per-mille (e.g. 1.5 = 1.5/1000).
+
+---
+
+## 3. Unified Rate Lookup (New)
+
+*Use for looking up the risk rate before full calculation.*
+
+*   **Endpoint:** `POST /api/calculate`
+*   **Payload:**
+
+```json
+{
+  "occupancyId": "1001",
+  "productCode": "BGRP"
+}
+```
+
+*   **Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "meta": {
+      "risk_rate": 0.15,
+      "product_code": "BGRP",
+      "occupancy_code": "1001"
+    }
+  }
+}
+```
 
 ---
 
