@@ -31,21 +31,19 @@ def create_app():
     app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=["*"])
 
     # CORS Configuration
-    # In Railway variables, set ALLOWED_ORIGINS to "https://your-netlify-app.netlify.app"
-    # For multiple origins, separate by comma: "https://app.com,https://staging.app.com"
-    origins_str = os.getenv("ALLOWED_ORIGINS", "*")
-    origins = [origin.strip() for origin in origins_str.split(",")]
-
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=origins,
+        allow_origins=["*"],   # For now (can restrict later)
         allow_credentials=True,
-        allow_methods=["*"],
+        allow_methods=["*"],   # MUST include OPTIONS
         allow_headers=["*"],
     )
 
     @app.middleware("http")
     async def log_requests(request: Request, call_next):
+        if request.method == "OPTIONS":
+            logger.info("CORS preflight handled for %s", request.url.path)
+            
         start_time = time.time()
         logger.info(f"Incoming Request: {request.method} {request.url}")
         
