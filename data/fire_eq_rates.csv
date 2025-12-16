@@ -1,6 +1,4 @@
 iib_code,eq_zone,eq_rate
-1001,Zone IV,0.05
-1001_2,Zone IV,0.05
 1002,Zone IV,0.05
 1003,Zone IV,0.05
 1004,Zone IV,0.05
@@ -297,8 +295,6 @@ iib_code,eq_zone,eq_rate
 4009,Zone IV,0.05
 4010,Zone IV,0.05
 4011,Zone IV,0.05
-1001,Zone III,0.1
-1001_2,Zone III,0.1
 1002,Zone III,0.1
 1003,Zone III,0.1
 1004,Zone III,0.1
@@ -595,8 +591,6 @@ iib_code,eq_zone,eq_rate
 4009,Zone III,0.1
 4010,Zone III,0.1
 4011,Zone III,0.1
-1001,Zone II,0.15
-1001_2,Zone II,0.15
 1002,Zone II,0.15
 1003,Zone II,0.15
 1004,Zone II,0.15
@@ -893,8 +887,6 @@ iib_code,eq_zone,eq_rate
 4009,Zone II,0.25
 4010,Zone II,0.25
 4011,Zone II,0.25
-1001,Zone I,0.25
-1001_2,Zone I,0.25
 1002,Zone I,0.25
 1003,Zone I,0.25
 1004,Zone I,0.25
