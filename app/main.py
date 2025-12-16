@@ -51,12 +51,16 @@ def create_app():
 
     @app.options("/{full_path:path}")
     async def options_handler(full_path: str, request: Request):
-        """
-        Catch-all OPTIONS handler to explicitly return 200 OK.
-        This prevents 502 Bad Gateway errors on Railway/LoadBalancers
-        when the default CORS middleware doesn't intercept correctly.
-        """
-        return Response(status_code=200)
+        return JSONResponse(
+            status_code=200,
+            content={"message": "OK"},
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "POST, GET, OPTIONS, PUT, DELETE",
+                "Access-Control-Allow-Headers": "*",
+                "Access-Control-Max-Age": "3600",
+            }
+        )
 
     @app.middleware("http")
     async def log_requests(request, call_next):
