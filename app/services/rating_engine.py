@@ -9,53 +9,71 @@ from app.database import engine
 
 logger = logging.getLogger(__name__)
 
-def get_basic_rate_per_mille(product_code: str, occupancy_code: Union[str, int], period_years: int = 1) -> Decimal:
+def get_basic_rate_per_mille(product_code: str, occupancy_code: Union[str, int], eq_zone: Optional[str] = None, period_years: int = 1) -> Decimal:
     """
     Fetches the basic rate per mille for a given product and occupancy code (iib_code).
     
-    IMPORTANT: Uses occupancy_id (PRIMARY KEY) for lookup, NOT iib_code.
-    The iib_code is only used to resolve the occupancy record.
-    
-    STRICT MODE: Raises ValueError if no rate found.
+    Refactored to use clean rate architecture:
+    1. BSUS -> fire_bsus_rates (Key: iib_code + eq_zone)
+    2. Others -> fire_iib_rates (Key: iib_code)
     
     Args:
-        product_code: Product code (e.g., 'UBGR', 'BGRP')
-        occupancy_code: IIB code (e.g., '1001' or 1001)
+        product_code: Product code (e.g., 'UBGR', 'BGRP', 'BSUS')
+        occupancy_code: IIB code (e.g., '1001')
+        eq_zone: Earthquake Zone (Required for BSUS)
         period_years: Policy period (not currently used in schema)
     
     Returns:
         Decimal: Basic rate per mille
         
     Raises:
-        ValueError: If no rate is configured for the product + occupancy combination
+        ValueError: If no rate is configured or inputs invalid
     """
-    stmt = text("""
-        SELECT r.basic_rate, o.id as occ_id, o.occupancy_type
-        FROM product_basic_rates r
-        JOIN occupancies o ON r.occupancy_id = o.id
-        WHERE r.product_code = :p 
-          AND o.iib_code = :o 
-        LIMIT 1
-    """)
+    iib_code = str(occupancy_code)
+    
     try:
-        # Cast to string for DB lookup if it's an int, as iib_code is text
-        code_str = str(occupancy_code)
-        
         with engine.connect() as conn:
-            row = conn.execute(stmt, {"p": product_code, "o": code_str}).fetchone()
-            
+            if product_code.upper() == "BSUS":
+                if not eq_zone:
+                    raise ValueError("EQ Zone is required for BSUS rating")
+                    
+                # BSUS LOOKUP
+                stmt = text("""
+                    SELECT rate_per_mille 
+                    FROM fire_bsus_rates 
+                    WHERE iib_code = :iib 
+                      AND eq_zone = :zone
+                """)
+                row = conn.execute(stmt, {"iib": iib_code, "zone": eq_zone}).fetchone()
+                src_table = "fire_bsus_rates"
+                
+            else:
+                # STANDARD LOOKUP (UBGR, BGRP, etc.)
+                stmt = text("""
+                    SELECT rate_per_mille 
+                    FROM fire_iib_rates 
+                    WHERE iib_code = :iib
+                """)
+                row = conn.execute(stmt, {"iib": iib_code}).fetchone()
+                src_table = "fire_iib_rates"
+
             if row:
-                rate = Decimal(str(row.basic_rate))
-                logger.info(f"✅ Basic Rate Lookup: {product_code}/{occupancy_code} (OccID: {row.occ_id}, Type: {row.occupancy_type}) → {rate}‰")
+                rate = Decimal(str(row.rate_per_mille))
+                logger.info(
+                    f"🔥 Fire Rate Applied | Product={product_code} "
+                    f"IIB={iib_code} EQ={eq_zone} Rate={rate}‰ (Table: {src_table})"
+                )
                 return rate
             
-            # Explicit error message as per requirements
-            error_msg = f"Base risk rate not configured for product '{product_code}' + occupancy '{occupancy_code}'. Please configure in product_basic_rates table."
+            # Not Found Error
+            error_msg = f"Rate not found in {src_table} for IIB={iib_code}"
+            if product_code.upper() == "BSUS":
+                error_msg += f", EQ={eq_zone}"
+            
             logger.error(f"❌ {error_msg}")
             raise ValueError(error_msg)
-            
+
     except ValueError:
-        # Re-raise ValueError as-is
         raise
     except Exception as e:
         logger.error(f"DB Error (get_basic_rate_per_mille): {e}")

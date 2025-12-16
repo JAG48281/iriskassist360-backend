@@ -12,10 +12,7 @@ router = APIRouter(tags=["Unified Calculation"])
 class CalculateRequest(BaseModel):
     occupancy_id: int = Field(..., description="Occupancy ID (Integer)")
     product_code: str = Field(..., description="Product Code (e.g. BGRP)") 
-    # Optional context fields if needed for future
-    building_si: Optional[float] = Field(0.0, alias="buildingSI")
-    # The user said "REMOVE all camelCase aliases". But for SIs I will just use snake_case and if frontend sends camelCase it will fail?
-    # Actually, I'll stick to the existing plan of just fixing occupancy_id
+    eq_zone: Optional[str] = Field(None, description="EQ Zone (Required for BSUS)")
     
     building_si: Optional[float] = 0.0
     contents_si: Optional[float] = 0.0
@@ -25,7 +22,7 @@ async def calculate_risk_rate(request: CalculateRequest):
     """
     Unified calculation endpoint. 
     Can be used for:
-    1. Risk Rate Lookup (provide occupancy_id + product_code)
+    1. Risk Rate Lookup (provide occupancy_id + product_code + optional eq_zone)
     2. Premium Calculation (provide SIs - functionality TBD/Proxied)
     """
     try:
@@ -35,14 +32,16 @@ async def calculate_risk_rate(request: CalculateRequest):
         # 1. Rate Lookup
         occ_id = request.occupancy_id
         prod_code = request.product_code.upper()
+        eq_zone = request.eq_zone
         
-        rate = float(get_basic_rate_per_mille(prod_code, occ_id))
+        # Pass eq_zone to rate engine
+        rate = float(get_basic_rate_per_mille(prod_code, occ_id, eq_zone=eq_zone))
         
         # 2. Risk Rate Meta Construction
         meta = {
             "risk_rate": rate,
             "product_code": prod_code,
-            "occupancy_code": occ_code
+            "occupancy_code": str(occ_id)
         }
         
         # 3. Premium Calculation (Placeholder)
