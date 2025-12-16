@@ -9,7 +9,7 @@ import os
 
 import logging
 import time
-from fastapi import Request
+from fastapi import Request, Response
 from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -38,6 +38,15 @@ def create_app():
         allow_methods=["*"],   # MUST include OPTIONS
         allow_headers=["*"],
     )
+
+    @app.options("/{full_path:path}")
+    async def options_handler(full_path: str, request: Request):
+        """
+        Catch-all OPTIONS handler to explicitly return 200 OK.
+        This prevents 502 Bad Gateway errors on Railway/LoadBalancers
+        when the default CORS middleware doesn't intercept correctly.
+        """
+        return Response(status_code=200)
 
     @app.middleware("http")
     async def log_requests(request: Request, call_next):
