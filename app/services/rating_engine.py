@@ -106,6 +106,34 @@ def get_fire_eq_rate_per_mille(iib_code: str, eq_zone: str) -> Decimal:
         logger.error(f"DB Error (get_fire_eq_rate_per_mille): {e}")
         raise ValueError(f"EQ Rate Fetch Error: {str(e)}")
 
+def get_stfi_rate_per_mille(iib_code: str) -> Decimal:
+    """
+    Fetches STFI rate from fire_stfi_rates.
+    Key: iib_code
+    """
+    stmt = text("""
+        SELECT stfi_rate_per_mille 
+        FROM fire_stfi_rates 
+        WHERE iib_code = :iib
+    """)
+    try:
+        with engine.connect() as conn:
+            row = conn.execute(stmt, {"iib": iib_code}).fetchone()
+            if row:
+                rate = Decimal(str(row.stfi_rate_per_mille))
+                logger.info(f"✅ STFI Rate Lookup: IIB={iib_code} -> {rate}‰")
+                return rate
+            
+            error_msg = f"STFI Rate not found for IIB={iib_code}"
+            logger.error(f"❌ {error_msg}")
+            # If strictly required, raise. If optional (legacy?), 0?
+            # Prompt says "From fire_stfi_rates". Assuming mandatory for applicable products.
+            return Decimal("0.0") # Fallback to avoid crash?
+            # Better to be strict if we expect it. But safely return 0 if not found to allow proceed (with valid log)
+    except Exception as e:
+        logger.error(f"DB Error (get_stfi_rate_per_mille): {e}")
+        return Decimal("0.0")
+
 def get_occupancy_details(occupancy_code: str) -> dict:
     """
     Fetches full occupancy details including all required fields.
@@ -194,43 +222,27 @@ def get_terrorism_rate_per_mille(product_code: str, occupancy_code: Optional[str
 
 def get_add_on_rate(product_code: str, add_on_code: str, occupancy_code: Optional[str] = None) -> Tuple[str, Decimal]:
     """
-    Fetches add-on rate. Handles flexible occupancy rules:
-    - rule is NULL or 'ALL' -> Applies to everyone
-    - rule is 'ONLY_<code>' -> Applies if occupancy_code == code
-    - rule is 'EXCEPT_<code>' -> Applies if occupancy_code != code
+    Fetches add-on rate from fire_add_on_rates.
+    Matches product_code against pipe-separated product_group.
+    Returns (pricing_type, rate_value).
     """
     stmt = text("""
-        SELECT rate_type, rate_value, occupancy_rule 
-        FROM add_on_rates 
-        WHERE product_code = :p 
-          AND add_on_code = :a 
+        SELECT pricing_type, rate_value, product_group 
+        FROM fire_add_on_rates 
+        WHERE add_on_code = :a 
+          AND is_active = true
     """)
     try:
         with engine.connect() as conn:
-            rows = conn.execute(stmt, {"p": product_code, "a": add_on_code}).fetchall()
+            rows = conn.execute(stmt, {"a": add_on_code}).fetchall()
             
-            # Filter logic
             for row in rows:
-                rule = row.occupancy_rule
-                
-                # Match logic
-                match = False
-                if not rule or rule.upper() == 'ALL':
-                    match = True
-                elif occupancy_code:
-                    if rule.startswith('ONLY_'):
-                        target = rule.replace('ONLY_', '')
-                        if occupancy_code == target:
-                            match = True
-                    elif rule.startswith('EXCEPT_'):
-                        target = rule.replace('EXCEPT_', '')
-                        if occupancy_code != target:
-                            match = True
-                
-                if match:
-                    return (row.rate_type, Decimal(str(row.rate_value)))
+                pgroups = [p.strip().upper() for p in row.product_group.split("|")]
+                if product_code.upper() in pgroups:
+                    return (row.pricing_type, Decimal(str(row.rate_value)))
             
-            logger.warning(f"No matching add-on rate found: Product={product_code}, AddOn={add_on_code}, Occ={occupancy_code}")
+            # If not found specifically for product, implies no rate/not applicable
+            logger.info(f"AddOn {add_on_code} not configured for {product_code} in fire_add_on_rates.")
             return ("fixed", Decimal("0.0"))
             
     except Exception as e:

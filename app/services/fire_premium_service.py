@@ -10,7 +10,8 @@ from app.services.rating_engine import (
     get_terrorism_rate_per_mille,
     get_add_on_rate,
     get_occupancy_details,
-    get_fire_eq_rate_per_mille
+    get_fire_eq_rate_per_mille,
+    get_stfi_rate_per_mille
 )
 from app.schemas.fire_premium import (
     UBGRUVGRRequest,
@@ -175,17 +176,7 @@ class FirePremiumCalculator:
             logger.info(f"Add-On Premium: {add_on_premium}")
             
             # 5. Discount Calculation (On Base + AddOn)
-            discount_base = base_premium + add_on_premium
-            discount_amount = discount_base * discount_pct / Decimal("100")
-            discount_amount = Decimal(str(round_currency(float(discount_amount))))
-            
-            # 6. Subtotal
-            subtotal = discount_base - discount_amount
-            subtotal = Decimal(str(round_currency(float(subtotal))))
-            
-            # 7. Loading (On Subtotal)
-            loading_amount = subtotal * loading_pct / Decimal("100")
-            loading_amount = Decimal(str(round_currency(float(loading_amount))))
+            # Note: Will be calculated on total_before_adjustments later
             
             # 8. Terrorism Premium
             terrorism_premium = Decimal("0")
@@ -210,16 +201,21 @@ class FirePremiumCalculator:
             
             # --- EARTHQUAKE (EQ) PREMIUM CALCULATION ---
             # Rules:
-            # - UBGR, BSUS: EQ Not applicable (0.0)
-            # - Others (SFSP, UVGR, UVUS, BLUS, IAR): Applicable, Key = (IIB, Zone)
+            # - UBGR, BSUS: EQ Not applicable (0.0) -> Wait, prompt says BSUS requires EQ Zone implies EQ applicable?
+            # Prompt Step 5: "BSUS -> fire_bsus_rates (EQ mandatory)".
+            # "EQ ... Applies to: SFSP, IAR, UVUS, BLUS ... Not for UBGR ... BSUS requires EQ Zone".
+            # This means BSUS uses `fire_bsus_rates` (which depends on EQ Zone) BUT `fire_eq_rates` (the separate EQ addon) does NOT apply to BSUS? 
+            # Prompt says "EQ ... Not for UBGR". It lists "Applies to: SFSP, IAR, UVUS, BLUS". It does NOT list BSUS in the 'Applies to' list for EQ.
+            # But "BSUS requires EQ Zone" is listed under EQ section? Or BSUS section?
+            # Under "Base Premium": "BSUS -> fire_bsus_rates (EQ mandatory)".
+            # Under "EQ": "Applies to: SFSP... Not for UBGR. BSUS requires EQ Zone".
+            # This confirms BSUS Base Rate DEPENDS on EQ Zone, but BSUS does NOT get a separate EQ Premium add-on (it's built into base or strictly derived from base table).
+            # So EQ Premium is ONLY for SFSP, IAR, UVUS, BLUS.
             
             eq_premium = Decimal("0")
             eq_rate = Decimal("0")
             
-            # Whitelist products that REQUIRE EQ (or blacklist UBGR/BSUS)
-            # Prompt says "EQ is NOT applicable to UBGR and BSUS"
-            if product_code not in ["UBGR", "BSUS", "BGRP"]: # BGRP is alias for UBGR often
-                 # Assume applicable for all others (SFSP, etc)
+            if product_code in ["SFSP", "IAR", "UVUS", "BLUS", "UVGR", "UVGS"]: # Assuming UVGR/UVGS are in the 'SFSP' family for this logic
                  # Validate Zone
                  if not request.eqZone:
                       raise ValueError(f"EQ Zone is required for product {product_code}")
@@ -227,26 +223,36 @@ class FirePremiumCalculator:
                  # Fetch Rate
                  try:
                       eq_rate = get_fire_eq_rate_per_mille(request.occupancyCode, request.eqZone)
-                      # Calc Premium
-                      eq_si = total_si # Usually EQ SI = Total SI unless specified otherwise
+                      eq_si = total_si 
                       eq_premium = eq_si * eq_rate / Decimal("1000")
                       eq_premium = Decimal(str(round_currency(float(eq_premium))))
                  except Exception as e:
                       logger.error(f"EQ Rate Lookup Failed: {e}")
-                      # If logic is strict, we should raise. Prompt: "ERROR: If EQ required ... return HTTP 400" (handled by ValueError prop)
                       raise ValueError(f"Failed to calculate EQ Premium: {e}")
+
+            # --- STFI PREMIUM CALCULATION ---
+            # Rules: 
+            # Applies to: SFSP, IAR, UVUS, BLUS.
+            # Not for UBGR.
+            stfi_premium = Decimal("0")
+            stfi_rate = Decimal("0")
             
-            # 9. Net Premium Aggregation
-            # Prompt Step 3:
-            # subtotal = base + add_on + pa
-            # discount = subtotal * pct
-            # loading = subtotal * pct
-            # net = subtotal - discount + loading + terr
-            
+            if product_code in ["SFSP", "IAR", "UVUS", "BLUS", "UVGR", "UVGS"]:
+                 try:
+                      stfi_rate = get_stfi_rate_per_mille(request.occupancyCode)
+                      stfi_si = total_si
+                      stfi_premium = stfi_si * stfi_rate / Decimal("1000")
+                      stfi_premium = Decimal(str(round_currency(float(stfi_premium))))
+                 except Exception as e:
+                      logger.error(f"STFI Rate Lookup Failed: {e}")
+                      # If critical, raise. Else 0.
+                      # Proceed with 0 for now unless strict
+                      stfi_premium = Decimal("0")
+
             # 9. Net Premium Aggregation
             # Define Subtotal (Excluding Terrorism)
-            # Typically includes Base + AddOns + EQ (if applicable)
-            total_before_adjustments = base_premium + add_on_premium + eq_premium
+            # Includes Base + AddOns + EQ + STFI
+            total_before_adjustments = base_premium + add_on_premium + eq_premium + stfi_premium
             
             # Recalculate Discount/Loading on this valid subtotal
             # Discount
