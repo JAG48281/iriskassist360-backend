@@ -405,7 +405,10 @@ def seed_fire_add_on_rates():
     logger.info(f"✅ Fire Add-on Rates: {stats['fire_add_on_rates']['success']} success, {stats['fire_add_on_rates']['failed']} failed")
 
 def verify_seeding():
-    """Verify all authorized tables are seeded"""
+    """
+    Verify all authorized tables are seeded.
+    Transaction-safe: continues even if tables are missing.
+    """
     logger.info("--- Post-Seeding Validation ---")
     
     tables = [
@@ -423,10 +426,22 @@ def verify_seeding():
     with engine.connect() as conn:
         for table in tables:
             try:
+                # Transaction-safe SELECT COUNT
                 count = conn.execute(text(f"SELECT COUNT(*) FROM {table}")).scalar()
                 logger.info(f"✅ {table}: {count} rows")
+            except SQLAlchemyError as e:
+                # Rollback on ANY database error to clean transaction
+                conn.rollback()
+                if "does not exist" in str(e).lower():
+                    logger.warning(f"⚠️  {table}: Table does not exist (will be created by migration)")
+                else:
+                    logger.warning(f"⚠️  {table}: Database error: {str(e)[:100]}")
+                # Continue with other tables
             except Exception as e:
-                logger.error(f"❌ {table}: {e}")
+                # Rollback on ANY exception
+                conn.rollback()
+                logger.warning(f"⚠️  {table}: Error: {str(e)[:100]}")
+                # Continue with other tables
 
 def print_summary():
     """Print final seeding summary"""
