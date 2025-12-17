@@ -184,9 +184,9 @@ def get_terrorism_rate_per_mille(occupancy_type: str, total_si: float) -> Decima
         SELECT rate_per_mille 
         FROM terrorism_slabs 
         WHERE occupancy_type = :ot
-          AND si_from <= :tsi
-          AND (si_to IS NULL OR si_to > :tsi)
-        ORDER BY si_from DESC
+          AND (:tsi >= COALESCE(min_sum_insured, 0))
+          AND (:tsi < COALESCE(max_sum_insured, 1000000000000000000))
+        ORDER BY min_sum_insured DESC
         LIMIT 1
     """)
     
