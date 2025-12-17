@@ -94,6 +94,10 @@ def create_app():
     from app.routers.fire import fire_premium
     app.include_router(fire_premium.router, prefix="/api")
     
+    # Fire Risk Rate API
+    from app.routers.fire import risk_rate
+    app.include_router(risk_rate.router)
+    
     # Rating Engine
     from app.routers.rating_engine import router as rating_router
     app.include_router(rating_router, prefix="/api/rating")
