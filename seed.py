@@ -356,9 +356,7 @@ def verify_seeding(conn):
             logger.error(f"❌ {table}: {e}")
 
 def main():
-    print("🚀 AUTORIT
-
-ATIVE SEEDING SCRIPT STARTING...")
+    print("🚀 AUTHORITATIVE SEEDING SCRIPT STARTING...")
     print("✅ Products are LOGICAL, not relational")
     print("✅ NO product_master table")
     
