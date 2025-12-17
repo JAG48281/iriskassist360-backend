@@ -99,11 +99,23 @@ async def calculate_risk_rate(request: CalculateRequest):
             total_si = float(request.total_si)
             
             # Step 2: Rate Lookup (Terrorism Only) - BGRP Specific
+            
+            # Resolve Occupancy Type
+            occupancy_type = "Residential" # Default
+            try:
+                occ_res = conn.execute(
+                    text("SELECT occupancy_type FROM occupancies WHERE iib_code = :iib"),
+                    {"iib": iib_code}
+                ).scalar()
+                if occ_res:
+                    occupancy_type = occ_res
+            except Exception as e:
+                logger.warning(f"Occupancy type lookup failed for {iib_code}: {e}. Using Default: Residential.")
+
             try:
                 terrorism_rate_d = get_terrorism_rate_per_mille(
-                    product_code="BGRP", 
-                    occupancy_code=iib_code,
-                    tsi=total_si
+                    occupancy_type=occupancy_type, 
+                    total_si=total_si
                 )
                 terrorism_rate = float(terrorism_rate_d)
             except Exception as e:

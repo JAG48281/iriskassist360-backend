@@ -171,48 +171,36 @@ def get_occupancy_details(occupancy_code: str) -> dict:
         logger.error(f"DB Error (get_occupancy_details): {e}")
         return None
 
-def get_terrorism_rate_per_mille(product_code: str, occupancy_code: Optional[str] = "1001", tsi: float = 0.0) -> Decimal:
+def get_terrorism_rate_per_mille(occupancy_type: str, total_si: float) -> Decimal:
     """
     Fetches the terrorism rate based on TSI slabs.
-    Matches product, occupancy type, and TSI range.
+    Matches Occupancy Type and TSI range.
+    Product-agnostic.
     """
-    # First get occupancy type for the code
-    occ_type = "Residential" # Default
-    logger.info(f"Using Occupancy Code: {occupancy_code}") # Task: Log Selected occupancy_code
-    
-    if occupancy_code:
-        # Resolve type
-        stmt_type = text("SELECT occupancy_type FROM occupancies WHERE iib_code = :c")
-        with engine.connect() as conn:
-             res = conn.execute(stmt_type, {"c": occupancy_code}).scalar()
-             if res:
-                 occ_type = res
-
-    logger.info(f"Looking up Terrorism Rate: Product={product_code}, OccType={occ_type}, TSI={tsi}")
+    logger.info(f"Looking up Terrorism Rate: OccType={occupancy_type}, TSI={total_si}")
 
     # Query with TSI range check & Deterministic Ordering
     stmt = text("""
         SELECT rate_per_mille 
         FROM terrorism_slabs 
-        WHERE product_code = :p 
-          AND occupancy_type = :ot
-          AND si_min <= :tsi
-          AND (si_max IS NULL OR si_max >= :tsi)
-        ORDER BY si_min DESC  -- Deterministic: Pick strict match if multiple ranges overlap (unlikely but safe)
+        WHERE occupancy_type = :ot
+          AND si_from <= :tsi
+          AND (si_to IS NULL OR si_to > :tsi)
+        ORDER BY si_from DESC
         LIMIT 1
     """)
     
     try:
         with engine.connect() as conn:
-            result = conn.execute(stmt, {"p": product_code, "ot": occ_type, "tsi": tsi}).scalar()
+            result = conn.execute(stmt, {"ot": occupancy_type, "tsi": total_si}).scalar()
             
             if result is not None:
                 rate = Decimal(str(result))
-                logger.info(f"✅ Selected terrorism rate: {rate} per mille") 
+                logger.info(f"TERRORISM RATE RESOLVED → occupancy={occupancy_type}, total_si={total_si}, rate={rate}") 
                 return rate
             
             # Explicit failure if no slab matches
-            error_msg = f"No terrorism slab found for Product={product_code}, Type={occ_type}, TSI={tsi}"
+            error_msg = f"No terrorism slab found for Type={occupancy_type}, TSI={total_si}"
             logger.error(error_msg)
             raise ValueError(error_msg)
             
