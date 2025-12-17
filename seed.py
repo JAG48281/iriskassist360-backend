@@ -77,37 +77,50 @@ def check_table_exists(conn, table_name: str) -> bool:
 
 def check_no_product_master():
     """
-    GUARD RAIL: Ensure no product_master BASE TABLE exists.
+    GUARD RAIL: Ensure no product_master BASE TABLE exists in ANY schema.
     
-    Uses information_schema.tables with table_type = 'BASE TABLE'.
-    This checks ONLY for real tables, NOT views or materialized views.
+    FINAL VERSION - Scans ALL schemas:
+    - Checks information_schema.tables across ALL schemas
+    - Filters for table_type = 'BASE TABLE' (not views/materialized views)
+    - Excludes PostgreSQL system schemas
+    - Detects orphan tables in non-public schemas
+    
+    WHY NOT just public schema:
+    - Tables could exist in other user schemas (test, staging, dev, etc.)
+    - Previous migrations only checked public
+    - Need complete database-wide verification
     
     WHY NOT to_regclass():
-    - to_regclass() detects ANY relation (tables, views, materialized views, etc.)
-    - This caused false positives when views existed
-    - information_schema.tables is the correct authority for BASE TABLES
+    - to_regclass() detects ANY relation type (tables, views, etc.)
+    - information_schema.tables distinguishes BASE TABLE vs VIEW
+    - We need precision: BASE TABLEs only, all schemas
     """
     sql = """
     SELECT COUNT(*)
     FROM information_schema.tables
-    WHERE table_schema = 'public'
-      AND table_name = 'product_master'
+    WHERE table_name = 'product_master'
       AND table_type = 'BASE TABLE'
+      AND table_schema NOT IN (
+          'pg_catalog',
+          'information_schema',
+          'pg_toast'
+      )
     """
     
     try:
         with engine.connect() as conn:
-            # Check for BASE TABLE only
+            # Check for BASE TABLE in ALL schemas
             count = conn.execute(text(sql)).scalar()
             
             if count > 0:
-                # BASE TABLE exists - this is FORBIDDEN
-                logger.critical(f"❌ FATAL: {FORBIDDEN_TABLE} BASE TABLE exists! This is NOT allowed.")
+                # BASE TABLE exists somewhere - this is FORBIDDEN
+                logger.critical(f"❌ FATAL: {FORBIDDEN_TABLE} BASE TABLE exists in some schema!")
                 logger.critical(f"❌ Products are LOGICAL, not relational.")
-                raise RuntimeError(f"{FORBIDDEN_TABLE} schema violation - BASE TABLE must not exist")
+                logger.critical(f"❌ Found {count} instance(s) of {FORBIDDEN_TABLE} BASE TABLE")
+                raise RuntimeError(f"{FORBIDDEN_TABLE} schema violation - BASE TABLE must not exist in ANY schema")
             else:
-                # No BASE TABLE - correct
-                logger.info(f"✅ Confirmed: No {FORBIDDEN_TABLE} BASE TABLE (correct)")
+                # No BASE TABLE in any schema - correct
+                logger.info(f"✅ Confirmed: No {FORBIDDEN_TABLE} BASE TABLE in any schema (correct)")
                 
     except RuntimeError:
         # Re-raise schema violations
@@ -116,6 +129,7 @@ def check_no_product_master():
         # Unexpected error during check
         logger.error(f"Could not verify {FORBIDDEN_TABLE} absence: {e}")
         raise
+
 
 
 
