@@ -205,8 +205,23 @@ The UBGR Risk Rate auto-fill fix has been **successfully committed and pushed** 
 
 ---
 
-**Deployed By**: Senior FastAPI Backend Team  
-**Deployment Time**: 2025-12-17 17:57:50 IST  
-**Commit Hash**: c2d43b8  
-**Branch**: main  
-**Status**: 🚀 **DEPLOYED TO GITHUB, AWAITING PRODUCTION VERIFICATION**
+**Status**: 🟢 **VERIFIED IN PRODUCTION**
+
+## 🔍 Live Verification
+
+**Endpoint**: `https://web-production-afeec.up.railway.app/api/master/risk-rate`
+
+**Test Cases**:
+1. `?iib_code=1001`
+   - **Response**: `{"iib_code":"1001","risk_rate_per_mille":0.15}`
+   - **Status**: ✅ PASS
+   
+2. `?iib_code=1001_2`
+   - **Response**: `{"iib_code":"1001_2","risk_rate_per_mille":0.15}`
+   - **Status**: ✅ PASS
+
+**Compliance Check**:
+- Strict JSON number: ✅ Yes (`0.15`)
+- Top-level object: ✅ Yes
+- Helper endpoint active: ✅ Yes
+
