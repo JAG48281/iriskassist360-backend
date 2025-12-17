@@ -33,33 +33,23 @@ def create_app():
     # CORS Configuration
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[
-            "http://localhost:3000",
-            "http://localhost:8080",      # Flutter web default
-            "http://localhost:8000",
-            "http://127.0.0.1:3000",
-            "http://127.0.0.1:8080",
-            "http://127.0.0.1:8000",
-            "http://localhost",           # Additional common origins
-        ],
+        allow_origins=["*"],  # Allow all origins for Railway deployment
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+        allow_methods=["*"],
         allow_headers=["*"],
-        expose_headers=["*"],
-        max_age=600,  # 10 minutes for preflight cache
     )
 
+    # Global OPTIONS handler - MUST be before all routers
     @app.options("/{full_path:path}")
     async def options_handler(full_path: str, request: Request):
-        return JSONResponse(
+        return Response(
             status_code=200,
-            content={"message": "OK"},
             headers={
                 "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "POST, GET, OPTIONS, PUT, DELETE",
+                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
                 "Access-Control-Allow-Headers": "*",
-                "Access-Control-Max-Age": "3600",
-            }
+                "Access-Control-Max-Age": "86400",
+            },
         )
 
     @app.middleware("http")
