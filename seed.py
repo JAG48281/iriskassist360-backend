@@ -77,21 +77,26 @@ def check_table_exists(conn, table_name: str) -> bool:
 
 def check_no_product_master():
     """
-    GUARD RAIL: Ensure no product_master BASE TABLE exists in public schema.
+    GUARD RAIL: Ensure no product_master BASE TABLE exists.
     
-    PRODUCTION-SAFE VERSION:
-    - Checks ONLY public schema (not all schemas)
-    - Avoids false positives from pg_catalog, temp schemas, etc.
-    - In production: logs error but doesn't crash
-    - In development: raises exception
+    RUNS ONLY IN DEVELOPMENT:
+    - Development: Strict schema enforcement
+    - Production: Skipped (migrations handle enforcement)
     
-    WHY ONLY PUBLIC SCHEMA:
-    - Checking all schemas caused false positives
-    - System schemas (pg_temp_*, pg_catalog) have artifacts
-    - Application only uses public schema
-    - Simpler is better for production stability
+    This prevents false-positive logs from Postgres catalog artifacts.
+    Schema enforcement belongs in Alembic migrations, not runtime checks.
     """
-    # Simple query: check ONLY public schema
+    # Get environment (default to production for safety)
+    app_env = os.getenv('APP_ENV', 'production').lower()
+    
+    # PRODUCTION: Skip check entirely
+    if app_env == 'production':
+        logger.info("✅ Schema enforcement skipped in production (handled by migrations)")
+        return
+    
+    # DEVELOPMENT ONLY: Run strict check
+    logger.info("🔍 Running schema check (development mode)")
+    
     sql = """
     SELECT table_schema, table_name
     FROM information_schema.tables
@@ -100,43 +105,29 @@ def check_no_product_master():
       AND table_schema = 'public'
     """
     
-    # Get environment (default to production for safety)
-    app_env = os.getenv('APP_ENV', 'production').lower()
-    
     try:
         with engine.connect() as conn:
-            # Execute check
             result = conn.execute(text(sql))
             rows = result.fetchall()
             
             if len(rows) > 0:
-                # BASE TABLE found in public schema - VIOLATION
-                logger.critical(f"❌ FATAL: {FORBIDDEN_TABLE} BASE TABLE found in public schema!")
+                # DEVELOPMENT: Strict enforcement - crash immediately
+                logger.critical(f"❌ FATAL: {FORBIDDEN_TABLE} BASE TABLE exists in public schema!")
                 logger.critical(f"❌ Products are LOGICAL, not relational.")
-                logger.critical(f"❌ Table must be dropped: public.{FORBIDDEN_TABLE}")
-                
-                # Environment-based enforcement
-                if app_env == 'development':
-                    # Development: crash immediately
-                    raise RuntimeError(f"{FORBIDDEN_TABLE} schema violation - BASE TABLE exists in public")
-                else:
-                    # Production: log error but don't crash (allow startup, migrations will fix)
-                    logger.error(f"⚠️  PRODUCTION MODE: Allowing startup despite violation")
-                    logger.error(f"⚠️  Run migrations to fix: alembic upgrade head")
+                logger.critical(f"❌ Drop the table: DROP TABLE public.{FORBIDDEN_TABLE};")
+                raise RuntimeError(f"{FORBIDDEN_TABLE} schema violation - run migrations to fix")
             else:
-                # No BASE TABLE in public - correct
+                # Development: No violation
                 logger.info(f"✅ Confirmed: No {FORBIDDEN_TABLE} BASE TABLE in public schema")
-                logger.info(f"✅ Checked: public schema only (production-safe)")
                 
     except RuntimeError:
-        # Re-raise schema violations (development mode)
+        # Re-raise schema violations
         raise
     except Exception as e:
         # Unexpected error during check
         logger.error(f"Could not verify {FORBIDDEN_TABLE} absence: {e}")
-        # In production, log but don't crash
-        if app_env == 'development':
-            raise
+        raise
+
 
 
 
