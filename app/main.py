@@ -35,7 +35,7 @@ def create_app():
             return Response(
                 status_code=200,
                 headers={
-                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
                     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH",
                     "Access-Control-Allow-Headers": "*",
                     "Access-Control-Allow-Credentials": "true",
@@ -49,12 +49,21 @@ def create_app():
     app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=["*"])
 
     # CORS Configuration - CRITICAL: Must be BEFORE routers but AFTER OPTIONS middleware
+    # Allow specific origins for production, with wildcard for development flexibility
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],  # Allow all origins for Railway deployment
+        allow_origins=[
+            "http://localhost",
+            "http://localhost:3000",
+            "http://localhost:5000",
+            "http://localhost:8000",
+            "http://localhost:50000",  # Flutter Web default
+            "https://*.railway.app",
+            "*",  # Fallback for development
+        ],
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["*"],  # Allow ALL methods (GET, POST, PUT, DELETE, OPTIONS, PATCH)
+        allow_headers=["*"],  # Allow ALL headers
         expose_headers=["*"],
     )
 

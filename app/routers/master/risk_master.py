@@ -33,6 +33,16 @@ def normalize_fire_product_code(code: str) -> str:
     }
     return mapping.get(code, code)
 
+@router.options("/master/risk-descriptions")
+async def risk_descriptions_options():
+    """
+    Explicit OPTIONS handler for CORS preflight.
+    Returns immediately without DB access or query params.
+    Browser uses this to validate CORS before sending actual GET.
+    """
+    logger.info("🔄 OPTIONS preflight for /master/risk-descriptions")
+    return {}  # Empty response with 200 OK - CORS handled by middleware
+
 @router.get("/master/risk-descriptions")
 def get_risk_descriptions(
     productCode: str = Query(..., description="Product Code"),
