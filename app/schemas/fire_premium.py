@@ -54,6 +54,9 @@ class UBGRUVGRRequest(BaseModel):
     
     # Policy Details
     policyPeriod: int = Field(default=1, ge=1, le=20, description="Policy Period in Years")
+    
+    # Risk Rate (Explicit for UBGR)
+    risk_rate_per_mille: Optional[float] = Field(default=None, ge=0, description="Explicit Risk Rate (Required for UBGR)")
 
 
 class PremiumBreakdown(BaseModel):

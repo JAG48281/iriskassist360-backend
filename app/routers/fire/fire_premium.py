@@ -4,6 +4,7 @@ Implements authoritative premium calculation endpoints for UBGR/UVGR/UVGS produc
 """
 import logging
 from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -50,6 +51,16 @@ def calculate_ubgr_premium(
         
         # Override product code to ensure UBGR
         payload.productCode = "UBGR"
+
+        # Defensive Validation: UBGR requires explicit risk rate
+        if payload.risk_rate_per_mille is None:
+            logger.error("Validation Failed: Risk rate missing for UBGR calculation")
+            return JSONResponse(
+                status_code=422,
+                content={
+                    "error": "Risk rate missing for UBGR calculation"
+                }
+            )
         
         result = FirePremiumCalculator.calculate_ubgr_uvgr(payload)
         

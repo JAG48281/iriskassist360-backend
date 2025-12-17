@@ -137,13 +137,23 @@ class FirePremiumCalculator:
             logger.info(f"Total SI: {total_si}")
 
             # 2. Basic Rate Lookup (SAFE)
-            try:
-                basic_rate = get_basic_rate_per_mille(product_code, request.occupancyCode)
-                if basic_rate is None or basic_rate <= 0:
-                     raise ValueError("Rate resolved to None or Zero")
-            except Exception as e:
-                logger.error(f"Basic rate lookup failed: {e}")
-                raise ValueError(f"Basic rate lookup failed for {product_code}/{request.occupancyCode}")
+            if product_code == "UBGR":
+                # STRICT: Use explicit rate provided in request
+                if request.risk_rate_per_mille is None:
+                     # This should be caught by router validation, but double safe
+                     raise ValueError("Risk rate missing for UBGR calculation")
+                
+                basic_rate = Decimal(str(request.risk_rate_per_mille))
+                logger.info(f"Using Explicit Risk Rate for UBGR: {basic_rate}")
+            else:
+                # Fallback / Other Products: Query Database
+                try:
+                    basic_rate = get_basic_rate_per_mille(product_code, request.occupancyCode)
+                    if basic_rate is None or basic_rate <= 0:
+                         raise ValueError("Rate resolved to None or Zero")
+                except Exception as e:
+                    logger.error(f"Basic rate lookup failed: {e}")
+                    raise ValueError(f"Basic rate lookup failed for {product_code}/{request.occupancyCode}")
             
             logger.info(f"Basic Rate: {basic_rate} (Per Mille)")
             
