@@ -34,13 +34,15 @@ def test_calculate_endpoint():
         
         if response.status_code == 200:
             data = response.json()
-            risk_rate = data.get("meta", {}).get("risk_rate")
+            risk_rate = data.get("risk_rate_per_mille")
+            iib_code = data.get("iib_code")
             
-            if risk_rate:
-                print(f"\n✅ SUCCESS: Risk Rate = {risk_rate}‰")
-                print("✅ UBGR Risk Rate Auto-fill is WORKING!")
+            if risk_rate is not None and iib_code == "1001":
+                print(f"\n✅ SUCCESS: Risk Rate = {risk_rate}‰ for IIB {iib_code}")
+                print("✅ UBGR Strict Logic is WORKING!")
             else:
-                print("\n❌ FAIL: Risk rate is missing from response")
+                print("\n❌ FAIL: Missing or incorrect fields in response")
+                print(f"   Received: iib_code={iib_code}, risk_rate={risk_rate}")
         else:
             print(f"\n❌ FAIL: HTTP {response.status_code}")
             
