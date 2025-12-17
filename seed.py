@@ -76,19 +76,35 @@ def check_table_exists(conn, table_name: str) -> bool:
         return False
 
 def check_no_product_master():
-    """GUARD RAIL: Ensure no product_master references exist"""
+    """
+    GUARD RAIL: Ensure no product_master references exist.
+    
+    Uses to_regclass for explicit existence check.
+    Logs CRITICAL only if table truly exists.
+    """
     try:
         with engine.connect() as conn:
-            result = conn.execute(text(f"SELECT COUNT(*) FROM information_schema.tables WHERE table_name='{FORBIDDEN_TABLE}'"))
-            if result.scalar() > 0:
+            # Use to_regclass for explicit check
+            result = conn.execute(text("SELECT to_regclass('public.product_master')"))
+            exists = result.scalar() is not None
+            
+            if exists:
+                # Table exists - this is FORBIDDEN
                 logger.critical(f"❌ FATAL: {FORBIDDEN_TABLE} table exists! This is NOT allowed.")
                 logger.critical(f"❌ Products are LOGICAL, not relational.")
-                raise RuntimeError(f"{FORBIDDEN_TABLE} is not part of schema")
+                raise RuntimeError(f"{FORBIDDEN_TABLE} schema violation - table must not exist")
+            else:
+                # Table correctly does not exist
+                logger.info(f"✅ Confirmed: No {FORBIDDEN_TABLE} table (correct)")
+                
+    except RuntimeError:
+        # Re-raise if we explicitly raised it
+        raise
     except Exception as e:
-        if "does not exist" in str(e) or "not part of schema" in str(e):
-            logger.info(f"✅ Confirmed: No {FORBIDDEN_TABLE} table (correct)")
-        else:
-            raise
+        # Unexpected error during check
+        logger.error(f"Could not verify {FORBIDDEN_TABLE} absence: {e}")
+        raise
+
 
 def safe_upsert(conn, model, data, table_name):
     """
