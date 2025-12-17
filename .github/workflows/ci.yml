@@ -158,19 +158,16 @@ jobs:
         run: |
           python tests/verify_schemas.py
       
+      
       - name: Run integration tests
         env:
           BASE_URL: ${{ env.BASE_URL }}
-          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
         run: |
           pytest tests/test_api.py -v --tb=short --maxfail=1
       
-      - name: Validate production database
-        env:
-          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
-        run: |
-          python tests/validate_addon_rates.py
-        continue-on-error: false
+      # Note: Production database validation removed from CI
+      # Database validation should be done manually or via separate monitoring
+      # CI should only test public API endpoints, not direct database access
 
   deploy-notification:
     name: Deployment Notification
