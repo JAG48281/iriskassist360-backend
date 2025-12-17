@@ -12,6 +12,12 @@ router = APIRouter(tags=["Unified Calculation"])
 
 from typing import Optional
 
+
+PRODUCT_CODE_MAP = {
+    "UBGR": "bgrp",
+    "ubgr": "bgrp",
+}
+
 class CalculateRequest(BaseModel):
     occupancyId: Optional[int] = None
     productCode: str
@@ -19,10 +25,22 @@ class CalculateRequest(BaseModel):
     
     @validator('productCode')
     def validate_product_code(cls, v):
-        v = v.upper().strip()
-        if v not in ["BGRP", "UBGR"]:  # Accept both formats
-            raise ValueError(f"Invalid product code. Must be BGRP/UBGR, got {v}")
-        return v
+        # Normalize product_code
+        v_clean = v.strip().lower()
+        # Resolver
+        canonical = PRODUCT_CODE_MAP.get(v_clean.upper(), v_clean)
+        
+        # If input was BGRP, loop above makes it bgrp (default).
+        # We want to support BGRP input too.
+        # If canonical is 'bgrp', it's valid.
+        
+        if canonical not in ["bgrp"]:
+             # Legacy support check or strict?
+             # Previous: ["BGRP", "UBGR"]
+             # Now both map to "bgrp".
+             # If user sends "XYZ", it remains "xyz".
+             raise ValueError(f"Invalid product code. Must be BGRP/UBGR, got {v}")
+        return canonical
 
 @router.post("/calculate")
 async def calculate_risk_rate(request: CalculateRequest):
@@ -34,12 +52,11 @@ async def calculate_risk_rate(request: CalculateRequest):
     try:
         logger.info(f"🧮 Calculate request: productCode={request.productCode}")
         
-        # Normalize Product Code
+        # Product Code is already normalized by validator to 'bgrp'
         product_code = request.productCode
-        if product_code == "UBGR":
-            product_code = "BGRP"
-            
-        if product_code == "BGRP":
+        
+        if product_code == "bgrp":
+            logger.info(f"UBGR normalized to canonical product code: {product_code}")
             # ---------------------------------------------------------
             # UBGR (Bharat Griha Raksha Policy) Strict Rate Lookup
             # ---------------------------------------------------------
