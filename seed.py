@@ -1,5 +1,5 @@
 """
-AUTHORITATIVE SEED SCRIPT - PRODUCTION SAFE
+AUTHORITATIVE SEED SCRIPT - PRODUCTION SAFE + SELF-HEALING
 Products are LOGICAL, not relational.
 NO product_master table exists or will ever exist.
 
@@ -18,6 +18,12 @@ TRANSACTION SAFETY:
 - Each table commits independently
 - Failed rows logged but don't break entire seed
 - Proper rollback on exceptions
+
+SELF-HEALING:
+- Verifies table exists before seeding
+- Skips missing tables with warning (doesn't crash)
+- Safe to run multiple times (idempotent)
+- No operation can poison transaction state
 """
 import sys
 import os
@@ -37,19 +43,37 @@ logger = logging.getLogger(__name__)
 
 # Seeding statistics
 stats = {
-    "lob_master": {"success": 0, "failed": 0},
-    "occupancies": {"success": 0, "failed": 0},
-    "fire_iib_rates": {"success": 0, "failed": 0},
-    "fire_bsus_rates": {"success": 0, "failed": 0},
-    "fire_stfi_rates": {"success": 0, "failed": 0},
-    "fire_eq_rates": {"success": 0, "failed": 0},
-    "terrorism_slabs": {"success": 0, "failed": 0},
-    "fire_add_on_master": {"success": 0, "failed": 0},
-    "fire_add_on_rates": {"success": 0, "failed": 0}
+    "lob_master": {"success": 0, "failed": 0, "skipped": False},
+    "occupancies": {"success": 0, "failed": 0, "skipped": False},
+    "fire_iib_rates": {"success": 0, "failed": 0, "skipped": False},
+    "fire_bsus_rates": {"success": 0, "failed": 0, "skipped": False},
+    "fire_stfi_rates": {"success": 0, "failed": 0, "skipped": False},
+    "fire_eq_rates": {"success": 0, "failed": 0, "skipped": False},
+    "terrorism_slabs": {"success": 0, "failed": 0, "skipped": False},
+    "fire_add_on_master": {"success": 0, "failed": 0, "skipped": False},
+    "fire_add_on_rates": {"success": 0, "failed": 0, "skipped": False}
 }
 
 # GUARD RAIL: Fail if product_master is referenced
 FORBIDDEN_TABLE = "product_master"
+
+def check_table_exists(conn, table_name: str) -> bool:
+    """
+    SELF-HEALING: Check if table exists before attempting to seed.
+    Uses PostgreSQL system catalog for non-invasive check.
+    
+    Returns: True if table exists, False otherwise
+    """
+    try:
+        result = conn.execute(text(f"SELECT to_regclass('public.{table_name}')"))
+        exists = result.scalar() is not None
+        if not exists:
+            logger.warning(f"⚠️  Table {table_name} does not exist - will skip seeding")
+        return exists
+    except SQLAlchemyError as e:
+        conn.rollback()  # Clean transaction on error
+        logger.warning(f"⚠️  Could not check {table_name}: {e}")
+        return False
 
 def check_no_product_master():
     """GUARD RAIL: Ensure no product_master references exist"""
@@ -131,6 +155,13 @@ def seed_lob_master():
     """Seed minimal LOB master for reference only"""
     logger.info("Seeding LOB Master (reference only)...")
     
+    # SELF-HEALING: Check if table exists before seeding
+    with engine.connect() as conn:
+        if not check_table_exists(conn, "lob_master"):
+            stats["lob_master"]["skipped"] = True
+            logger.warning("⚠️  Skipping lob_master - table does not exist")
+            return
+    
     lobs = [
         {"lob_code": "FIRE", "lob_name": "Fire Insurance", "description": "Fire and Special Perils", "active": True},
     ]
@@ -151,6 +182,13 @@ def seed_occupancies():
     if not os.path.exists(csv_path):
         logger.error(f"❌ {csv_path} not found!")
         return
+    
+    # SELF-HEALING: Check if table exists before seeding
+    with engine.connect() as conn:
+        if not check_table_exists(conn, "occupancies"):
+            stats["occupancies"]["skipped"] = True
+            logger.warning("⚠️  Skipping occupancies - table does not exist")
+            return
     
     with engine.connect() as conn:
         with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
