@@ -12,53 +12,36 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-from sqlalchemy import text
+from app.models.fire_models import FireIibRate
 
 @router.get("/master/risk-rate")
 def get_risk_rate(
-    iib_code: str = Query(..., description="IIB Code"),
+    iib_code: str = Query(..., description="IIB code as string"),
     db: Session = Depends(get_db)
 ):
-    """
-    Get risk rate for UBGR based on IIB Code.
-    Strict backend-only endpoint.
-    """
-    # 1. Match iib_code as STRING (no casting, only strip)
     iib_code_str = iib_code.strip()
-    
-    # 2. Query ONLY fire_iib_rates
-    query = text("""
-        SELECT rate_per_mille
-        FROM fire_iib_rates
-        WHERE iib_code = :iib_code
-        LIMIT 1
-    """)
-    
-    result = db.execute(query, {"iib_code": iib_code_str}).fetchone()
-    
-    # 3. Response Contract (STRICT)
-    if not result:
-        # If not found -> HTTP 404
+
+    rate = (
+        db.query(FireIibRate.rate_per_mille)
+        .filter(FireIibRate.iib_code == iib_code_str)
+        .scalar()
+    )
+
+    if rate is None:
         logger.warning(f"UBGR rate not found for iib_code={iib_code_str}")
-        raise HTTPException(status_code=404, detail="Risk rate not found")
-        
-    rate = result[0]
-    
-    # risk_rate_per_mille MUST be JSON number.
-    try:
-        rate_val = float(rate)
-    except (TypeError, ValueError):
-        logger.error(f"Invalid rate format in DB for iib_code={iib_code_str}: {rate}")
-        raise HTTPException(status_code=500, detail="Invalid rate format in database")
-    
+        raise HTTPException(
+            status_code=404,
+            detail=f"Risk rate not found for IIB code {iib_code_str}"
+        )
+
     # Logging (Required)
     logger.info(
-        f"UBGR API response → iib={iib_code_str}, rate={rate_val}"
+        f"UBGR API response → iib={iib_code_str}, rate={float(rate)}"
     )
-    
+
     return {
         "iib_code": iib_code_str,
-        "risk_rate_per_mille": rate_val
+        "risk_rate_per_mille": float(rate)
     }
 
 logger = logging.getLogger(__name__)

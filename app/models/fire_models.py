@@ -132,3 +132,9 @@ class AddOnRate(Base):
     __table_args__ = (
         UniqueConstraint('add_on_id', 'product_code', 'occupancy_type', 'si_min', 'si_max', name='uq_add_on_rates_composite'),
     )
+
+class FireIibRate(Base):
+    __tablename__ = "fire_iib_rates"
+    
+    iib_code = Column(String(length=20), primary_key=True)
+    rate_per_mille = Column(Numeric(precision=10, scale=6), nullable=False)
