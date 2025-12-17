@@ -54,9 +54,6 @@ stats = {
     "fire_add_on_rates": {"success": 0, "failed": 0, "skipped": False}
 }
 
-# GUARD RAIL: Fail if product_master is referenced
-FORBIDDEN_TABLE = "product_master"
-
 def check_table_exists(conn, table_name: str) -> bool:
     """
     SELF-HEALING: Check if table exists before attempting to seed.
@@ -75,58 +72,39 @@ def check_table_exists(conn, table_name: str) -> bool:
         logger.warning(f"⚠️  Could not check {table_name}: {e}")
         return False
 
-def check_no_product_master():
+def should_seed(engine) -> bool:
     """
-    GUARD RAIL: Ensure no product_master BASE TABLE exists.
+    Determine if seeding should run.
     
-    RUNS ONLY IN DEVELOPMENT:
-    - Development: Strict schema enforcement
-    - Production: Skipped (migrations handle enforcement)
+    Uses lob_master row count as canonical marker:
+    - If lob_master has >= 1 row: SKIP SEEDING (already applied)
+    - If lob_master has 0 rows or doesn't exist: RUN SEEDING (first time)
     
-    This prevents false-positive logs from Postgres catalog artifacts.
-    Schema enforcement belongs in Alembic migrations, not runtime checks.
+    Returns: True if should seed, False if already seeded
     """
-    # Get environment (default to production for safety)
-    app_env = os.getenv('APP_ENV', 'production').lower()
-    
-    # PRODUCTION: Skip check entirely
-    if app_env == 'production':
-        logger.info("✅ Schema enforcement skipped in production (handled by migrations)")
-        return
-    
-    # DEVELOPMENT ONLY: Run strict check
-    logger.info("🔍 Running schema check (development mode)")
-    
-    sql = """
-    SELECT table_schema, table_name
-    FROM information_schema.tables
-    WHERE table_type = 'BASE TABLE'
-      AND table_name = 'product_master'
-      AND table_schema = 'public'
-    """
-    
     try:
         with engine.connect() as conn:
-            result = conn.execute(text(sql))
-            rows = result.fetchall()
+            # Check if lob_master exists
+            table_exists = conn.execute(text("SELECT to_regclass('public.lob_master')")).scalar()
             
-            if len(rows) > 0:
-                # DEVELOPMENT: Strict enforcement - crash immediately
-                logger.critical(f"❌ FATAL: {FORBIDDEN_TABLE} BASE TABLE exists in public schema!")
-                logger.critical(f"❌ Products are LOGICAL, not relational.")
-                logger.critical(f"❌ Drop the table: DROP TABLE public.{FORBIDDEN_TABLE};")
-                raise RuntimeError(f"{FORBIDDEN_TABLE} schema violation - run migrations to fix")
+            if table_exists is None:
+                # Table doesn't exist - first time setup
+                return True
+            
+            # Table exists - check row count
+            count = conn.execute(text("SELECT COUNT(*) FROM lob_master")).scalar()
+            
+            if count > 0:
+                # Already seeded
+                return False
             else:
-                # Development: No violation
-                logger.info(f"✅ Confirmed: No {FORBIDDEN_TABLE} BASE TABLE in public schema")
+                # Table exists but empty - seed needed
+                return True
                 
-    except RuntimeError:
-        # Re-raise schema violations
-        raise
     except Exception as e:
-        # Unexpected error during check
-        logger.error(f"Could not verify {FORBIDDEN_TABLE} absence: {e}")
-        raise
+        # Error checking - assume should seed (first time)
+        logger.warning(f"Could not check seed status: {e}")
+        return True
 
 
 
@@ -554,12 +532,17 @@ def print_summary():
 def main():
     print("🚀 AUTHORITATIVE SEEDING SCRIPT STARTING...")
     print("✅ Products are LOGICAL, not relational")
-    print("✅ NO product_master table")
     print("✅ PRODUCTION SAFE: Each table commits independently")
     
-    # GUARD RAIL
-    check_no_product_master()
+    # Check if seeding already applied
+    if not should_seed(engine):
+        logger.info("✅ Seed already applied — skipping seeding")
+        print("✅ Seed already applied — skipping seeding")
+        print("✅ Database is ready")
+        return
     
+    logger.info("🌱 First-time setup detected — running seed")
+    print("🌱 First-time setup detected — running seed")
     logger.info(f"Current Working Directory: {os.getcwd()}")
     
     try:
