@@ -40,18 +40,17 @@ def get_bsus_risk_rate(
     result = db.execute(query, {"iib_code": iib, "eq_zone": zone}).fetchone()
 
     if not result:
-        logger.warning(f"❌ BSUS RATE NOT FOUND → iib_code={iib}, eq_zone={zone}")
+        logger.warning(f"BSUS rate not found for given IIB code and EQ zone: iib_code={iib}, eq_zone={zone}")
         raise HTTPException(
             status_code=404,
-            detail=f"BSUS risk rate not found for iib_code={iib} and eq_zone={zone}"
+            detail="BSUS rate not found for given IIB code and EQ zone"
         )
 
     rate = float(result[0])
     
-    logger.info(f"BSUS RATE RESOLVED → rate={rate}")
+    logger.info(f"BSUS rate resolved: iib_code={iib}, eq_zone={zone}, rate={rate}")
 
     return {
-        "product": "BSUS",
         "iib_code": iib,
         "eq_zone": zone,
         "risk_rate_per_mille": rate
