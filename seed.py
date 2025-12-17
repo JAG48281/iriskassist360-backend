@@ -77,33 +77,46 @@ def check_table_exists(conn, table_name: str) -> bool:
 
 def check_no_product_master():
     """
-    GUARD RAIL: Ensure no product_master references exist.
+    GUARD RAIL: Ensure no product_master BASE TABLE exists.
     
-    Uses to_regclass for explicit existence check.
-    Logs CRITICAL only if table truly exists.
+    Uses information_schema.tables with table_type = 'BASE TABLE'.
+    This checks ONLY for real tables, NOT views or materialized views.
+    
+    WHY NOT to_regclass():
+    - to_regclass() detects ANY relation (tables, views, materialized views, etc.)
+    - This caused false positives when views existed
+    - information_schema.tables is the correct authority for BASE TABLES
     """
+    sql = """
+    SELECT COUNT(*)
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+      AND table_name = 'product_master'
+      AND table_type = 'BASE TABLE'
+    """
+    
     try:
         with engine.connect() as conn:
-            # Use to_regclass for explicit check
-            result = conn.execute(text("SELECT to_regclass('public.product_master')"))
-            exists = result.scalar() is not None
+            # Check for BASE TABLE only
+            count = conn.execute(text(sql)).scalar()
             
-            if exists:
-                # Table exists - this is FORBIDDEN
-                logger.critical(f"❌ FATAL: {FORBIDDEN_TABLE} table exists! This is NOT allowed.")
+            if count > 0:
+                # BASE TABLE exists - this is FORBIDDEN
+                logger.critical(f"❌ FATAL: {FORBIDDEN_TABLE} BASE TABLE exists! This is NOT allowed.")
                 logger.critical(f"❌ Products are LOGICAL, not relational.")
-                raise RuntimeError(f"{FORBIDDEN_TABLE} schema violation - table must not exist")
+                raise RuntimeError(f"{FORBIDDEN_TABLE} schema violation - BASE TABLE must not exist")
             else:
-                # Table correctly does not exist
-                logger.info(f"✅ Confirmed: No {FORBIDDEN_TABLE} table (correct)")
+                # No BASE TABLE - correct
+                logger.info(f"✅ Confirmed: No {FORBIDDEN_TABLE} BASE TABLE (correct)")
                 
     except RuntimeError:
-        # Re-raise if we explicitly raised it
+        # Re-raise schema violations
         raise
     except Exception as e:
         # Unexpected error during check
         logger.error(f"Could not verify {FORBIDDEN_TABLE} absence: {e}")
         raise
+
 
 
 def safe_upsert(conn, model, data, table_name):
