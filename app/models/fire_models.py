@@ -1,7 +1,8 @@
 from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, DateTime, func, Text, CheckConstraint, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
 from app.database import Base
-from app.models.master import ProductMaster
+
+# AUTHORITATIVE: Products are LOGICAL, not relational. NO product_master table exists.
 
 class Occupancy(Base):
     __tablename__ = "occupancies"
@@ -32,12 +33,11 @@ class AddOnProductMap(Base):
     id = Column(Integer, primary_key=True, index=True)
     add_on_id = Column(Integer, ForeignKey("add_on_master.id"), nullable=False)
     product_code = Column(String(length=50), nullable=False)
-    product_id = Column(Integer, ForeignKey("product_master.id"), nullable=True)
+    # NO product_master reference - products are LOGICAL
     active = Column(Boolean, server_default='true', nullable=False)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
-    product = relationship("ProductMaster")
     add_on = relationship("AddOnMaster")
 
 class ProductBasicRate(Base):
@@ -45,13 +45,12 @@ class ProductBasicRate(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     product_code = Column(String(length=20), nullable=False)
-    product_id = Column(Integer, ForeignKey("product_master.id"), nullable=True)
+    # NO product_master reference - products are LOGICAL
     occupancy_id = Column(Integer, ForeignKey("occupancies.id"), nullable=False)
     basic_rate = Column(Numeric(precision=10, scale=6), nullable=False)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
-    product = relationship("ProductMaster")
     occupancy = relationship("Occupancy")
 
 class StfiRate(Base):
@@ -59,13 +58,12 @@ class StfiRate(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     occupancy_id = Column(Integer, ForeignKey("occupancies.id"), nullable=False, unique=True)
-    product_code = Column(String(length=20), nullable=True) # Adding
-    product_id = Column(Integer, ForeignKey("product_master.id"), nullable=True)
+    product_code = Column(String(length=20), nullable=True)
+    # NO product_master reference - products are LOGICAL
     stfi_rate = Column(Numeric(precision=10, scale=6), nullable=False)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
-    product = relationship("ProductMaster")
     occupancy = relationship("Occupancy")
 
 class EqRate(Base):
@@ -73,22 +71,21 @@ class EqRate(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     occupancy_id = Column(Integer, ForeignKey("occupancies.id"), nullable=False)
-    product_code = Column(String(length=20), nullable=True) # Adding
-    product_id = Column(Integer, ForeignKey("product_master.id"), nullable=True)
+    product_code = Column(String(length=20), nullable=True)
+    # NO product_master reference - products are LOGICAL
     eq_zone = Column(String(length=20), nullable=False)
     eq_rate = Column(Numeric(precision=10, scale=6), nullable=False)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
-    product = relationship("ProductMaster")
     occupancy = relationship("Occupancy")
 
 class TerrorismSlab(Base):
     __tablename__ = "terrorism_slabs"
 
     id = Column(Integer, primary_key=True, index=True)
-    product_code = Column(String(length=20), nullable=True) # Adding
-    product_id = Column(Integer, ForeignKey("product_master.id"), nullable=True)
+    product_code = Column(String(length=20), nullable=True)
+    # NO product_master reference - products are LOGICAL
     occupancy_type = Column(String(length=50), nullable=False)
     si_min = Column(Numeric(precision=20, scale=2), nullable=False)
     si_max = Column(Numeric(precision=20, scale=2), nullable=True)
@@ -96,21 +93,18 @@ class TerrorismSlab(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
-    product = relationship("ProductMaster")
-
 class BsusRate(Base):
     __tablename__ = "bsus_rates"
 
     id = Column(Integer, primary_key=True, index=True)
     product_code = Column(String(length=20), nullable=True) 
-    product_id = Column(Integer, ForeignKey("product_master.id"), nullable=True)
+    # NO product_master reference - products are LOGICAL
     occupancy_id = Column(Integer, ForeignKey("occupancies.id"), nullable=False)
     eq_zone = Column(String(length=20), nullable=False)
     basic_rate = Column(Numeric(precision=10, scale=6), nullable=False)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
-    product = relationship("ProductMaster")
     occupancy = relationship("Occupancy")
 
     __table_args__ = (
@@ -123,7 +117,7 @@ class AddOnRate(Base):
     id = Column(Integer, primary_key=True, index=True)
     add_on_id = Column(Integer, ForeignKey("add_on_master.id"), nullable=False)
     product_code = Column(String(length=50), nullable=False)
-    product_id = Column(Integer, ForeignKey("product_master.id"), nullable=True)
+    # NO product_master reference - products are LOGICAL
     occupancy_type = Column(String(length=50), nullable=True)
     si_min = Column(Numeric(precision=20, scale=2), nullable=True)
     si_max = Column(Numeric(precision=20, scale=2), nullable=True)
@@ -133,9 +127,8 @@ class AddOnRate(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
-    product = relationship("ProductMaster")
     add_on = relationship("AddOnMaster")
 
     __table_args__ = (
-        UniqueConstraint('add_on_id', 'product_id', 'occupancy_type', 'si_min', 'si_max', name='uq_add_on_rates_composite'),
+        UniqueConstraint('add_on_id', 'product_code', 'occupancy_type', 'si_min', 'si_max', name='uq_add_on_rates_composite'),
     )
