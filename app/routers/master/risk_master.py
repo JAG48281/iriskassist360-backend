@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from fastapi.responses import JSONResponse
 import logging
 from sqlalchemy.orm import Session
 from typing import List
@@ -39,28 +38,64 @@ def get_risk_descriptions(
     productCode: str = Query(..., description="Product Code"),
     db: Session = Depends(get_db)
 ):
+    """
+    Get risk descriptions for a given product code.
+    
+    **Product Normalization**:
+    - UBGR → BGRP
+    - UVGR → UVUS
+    - BLGR → BLUS
+    
+    **Filtering Rules**:
+    - BGRP: Only residential dwellings (IIB codes 1001, 1001_2)
+    - Other products: Exclude residential dwellings
+    
+    **Response Format**:
+    ```json
+    {
+        "success": true,
+        "data": [
+            {
+                "id": 1,
+                "description": "Dwellings",
+                "occupancy_type": "Residential",
+                "aift_section": "III",
+                "iib_code": "1001"
+            }
+        ]
+    }
+    ```
+    """
     try:
-        # Normalize product code
+        logger.info(f"📋 Risk descriptions request for productCode={productCode}")
+        
+        # Normalize product code (UBGR → BGRP)
         normalized = normalize_fire_product_code(productCode)
+        logger.info(f"📋 Normalized product code: {productCode} → {normalized}")
 
         query = db.query(Occupancy)
         # Note: Occupancy table does not have is_active column, skipping filter.
         # query = query.filter(Occupancy.is_active == True)
 
-        # UBGR / BGRP → ONLY residential dwellings
+        # UBGR / BGRP → ONLY residential dwellings (IIB codes 1001, 1001_2)
         if normalized == "BGRP":
             query = query.filter(
                 Occupancy.iib_code.in_(["1001", "1001_2"])
             )
+            logger.info("📋 Filtering for BGRP: IIB codes 1001, 1001_2")
 
-        # ALL OTHER FIRE PRODUCTS
+        # ALL OTHER FIRE PRODUCTS - exclude residential dwellings
         else:
             query = query.filter(
                 Occupancy.iib_code.notin_(["1001", "1001_2"])
             )
+            logger.info(f"📋 Filtering for {normalized}: Excluding IIB codes 1001, 1001_2")
 
         risks = query.order_by(Occupancy.risk_description).all()
+        
+        logger.info(f"✅ Found {len(risks)} risk descriptions for {normalized}")
 
+        # ALWAYS return success with data array (even if empty)
         return {
             "success": True,
             "data": [
@@ -76,8 +111,11 @@ def get_risk_descriptions(
         }
 
     except Exception as e:
-        logger.error(f"Error serving risk descriptions: {e}", exc_info=True)
-        return JSONResponse(
-            status_code=500,
-            content={"success": False, "message": str(e)}
-        )
+        logger.error(f"❌ Error serving risk descriptions: {e}", exc_info=True)
+        # NEVER throw - always return valid JSON
+        return {
+            "success": False,
+            "message": str(e),
+            "data": []  # Return empty array on error
+        }
+

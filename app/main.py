@@ -26,39 +26,42 @@ def create_app():
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-    # Trust Proxy Headers (Railway/LoadBalancers)
+    # CRITICAL: Handle OPTIONS before any middleware
+    @app.middleware("http")
+    async def handle_options_first(request: Request, call_next):
+        """Handle OPTIONS requests immediately to prevent 502 on CORS preflight"""
+        if request.method == "OPTIONS":
+            logger.info(f"🔄 OPTIONS preflight for: {request.url.path}")
+            return Response(
+                status_code=200,
+                headers={
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH",
+                    "Access-Control-Allow-Headers": "*",
+                    "Access-Control-Allow-Credentials": "true",
+                    "Access-Control-Max-Age": "86400",
+                },
+            )
+        return await call_next(request)
+
+    # Trust Proxy Headers (Railway/LoadBalancers) - AFTER OPTIONS handler
     from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
     app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=["*"])
 
-    # CORS Configuration
+    # CORS Configuration - CRITICAL: Must be BEFORE routers but AFTER OPTIONS middleware
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],  # Allow all origins for Railway deployment
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+        expose_headers=["*"],
     )
-
-    # Global OPTIONS handler - MUST be before all routers
-    @app.options("/{full_path:path}")
-    async def options_handler(full_path: str, request: Request):
-        return Response(
-            status_code=200,
-            headers={
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-                "Access-Control-Allow-Headers": "*",
-                "Access-Control-Max-Age": "86400",
-            },
-        )
 
     @app.middleware("http")
     async def log_requests(request, call_next):
         logger.info(f"📥 Request: {request.method} {request.url.path}")
         logger.info(f"📥 Origin header: {request.headers.get('origin')}")
-        
-        if request.method == "OPTIONS":
-            logger.info("🔄 Handling OPTIONS preflight request")
         
         response = await call_next(request)
         
