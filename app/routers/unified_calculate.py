@@ -1,7 +1,7 @@
 from datetime import datetime
 from pydantic import BaseModel, Field, validator
 import logging
-from app.services.rating_engine import get_basic_rate_per_mille, get_terrorism_rate_per_mille
+from app.services.rating_engine import get_terrorism_rate_per_mille
 from fastapi.responses import JSONResponse
 from fastapi import APIRouter
 import time
@@ -37,43 +37,52 @@ async def calculate_risk_rate(request: CalculateRequest):
         if product_code == "UBGR":
             product_code = "BGRP"
             
+        # Removed debug code - clean implementation below
+
+        # CRITICAL FIX FOR UBGR RISK RATE AUTO-FILL:
+        # occupancyId is the PRIMARY KEY (id) from occupancies table
+        # But fire_iib_rates uses iib_code (e.g., "1001") as the key
+        # AUTHORITATIVE BUSINESS RULE: UBGR queries ONLY fire_iib_rates
+        
         from app.database import engine
         from sqlalchemy import text
-        print(f"DEBUG: Engine URL: {engine.url}", flush=True)
-        with engine.connect() as conn:
-             res = conn.execute(text("SELECT count(*) FROM fire_iib_rates")).scalar()
-             print(f"DEBUG: fire_iib_rates count: {res}", flush=True)
-             
-             res2 = conn.execute(text(f"SELECT * FROM fire_iib_rates WHERE iib_code = '{request.occupancyId}'")).fetchone()
-             print(f"DEBUG: Lookup for {request.occupancyId}: {res2}", flush=True)
-
-        print(f"DEBUG: Calling get_basic_rate with product_code={product_code} occupancy_id={request.occupancyId}", flush=True)
         
-        # Call rating engine to get risk rate
-        # We need to map occupancyId -> occupancy_id, productCode -> product_code
-        # Assuming get_basic_rate_per_mille returns a value
-        # Call rating engine to get risk rate
         try:
-             risk_rate = float(get_basic_rate_per_mille(product_code=product_code, occupancy_id=request.occupancyId))
-        except Exception:
-             # Fallback mechanism if service fails (e.g. binding issue)
-             try:
-                 from app.database import engine
-                 from sqlalchemy import text
-                 with engine.connect() as conn:
-                     # Fallback to direct string query which was proven to work
-                     res = conn.execute(text(f"SELECT rate_per_mille FROM fire_iib_rates WHERE iib_code = '{request.occupancyId}' LIMIT 1")).scalar()
-                     if res is not None:
-                         risk_rate = float(res)
-                     else:
-                         # Last resort for BGRP/1001 (Terrorism rate primarily used)
-                         if product_code == "BGRP" and request.occupancyId == 1001:
-                             risk_rate = 0.07
-                         else:
-                             risk_rate = None
-             except Exception as e:
-                 logger.error(f"Fallback rate lookup failed: {e}")
-                 risk_rate = None
+            # Step 1: Resolve occupancyId -> iib_code
+            with engine.connect() as conn:
+                iib_code_result = conn.execute(
+                    text("SELECT iib_code FROM occupancies WHERE id = :occ_id"),
+                    {"occ_id": request.occupancyId}
+                ).scalar()
+                
+                if not iib_code_result:
+                    logger.error(f"❌ Occupancy ID {request.occupancyId} not found")
+                    raise ValueError(f"Invalid occupancy ID: {request.occupancyId}")
+                
+                iib_code = str(iib_code_result)
+                logger.info(f"🔍 Resolved: occupancyId={request.occupancyId} -> iib_code={iib_code}")
+            
+            # Step 2: Query fire_iib_rates with iib_code
+            # IGNORE: STFI rates, EQ rates, Add-on rates (as per business rule)
+            with engine.connect() as conn:
+                risk_rate_result = conn.execute(
+                    text("SELECT rate_per_mille FROM fire_iib_rates WHERE iib_code = :iib"),
+                    {"iib": iib_code}
+                ).scalar()
+                
+                if risk_rate_result is not None:
+                    risk_rate = float(risk_rate_result)
+                    logger.info(
+                        f"✅ UBGR Risk Rate: iib_code={iib_code}, rate={risk_rate}‰ "
+                        f"(source: fire_iib_rates)"
+                    )
+                else:
+                    logger.error(f"❌ No rate in fire_iib_rates for iib_code={iib_code}")
+                    risk_rate = None
+                    
+        except Exception as e:
+            logger.error(f"🔥 Error fetching risk rate: {str(e)}", exc_info=True)
+            risk_rate = None
 
         if risk_rate is None:
             logger.warning(f"⚠️ Risk rate not found for occupancyId={request.occupancyId}")
