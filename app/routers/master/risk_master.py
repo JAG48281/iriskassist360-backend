@@ -53,7 +53,7 @@ def get_risk_rate(
     
     # Logging (Required)
     logger.info(
-        f"UBGR rate resolved: iib_code={iib_code_str}, rate={rate_val}"
+        f"UBGR API response → iib={iib_code_str}, rate={rate_val}"
     )
     
     return {
