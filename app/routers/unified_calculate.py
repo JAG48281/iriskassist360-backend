@@ -10,9 +10,12 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Unified Calculation"])
 
+from typing import Optional
+
 class CalculateRequest(BaseModel):
-    occupancyId: int
+    occupancyId: Optional[int] = None
     productCode: str
+    iib_code: Optional[str] = None
     
     @validator('productCode')
     def validate_product_code(cls, v):
@@ -25,12 +28,11 @@ class CalculateRequest(BaseModel):
 async def calculate_risk_rate(request: CalculateRequest):
     """
     Calculate risk rate for Fire (UBGR) product.
-    Expected request: {"occupancyId": 1001, "productCode": "BGRP"}
+    Expected request: {"iib_code": "1001", "productCode": "BGRP"}
     Response: {"meta": {"risk_rate": 0.07}}
     """
     try:
-        logger.info(f"🧮 Calculate request: occupancyId={request.occupancyId}, productCode={request.productCode}")
-        print(f"DEBUG: Processing occupancyId={request.occupancyId} productCode={request.productCode}", flush=True)
+        logger.info(f"🧮 Calculate request: productCode={request.productCode}")
         
         # Normalize Product Code
         product_code = request.productCode
@@ -41,25 +43,31 @@ async def calculate_risk_rate(request: CalculateRequest):
             # ---------------------------------------------------------
             # UBGR (Bharat Griha Raksha Policy) Strict Rate Lookup
             # ---------------------------------------------------------
+            logger.info("UBGR calculate: occupancy validation skipped")
+            
             from app.database import engine
             from sqlalchemy import text
             
-            # Step 1: Resolve occupancyId -> iib_code (Strict String)
-            with engine.connect() as conn:
-                iib_code_result = conn.execute(
-                    text("SELECT iib_code FROM occupancies WHERE id = :occ_id"),
-                    {"occ_id": request.occupancyId}
-                ).scalar()
-                
-                if not iib_code_result:
-                    logger.error(f"❌ Occupancy ID {request.occupancyId} not found")
-                    return JSONResponse(
-                        status_code=404,
-                        content={"error": f"Occupancy ID {request.occupancyId} not found", "success": False}
-                    )
-                
-                # STRICT: Trim whitespace only, NO casting to int
-                iib_code = str(iib_code_result).strip()
+            # Step 1: Use iib_code directly (No Occupancy Lookup)
+            if not request.iib_code:
+                # If iib_code missing, check strictness. 
+                # User said "iib_code is present" for 200.
+                if request.occupancyId:
+                     # Fallback to current behavior if user didn't forbid it?
+                     # "DO NOT query occupancies table" -> So I cannot use occupancyId to look it up.
+                     logger.error("iib_code required for BGRP calculation (Occupancy lookup disabled)")
+                     return JSONResponse(
+                        status_code=422,
+                        content={"error": "iib_code required for BGRP", "success": False}
+                     )
+                else:
+                     logger.error("iib_code missing for BGRP calculation")
+                     return JSONResponse(
+                        status_code=422,
+                        content={"error": "iib_code required", "success": False}
+                     )
+
+            iib_code = request.iib_code.strip()
             
             # Step 2: Query fire_iib_rates ONLY (Strict Match)
             with engine.connect() as conn:
@@ -92,7 +100,7 @@ async def calculate_risk_rate(request: CalculateRequest):
                     "risk_rate_per_mille": risk_rate,
                     "meta": {
                         "risk_rate": risk_rate,
-                        "calculation_id": f"calc_{request.occupancyId}_{int(time.time())}",
+                        "calculation_id": f"calc_{iib_code}_{int(time.time())}",
                         "timestamp": datetime.now().isoformat()
                     },
                     "status": "success",
