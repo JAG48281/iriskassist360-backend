@@ -38,7 +38,6 @@ def create_app():
                     "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
                     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH",
                     "Access-Control-Allow-Headers": "*",
-                    "Access-Control-Allow-Credentials": "true",
                     "Access-Control-Max-Age": "86400",
                 },
             )
@@ -48,20 +47,19 @@ def create_app():
     from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
     app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=["*"])
 
-    # CORS Configuration - CRITICAL: Must be BEFORE routers but AFTER OPTIONS middleware
-    # Allow specific origins for production, with wildcard for development flexibility
+
+    # CORS Configuration - STRICT: No wildcards, specific origins only
+    # CRITICAL: Must be BEFORE routers but AFTER OPTIONS middleware
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[
-            "http://localhost",
-            "http://localhost:3000",
-            "http://localhost:5000",
-            "http://localhost:8000",
+            "http://localhost:57328",  # Flutter Web port
             "http://localhost:50000",  # Flutter Web default
-            "https://*.railway.app",
-            "*",  # Fallback for development
+            "http://localhost:8000",   # Backend dev server
+            "http://localhost",        # Generic localhost
+            "https://web-production-afeec.up.railway.app",  # Production Railway
         ],
-        allow_credentials=True,
+        allow_credentials=False,  # IMPORTANT: False for security
         allow_methods=["*"],  # Allow ALL methods (GET, POST, PUT, DELETE, OPTIONS, PATCH)
         allow_headers=["*"],  # Allow ALL headers
         expose_headers=["*"],
