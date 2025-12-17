@@ -48,19 +48,13 @@ def create_app():
     app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=["*"])
 
 
-    # CORS Configuration - STRICT: No wildcards, specific origins only
+    # CORS Configuration - Allow all origins for testing
     # CRITICAL: Must be BEFORE routers but AFTER OPTIONS middleware
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[
-            "http://localhost:57328",  # Flutter Web port
-            "http://localhost:50000",  # Flutter Web default
-            "http://localhost:8000",   # Backend dev server
-            "http://localhost",        # Generic localhost
-            "https://web-production-afeec.up.railway.app",  # Production Railway
-        ],
-        allow_credentials=False,  # IMPORTANT: False for security
-        allow_methods=["*"],  # Allow ALL methods (GET, POST, PUT, DELETE, OPTIONS, PATCH)
+        allow_origins=["*"],  # Allow ALL origins
+        allow_credentials=False,
+        allow_methods=["*"],  # Allow ALL methods
         allow_headers=["*"],  # Allow ALL headers
         expose_headers=["*"],
     )
@@ -119,6 +113,10 @@ def create_app():
     # Unified Calculation Endpoint
     from app.routers import unified_calculate
     app.include_router(unified_calculate.router, prefix="/api")
+
+    # Risk Descriptions
+    from app.routers import risk_descriptions
+    app.include_router(risk_descriptions.router)
 
     # Debug Router
     from app.routers import debug
