@@ -13,6 +13,49 @@ router = APIRouter(
 )
 
 from app.models.fire_models import FireIibRate
+from sqlalchemy import text
+
+@router.get("/master/bsus-risk-rate")
+def get_bsus_risk_rate(
+    iib_code: str = Query(..., description="IIB Code"),
+    eq_zone: str = Query(..., description="EQ Zone (Zone I, Zone II, ...)"),
+    db: Session = Depends(get_db)
+):
+    """
+    Get BSUS risk rate strictly from fire_bsus_rates.
+    """
+    iib = iib_code.strip()
+    zone = eq_zone.strip()
+    
+    logger.info(f"BSUS RATE LOOKUP → iib_code={iib}, eq_zone={zone}")
+
+    query = text("""
+        SELECT rate_per_mille
+        FROM fire_bsus_rates
+        WHERE iib_code = :iib_code
+          AND eq_zone = :eq_zone
+        LIMIT 1
+    """)
+    
+    result = db.execute(query, {"iib_code": iib, "eq_zone": zone}).fetchone()
+
+    if not result:
+        logger.warning(f"❌ BSUS RATE NOT FOUND → iib_code={iib}, eq_zone={zone}")
+        raise HTTPException(
+            status_code=404,
+            detail=f"BSUS risk rate not found for iib_code={iib} and eq_zone={zone}"
+        )
+
+    rate = float(result[0])
+    
+    logger.info(f"BSUS RATE RESOLVED → rate={rate}")
+
+    return {
+        "product": "BSUS",
+        "iib_code": iib,
+        "eq_zone": zone,
+        "risk_rate_per_mille": rate
+    }
 
 @router.get("/master/risk-rate")
 def get_risk_rate(
