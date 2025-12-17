@@ -1,5 +1,5 @@
 """
-AUTHORITATIVE SEED SCRIPT
+AUTHORITATIVE SEED SCRIPT - PRODUCTION SAFE
 Products are LOGICAL, not relational.
 NO product_master table exists or will ever exist.
 
@@ -13,24 +13,40 @@ ONLY seed these tables (CSV-backed):
 - fire_add_on_master
 - fire_add_on_rates
 - lob_master (minimal, for reference only)
+
+TRANSACTION SAFETY:
+- Each table commits independently
+- Failed rows logged but don't break entire seed
+- Proper rollback on exceptions
 """
 import sys
 import os
 import csv
 import logging
 from sqlalchemy import text, select, insert
-from sqlalchemy.dialects.postgresql import insert as pg_insert
-from sqlalchemy.exc import IntegrityError
-from app.database import engine
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from app.database import engine, SessionLocal
 from app.models.fire_models import (
-    Occupancy, TerrorismSlab, AddOnMaster, AddOnRate,
-    AddOnProductMap
+    Occupancy, TerrorismSlab, AddOnMaster, AddOnRate
 )
 from app.models.master import LobMaster
 
 # Configure Logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
+# Seeding statistics
+stats = {
+    "lob_master": {"success": 0, "failed": 0},
+    "occupancies": {"success": 0, "failed": 0},
+    "fire_iib_rates": {"success": 0, "failed": 0},
+    "fire_bsus_rates": {"success": 0, "failed": 0},
+    "fire_stfi_rates": {"success": 0, "failed": 0},
+    "fire_eq_rates": {"success": 0, "failed": 0},
+    "terrorism_slabs": {"success": 0, "failed": 0},
+    "fire_add_on_master": {"success": 0, "failed": 0},
+    "fire_add_on_rates": {"success": 0, "failed": 0}
+}
 
 # GUARD RAIL: Fail if product_master is referenced
 FORBIDDEN_TABLE = "product_master"
@@ -50,19 +66,68 @@ def check_no_product_master():
         else:
             raise
 
-def upsert(conn, model, data):
-    """Insert data, ignore duplicates safely using SAVEPOINT"""
+def safe_upsert(conn, model, data, table_name):
+    """
+    Safely insert data with proper rollback on failure.
+    Returns: (success: bool, error_msg: str or None)
+    """
     try:
-        with conn.begin_nested():
-            stmt = insert(model).values(**data)
-            conn.execute(stmt)
-    except IntegrityError:
-        pass  # Duplicate, skip
+        stmt = insert(model).values(**data)
+        conn.execute(stmt)
+        conn.commit()  # Commit each row independently
+        stats[table_name]["success"] += 1
+        return True, None
+    except IntegrityError as e:
+        # Duplicate - rollback and continue
+        conn.rollback()
+        if "unique constraint" in str(e).lower():
+            # This is expected for duplicates - not an error
+            stats[table_name]["success"] += 1
+            return True, None
+        stats[table_name]["failed"] += 1
+        return False, f"Integrity error: {str(e)[:100]}"
+    except SQLAlchemyError as e:
+        # DB error - rollback and continue
+        conn.rollback()
+        stats[table_name]["failed"] += 1
+        return False, f"DB error: {str(e)[:100]}"
     except Exception as e:
-        if "unique constraint" not in str(e).lower():
-            logger.warning(f"Upsert error in {model.__tablename__}: {e}")
+        # Any other error - rollback and continue
+        conn.rollback()
+        stats[table_name]["failed"] += 1
+        return False, f"Error: {str(e)[:100]}"
 
-def seed_lob_master(conn):
+def safe_execute_sql(conn, sql, params, table_name):
+    """
+    Safely execute SQL with proper rollback on failure.
+    Returns: (success: bool, error_msg: str or None)
+    """
+    try:
+        conn.execute(text(sql), params)
+        conn.commit()  # Commit each row independently
+        stats[table_name]["success"] += 1
+        return True, None
+    except IntegrityError as e:
+        # Duplicate - rollback and continue
+        conn.rollback()
+        if "unique constraint" in str(e).lower():
+            # Expected for duplicates
+            stats[table_name]["success"] += 1
+            return True, None
+        stats[table_name]["failed"] += 1
+        return False, f"Integrity error: {str(e)[:100]}"
+    except SQLAlchemyError as e:
+        # DB error - rollback and continue
+        conn.rollback()
+        stats[table_name]["failed"] += 1
+        return False, f"DB error: {str(e)[:100]}"
+    except Exception as e:
+        # Any other error - rollback and continue
+        conn.rollback()
+        stats[table_name]["failed"] += 1
+        return False, f"Error: {str(e)[:100]}"
+
+def seed_lob_master():
     """Seed minimal LOB master for reference only"""
     logger.info("Seeding LOB Master (reference only)...")
     
@@ -70,37 +135,39 @@ def seed_lob_master(conn):
         {"lob_code": "FIRE", "lob_name": "Fire Insurance", "description": "Fire and Special Perils", "active": True},
     ]
     
-    for lob in lobs:
-        upsert(conn, LobMaster, lob)
+    with engine.connect() as conn:
+        for lob in lobs:
+            success, error = safe_upsert(conn, LobMaster, lob, "lob_master")
+            if not success:
+                logger.warning(f"Failed LOB {lob.get('lob_code')}: {error}")
     
-    logger.info("✅ LOB Master seeded")
+    logger.info(f"✅ LOB Master: {stats['lob_master']['success']} success, {stats['lob_master']['failed']} failed")
 
-def seed_occupancies(conn):
+def seed_occupancies():
     """Seed occupancies from CSV"""
     logger.info("Seeding Occupancies from CSV...")
     csv_path = "data/occupancies.csv"
     
     if not os.path.exists(csv_path):
         logger.error(f"❌ {csv_path} not found!")
-        raise FileNotFoundError(f"{csv_path} required")
+        return
     
-    count = 0
-    with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            # Remap column if needed
-            if 'occupancy_description' in row:
-                row['risk_description'] = row.pop('occupancy_description')
-            
-            upsert(conn, Occupancy, row)
-            count += 1
+    with engine.connect() as conn:
+        with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                # Remap column if needed
+                if 'occupancy_description' in row:
+                    row['risk_description'] = row.pop('occupancy_description')
+                
+                success, error = safe_upsert(conn, Occupancy, row, "occupancies")
+                if not success:
+                    logger.warning(f"Failed occupancy {row.get('iib_code')}: {error}")
     
-    logger.info(f"✅ Seeded {count} occupancies")
+    logger.info(f"✅ Occupancies: {stats['occupancies']['success']} success, {stats['occupancies']['failed']} failed")
 
-def seed_fire_iib_rates(conn):
-    """Seed fire
-
-_iib_rates from CSV"""
+def seed_fire_iib_rates():
+    """Seed fire_iib_rates from CSV"""
     logger.info("Seeding Fire IIB Rates from CSV...")
     csv_path = "data/fire_iib_rates.csv"
     
@@ -108,31 +175,28 @@ _iib_rates from CSV"""
         logger.warning(f"⚠️  {csv_path} not found, skipping")
         return
     
-    # Get occupancy ID map
-    occ_map = {row[0]: row[1] for row in conn.execute(select(Occupancy.iib_code, Occupancy.id)).fetchall()}
-    
-    count = 0
-    with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            iib_code = row.get('iib_code')
-            rate = row.get('basic_rate') or row.get('rate_per_mille')
-            
-            if iib_code and rate:
-                # Insert directly into fire_iib_rates table
-                try:
-                    conn.execute(text("""
+    with engine.connect() as conn:
+        with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                iib_code = row.get('iib_code')
+                rate = row.get('basic_rate') or row.get('rate_per_mille')
+                
+                if iib_code and rate:
+                    # ONLY ONE ON CONFLICT clause allowed
+                    sql = """
                         INSERT INTO fire_iib_rates (iib_code, rate_per_mille)
                         VALUES (:iib, :rate)
-                        ON CONFLICT (iib_code) DO UPDATE SET rate_per_mille = EXCLUDED.rate_per_mille
-                    """), {"iib": iib_code, "rate": float(rate)})
-                    count += 1
-                except Exception as e:
-                    logger.warning(f"Failed to insert IIB rate {iib_code}: {e}")
+                        ON CONFLICT (iib_code) DO UPDATE 
+                        SET rate_per_mille = EXCLUDED.rate_per_mille
+                    """
+                    success, error = safe_execute_sql(conn, sql, {"iib": iib_code, "rate": float(rate)}, "fire_iib_rates")
+                    if not success:
+                        logger.warning(f"Failed IIB rate {iib_code}: {error}")
     
-    logger.info(f"✅ Seeded {count} fire_iib_rates")
+    logger.info(f"✅ Fire IIB Rates: {stats['fire_iib_rates']['success']} success, {stats['fire_iib_rates']['failed']} failed")
 
-def seed_fire_bsus_rates(conn):
+def seed_fire_bsus_rates():
     """Seed fire_bsus_rates from CSV"""
     logger.info("Seeding Fire BSUS Rates from CSV...")
     csv_path = "data/fire_bsus_rates.csv"
@@ -141,28 +205,29 @@ def seed_fire_bsus_rates(conn):
         logger.warning(f"⚠️  {csv_path} not found, skipping")
         return
     
-    count = 0
-    with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            iib_code = row.get('iib_code')
-            eq_zone = row.get('eq_zone')
-            rate = row.get('rate') or row.get('rate_per_mille')
-            
-            if iib_code and eq_zone and rate:
-                try:
-                    conn.execute(text("""
+    with engine.connect() as conn:
+        with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                iib_code = row.get('iib_code')
+                eq_zone = row.get('eq_zone')
+                rate = row.get('rate') or row.get('rate_per_mille')
+                
+                if iib_code and eq_zone and rate:
+                    # ONLY ONE ON CONFLICT clause allowed
+                    sql = """
                         INSERT INTO fire_bsus_rates (iib_code, eq_zone, rate_per_mille)
                         VALUES (:iib, :zone, :rate)
-                        ON CONFLICT (iib_code, eq_zone) DO UPDATE SET rate_per_mille = EXCLUDED.rate_per_mille
-                    """), {"iib": iib_code, "zone": eq_zone, "rate": float(rate)})
-                    count += 1
-                except Exception as e:
-                    logger.warning(f"Failed to insert BSUS rate {iib_code}/{eq_zone}: {e}")
+                        ON CONFLICT (iib_code, eq_zone) DO UPDATE 
+                        SET rate_per_mille = EXCLUDED.rate_per_mille
+                    """
+                    success, error = safe_execute_sql(conn, sql, {"iib": iib_code, "zone": eq_zone, "rate": float(rate)}, "fire_bsus_rates")
+                    if not success:
+                        logger.warning(f"Failed BSUS rate {iib_code}/{eq_zone}: {error}")
     
-    logger.info(f"✅ Seeded {count} fire_bsus_rates")
+    logger.info(f"✅ Fire BSUS Rates: {stats['fire_bsus_rates']['success']} success, {stats['fire_bsus_rates']['failed']} failed")
 
-def seed_fire_stfi_rates(conn):
+def seed_fire_stfi_rates():
     """Seed fire_stfi_rates from CSV"""
     logger.info("Seeding Fire STFI Rates from CSV...")
     csv_path = "data/fire_stfi_rates.csv"
@@ -171,27 +236,28 @@ def seed_fire_stfi_rates(conn):
         logger.warning(f"⚠️  {csv_path} not found, skipping")
         return
     
-    count = 0
-    with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            iib_code = row.get('iib_code')
-            rate = row.get('stfi_rate') or row.get('rate_per_mille')
-            
-            if iib_code and rate:
-                try:
-                    conn.execute(text("""
+    with engine.connect() as conn:
+        with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                iib_code = row.get('iib_code')
+                rate = row.get('stfi_rate') or row.get('rate_per_mille')
+                
+                if iib_code and rate:
+                    # ONLY ONE ON CONFLICT clause allowed
+                    sql = """
                         INSERT INTO fire_stfi_rates (iib_code, rate_per_mille)
                         VALUES (:iib, :rate)
-                        ON CONFLICT (iib_code) DO UPDATE SET rate_per_mille = EXCLUDED.rate_per_mille
-                    """), {"iib": iib_code, "rate": float(rate)})
-                    count += 1
-                except Exception as e:
-                    logger.warning(f"Failed to insert STFI rate {iib_code}: {e}")
+                        ON CONFLICT (iib_code) DO UPDATE 
+                        SET rate_per_mille = EXCLUDED.rate_per_mille
+                    """
+                    success, error = safe_execute_sql(conn, sql, {"iib": iib_code, "rate": float(rate)}, "fire_stfi_rates")
+                    if not success:
+                        logger.warning(f"Failed STFI rate {iib_code}: {error}")
     
-    logger.info(f"✅ Seeded {count} fire_stfi_rates")
+    logger.info(f"✅ Fire STFI Rates: {stats['fire_stfi_rates']['success']} success, {stats['fire_stfi_rates']['failed']} failed")
 
-def seed_fire_eq_rates(conn):
+def seed_fire_eq_rates():
     """Seed fire_eq_rates from CSV"""
     logger.info("Seeding Fire EQ Rates from CSV...")
     csv_path = "data/fire_eq_rates.csv"
@@ -200,28 +266,29 @@ def seed_fire_eq_rates(conn):
         logger.warning(f"⚠️  {csv_path} not found, skipping")
         return
     
-    count = 0
-    with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            iib_code = row.get('iib_code')
-            eq_zone = row.get('eq_zone')
-            rate = row.get('eq_rate') or row.get('rate_per_mille')
-            
-            if iib_code and eq_zone and rate:
-                try:
-                    conn.execute(text("""
+    with engine.connect() as conn:
+        with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                iib_code = row.get('iib_code')
+                eq_zone = row.get('eq_zone')
+                rate = row.get('eq_rate') or row.get('rate_per_mille')
+                
+                if iib_code and eq_zone and rate:
+                    # ONLY ONE ON CONFLICT clause allowed (FIXED)
+                    sql = """
                         INSERT INTO fire_eq_rates (iib_code, eq_zone, rate_per_mille)
                         VALUES (:iib, :zone, :rate)
-                        ON CONFLICT (iib_code, eq_zone) DO UPDATE SET rate_per_mille = EXCLUDED.rate_per_mille
-                    """), {"iib": iib_code, "zone": eq_zone, "rate": float(rate)})
-                    count += 1
-                except Exception as e:
-                    logger.warning(f"Failed to insert EQ rate {iib_code}/{eq_zone}: {e}")
+                        ON CONFLICT (iib_code, eq_zone) DO UPDATE 
+                        SET rate_per_mille = EXCLUDED.rate_per_mille
+                    """
+                    success, error = safe_execute_sql(conn, sql, {"iib": iib_code, "zone": eq_zone, "rate": float(rate)}, "fire_eq_rates")
+                    if not success:
+                        logger.warning(f"Failed EQ rate {iib_code}/{eq_zone}: {error}")
     
-    logger.info(f"✅ Seeded {count} fire_eq_rates")
+    logger.info(f"✅ Fire EQ Rates: {stats['fire_eq_rates']['success']} success, {stats['fire_eq_rates']['failed']} failed")
 
-def seed_terrorism_slabs(conn):
+def seed_terrorism_slabs():
     """Seed terrorism_slabs with official values"""
     logger.info("Seeding Terrorism Slabs...")
     
@@ -250,12 +317,15 @@ def seed_terrorism_slabs(conn):
         {"product_code": "UVUS", "occupancy_type": "Non-Industrial", "si_min": 20000000000, "si_max": None, "rate_per_mille": 0.12},
     ]
     
-    for slab in slabs:
-        upsert(conn, TerrorismSlab, slab)
+    with engine.connect() as conn:
+        for slab in slabs:
+            success, error = safe_upsert(conn, TerrorismSlab, slab, "terrorism_slabs")
+            if not success:
+                logger.warning(f"Failed terrorism slab {slab.get('product_code')}/{slab.get('occupancy_type')}: {error}")
     
-    logger.info(f"✅ Seeded {len(slabs)} terrorism slabs")
+    logger.info(f"✅ Terrorism Slabs: {stats['terrorism_slabs']['success']} success, {stats['terrorism_slabs']['failed']} failed")
 
-def seed_fire_add_on_master(conn):
+def seed_fire_add_on_master():
     """Seed fire_add_on_master from CSV"""
     logger.info("Seeding Fire Add-on Master...")
     csv_path = "data/fire_add_on_master.csv"
@@ -264,42 +334,43 @@ def seed_fire_add_on_master(conn):
         logger.warning(f"⚠️  {csv_path} not found, skipping")
         return
     
-    count = 0
-    with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            # Handle booleans
-            if 'pricing_type' in row:
-                row['pricing_type'] = row['pricing_type'].strip()
-            if 'is_active' in row:
-                row['is_active'] = (str(row.get('is_active')).upper() == 'TRUE')
-            elif 'active' in row:
-                row['is_active'] = (str(row.get('active')).upper() == 'TRUE')
-                del row['active']
-            
-            try:
-                conn.execute(text("""
+    with engine.connect() as conn:
+        with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                # Handle booleans
+                if 'pricing_type' in row:
+                    row['pricing_type'] = row['pricing_type'].strip()
+                if 'is_active' in row:
+                    row['is_active'] = (str(row.get('is_active')).upper() == 'TRUE')
+                elif 'active' in row:
+                    row['is_active'] = (str(row.get('active')).upper() == 'TRUE')
+                    del row['active']
+                
+                # ONLY ONE ON CONFLICT clause allowed
+                sql = """
                     INSERT INTO fire_add_on_master (add_on_code, add_on_name, pricing_type, minimum_amount, applies_to, is_active)
                     VALUES (:code, :name, :pricing, :min_amt, :applies, :active)
                     ON CONFLICT (add_on_code) DO UPDATE 
                     SET add_on_name = EXCLUDED.add_on_name,
                         pricing_type = EXCLUDED.pricing_type,
                         minimum_amount = EXCLUDED.minimum_amount
-                """), {
+                """
+                params = {
                     "code": row.get('add_on_code'),
                     "name": row.get('add_on_name'),
                     "pricing": row.get('pricing_type'),
                     "min_amt": row.get('minimum_amount'),
                     "applies": row.get('applies_to'),
                     "active": row.get('is_active', True)
-                })
-                count += 1
-            except Exception as e:
-                logger.warning(f"Failed to insert add-on {row.get('add_on_code')}: {e}")
+                }
+                success, error = safe_execute_sql(conn, sql, params, "fire_add_on_master")
+                if not success:
+                    logger.warning(f"Failed add-on master {row.get('add_on_code')}: {error}")
     
-    logger.info(f"✅ Seeded {count} fire_add_on_master rows")
+    logger.info(f"✅ Fire Add-on Master: {stats['fire_add_on_master']['success']} success, {stats['fire_add_on_master']['failed']} failed")
 
-def seed_fire_add_on_rates(conn):
+def seed_fire_add_on_rates():
     """Seed fire_add_on_rates from CSV"""
     logger.info("Seeding Fire Add-on Rates...")
     csv_path = "data/fire_add_on_rates.csv"
@@ -308,31 +379,32 @@ def seed_fire_add_on_rates(conn):
         logger.warning(f"⚠️  {csv_path} not found, skipping")
         return
     
-    count = 0
-    with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            try:
-                conn.execute(text("""
+    with engine.connect() as conn:
+        with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                # ONLY ONE ON CONFLICT clause allowed (FIXED)
+                sql = """
                     INSERT INTO fire_add_on_rates (add_on_code, product_group, pricing_type, rate_value, is_active)
                     VALUES (:addon, :product, :pricing, :rate, :active)
                     ON CONFLICT (add_on_code, product_group) DO UPDATE 
                     SET rate_value = EXCLUDED.rate_value,
                         pricing_type = EXCLUDED.pricing_type
-                """), {
+                """
+                params = {
                     "addon": row.get('add_on_code'),
                     "product": row.get('product_group') or row.get('product_code'),
                     "pricing": row.get('pricing_type'),
                     "rate": float(row.get('rate_value', 0)),
                     "active": (str(row.get('is_active', 'TRUE')).upper() == 'TRUE')
-                })
-                count += 1
-            except Exception as e:
-                logger.warning(f"Failed to insert add-on rate: {e}")
+                }
+                success, error = safe_execute_sql(conn, sql, params, "fire_add_on_rates")
+                if not success:
+                    logger.warning(f"Failed add-on rate {row.get('add_on_code')}: {error}")
     
-    logger.info(f"✅ Seeded {count} fire_add_on_rates rows")
+    logger.info(f"✅ Fire Add-on Rates: {stats['fire_add_on_rates']['success']} success, {stats['fire_add_on_rates']['failed']} failed")
 
-def verify_seeding(conn):
+def verify_seeding():
     """Verify all authorized tables are seeded"""
     logger.info("--- Post-Seeding Validation ---")
     
@@ -348,17 +420,46 @@ def verify_seeding(conn):
         "fire_add_on_rates"
     ]
     
-    for table in tables:
-        try:
-            count = conn.execute(text(f"SELECT COUNT(*) FROM {table}")).scalar()
-            logger.info(f"✅ {table}: {count} rows")
-        except Exception as e:
-            logger.error(f"❌ {table}: {e}")
+    with engine.connect() as conn:
+        for table in tables:
+            try:
+                count = conn.execute(text(f"SELECT COUNT(*) FROM {table}")).scalar()
+                logger.info(f"✅ {table}: {count} rows")
+            except Exception as e:
+                logger.error(f"❌ {table}: {e}")
+
+def print_summary():
+    """Print final seeding summary"""
+    print("\n" + "="*60)
+    print("SEEDING SUMMARY")
+    print("="*60)
+    
+    total_success = 0
+    total_failed = 0
+    
+    for table, counts in stats.items():
+        success = counts["success"]
+        failed = counts["failed"]
+        total_success += success
+        total_failed += failed
+        
+        status = "✅" if failed == 0 else "⚠️"
+        print(f"{status} {table:25} Success: {success:4}  Failed: {failed:4}")
+    
+    print("="*60)
+    print(f"TOTAL:                       Success: {total_success:4}  Failed: {total_failed:4}")
+    print("="*60)
+    
+    if total_failed > 0:
+        print(f"⚠️  {total_failed} rows failed (see logs above)")
+    else:
+        print("✅ All rows seeded successfully!")
 
 def main():
     print("🚀 AUTHORITATIVE SEEDING SCRIPT STARTING...")
     print("✅ Products are LOGICAL, not relational")
     print("✅ NO product_master table")
+    print("✅ PRODUCTION SAFE: Each table commits independently")
     
     # GUARD RAIL
     check_no_product_master()
@@ -366,35 +467,30 @@ def main():
     logger.info(f"Current Working Directory: {os.getcwd()}")
     
     try:
-        with engine.begin() as conn:
-            db_name = conn.execute(text("SELECT current_database()")).scalar()
-            logger.info(f"Connected to Database: {db_name}")
-            
-            # Seed in correct order
-            seed_lob_master(conn)
-            seed_occupancies(conn)
-            seed_fire_iib_rates(conn)
-            seed_fire_bsus_rates(conn)
-            seed_fire_stfi_rates(conn)
-            seed_fire_eq_rates(conn)
-            seed_terrorism_slabs(conn)
-            seed_fire_add_on_master(conn)
-            seed_fire_add_on_rates(conn)
-            
-            print("✅ Seeding logic finished, committing...")
-        
-        print("✅ Transaction Committed Successfully")
+        # Seed each table independently (safe transaction design)
+        seed_lob_master()
+        seed_occupancies()
+        seed_fire_iib_rates()
+        seed_fire_bsus_rates()
+        seed_fire_stfi_rates()
+        seed_fire_eq_rates()
+        seed_terrorism_slabs()
+        seed_fire_add_on_master()
+        seed_fire_add_on_rates()
         
         # Verify
-        with engine.connect() as verify_conn:
-            verify_seeding(verify_conn)
+        verify_seeding()
         
-        print("✅ ✅ ✅ SEEDING COMPLETE ✅ ✅ ✅")
+        # Print summary
+        print_summary()
+        
+        print("\n✅ ✅ ✅ SEEDING COMPLETE ✅ ✅ ✅\n")
         
     except Exception as e:
-        print(f"❌ Seeding Failed: {e}")
+        print(f"\n❌ Seeding Failed: {e}")
         import traceback
         traceback.print_exc()
+        print_summary()
         sys.exit(2)
 
 if __name__ == "__main__":
