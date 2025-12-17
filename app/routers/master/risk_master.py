@@ -12,6 +12,55 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
+from sqlalchemy import text
+
+@router.get("/master/risk-rate")
+def get_risk_rate(
+    iib_code: str = Query(..., description="IIB Code"),
+    db: Session = Depends(get_db)
+):
+    """
+    Get risk rate for UBGR based on IIB Code.
+    Strict backend-only endpoint.
+    """
+    # 1. Match iib_code as STRING (no casting, only strip)
+    iib_code_str = iib_code.strip()
+    
+    # 2. Query ONLY fire_iib_rates
+    query = text("""
+        SELECT rate_per_mille
+        FROM fire_iib_rates
+        WHERE iib_code = :iib_code
+        LIMIT 1
+    """)
+    
+    result = db.execute(query, {"iib_code": iib_code_str}).fetchone()
+    
+    # 3. Response Contract (STRICT)
+    if not result:
+        # If not found -> HTTP 404
+        logger.warning(f"UBGR rate not found for iib_code={iib_code_str}")
+        raise HTTPException(status_code=404, detail="Risk rate not found")
+        
+    rate = result[0]
+    
+    # risk_rate_per_mille MUST be JSON number.
+    try:
+        rate_val = float(rate)
+    except (TypeError, ValueError):
+        logger.error(f"Invalid rate format in DB for iib_code={iib_code_str}: {rate}")
+        raise HTTPException(status_code=500, detail="Invalid rate format in database")
+    
+    # Logging (Required)
+    logger.info(
+        f"UBGR rate resolved: iib_code={iib_code_str}, rate={rate_val}"
+    )
+    
+    return {
+        "iib_code": iib_code_str,
+        "risk_rate_per_mille": rate_val
+    }
+
 logger = logging.getLogger(__name__)
 
 def _to_roman_safe(val: str) -> str:
