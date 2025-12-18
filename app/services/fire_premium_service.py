@@ -291,26 +291,20 @@ class FirePremiumCalculator:
             # Net Excl Terrorism
             net_premium_excl_terrorism = sub_total_after_discount + loading_amount
             
-            # CRITICAL: Policy period multiplier applies ONLY to non-terrorism components
-            # Terrorism premium does NOT scale with policy period
-            logger.info(f"Net Premium Excl Terrorism (1-year): {net_premium_excl_terrorism}")
+            # Add terrorism premium to get annual net premium (1-year)
+            # Terrorism is NOT subject to discount/loading but IS included in annual net
+            annual_net_premium = net_premium_excl_terrorism + terrorism_premium
+            annual_net_premium = Decimal(str(round_currency(float(annual_net_premium))))
+            
+            logger.info(f"Annual Net Premium (1-year): {annual_net_premium}")
             logger.info(f"Policy Period: {policy_period} years")
             
-            # Apply policy period multiplier to non-terrorism components ONLY
-            net_premium_multi_year = net_premium_excl_terrorism * Decimal(str(policy_period))
-            net_premium_multi_year = Decimal(str(round_currency(float(net_premium_multi_year))))
-            
-            # Add terrorism premium (NOT multiplied by policy period)
-            final_net = net_premium_multi_year + terrorism_premium
+            # Policy Period Multiplier - Applied to FINAL net premium (including terrorism)
+            # All premiums are annual - multiply final net by policy period
+            final_net = annual_net_premium * Decimal(str(policy_period))
             final_net = Decimal(str(round_currency(float(final_net))))
             
-            # For transparency: calculate what 1-year net would be (for reference)
-            annual_net = net_premium_excl_terrorism + terrorism_premium
-            annual_net = Decimal(str(round_currency(float(annual_net))))
-            
-            logger.info(f"Net Premium ({policy_period}Y non-terrorism): {net_premium_multi_year}")
-            logger.info(f"Terrorism Premium (NOT scaled): {terrorism_premium}")
-            logger.info(f"Final Net Premium: {final_net}")
+            logger.info(f"Final Net Premium ({policy_period}Y): {final_net}")
             
             if final_net <= 0 and total_si > 0:
                  logger.warning("Net premium is zero despite SI > 0")
