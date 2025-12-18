@@ -21,17 +21,22 @@ def get_risk_rate(
 ):
     """
     Get Fire Risk Rate strictly from fire_iib_rates.
-    Product Agnostic: BLUS, UVUS, SFSP, IAR, BGRP.
+    Product Agnostic by design: BLUS, UVUS, SFSP, IAR, BGRP.
     """
     code_str = str(iib_code).strip()
     
     rate_val = get_fire_risk_rate(code_str, db)
     
+    # ❌ If no row → return 404 with clear message
+    if rate_val is None:
+        logger.warning(f"No risk rate found in fire_iib_rates for iib_code={code_str}")
+        raise HTTPException(
+            status_code=404, 
+            detail=f"Risk rate not found for IIB code {code_str}"
+        )
+
     # Debug Log (MANDATORY)
-    if rate_val is not None:
-        logger.info(f"Fire risk rate fetched from fire_iib_rates for iib_code={code_str}")
-    else:
-        logger.info(f"No risk rate found in fire_iib_rates for iib_code={code_str}")
+    logger.info(f"Fire risk rate fetched from fire_iib_rates for iib_code={code_str}")
 
     return {
         "iib_code": code_str,
@@ -44,6 +49,10 @@ def get_fire_risk_rate(iib_code: str, db: Session) -> float | None:
     Returns value or None.
     Uses MANDATORY RAW SQL.
     """
+    # 3️⃣ BACKEND LOGIC (MANDATORY SQL EQUIVALENT)
+    # rate = db.query(FireIIBRate).filter(FireIIBRate.iib_code == iib_code).first()
+    # Implemented via RAW SQL for reliability as per previous context.
+    
     query = text("""
         SELECT rate_per_mille
         FROM fire_iib_rates
