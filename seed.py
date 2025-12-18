@@ -226,8 +226,11 @@ def seed_occupancies():
     logger.info(f"✅ Occupancies: {stats['occupancies']['success']} success, {stats['occupancies']['failed']} failed")
 
 def seed_fire_iib_rates():
-    """Seed fire_iib_rates from CSV"""
-    logger.info("Seeding Fire IIB Rates from CSV...")
+    """
+    Seed fire_iib_rates from CSV.
+    FORCE REFRESH: Always runs to ensure corrected data is loaded.
+    """
+    logger.info("Seeding Fire IIB Rates from CSV (FORCE REFRESH)...")
     csv_path = "data/fire_iib_rates.csv"
     
     if not os.path.exists(csv_path):
@@ -235,6 +238,17 @@ def seed_fire_iib_rates():
         return
     
     with engine.connect() as conn:
+        # FORCE REFRESH: Truncate and reload to ensure corrected data
+        try:
+            logger.info("🔄 Truncating fire_iib_rates for fresh data load...")
+            conn.execute(text("TRUNCATE TABLE fire_iib_rates RESTART IDENTITY CASCADE"))
+            conn.commit()
+            logger.info("✅ Table truncated")
+        except Exception as e:
+            logger.warning(f"⚠️  Could not truncate fire_iib_rates: {e}")
+            conn.rollback()
+        
+        # Load corrected CSV data
         with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
             reader = csv.DictReader(f)
             for row in reader:
@@ -242,18 +256,15 @@ def seed_fire_iib_rates():
                 rate = row.get('basic_rate') or row.get('rate_per_mille')
                 
                 if iib_code and rate:
-                    # ONLY ONE ON CONFLICT clause allowed
                     sql = """
                         INSERT INTO fire_iib_rates (iib_code, rate_per_mille)
                         VALUES (:iib, :rate)
-                        ON CONFLICT (iib_code) DO UPDATE 
-                        SET rate_per_mille = EXCLUDED.rate_per_mille
                     """
                     success, error = safe_execute_sql(conn, sql, {"iib": iib_code, "rate": float(rate)}, "fire_iib_rates")
                     if not success:
                         logger.warning(f"Failed IIB rate {iib_code}: {error}")
     
-    logger.info(f"✅ Fire IIB Rates: {stats['fire_iib_rates']['success']} success, {stats['fire_iib_rates']['failed']} failed")
+    logger.info(f"✅ Fire IIB Rates (FORCE REFRESH): {stats['fire_iib_rates']['success']} success, {stats['fire_iib_rates']['failed']} failed")
 
 def seed_fire_bsus_rates():
     """Seed fire_bsus_rates from CSV"""
@@ -546,8 +557,19 @@ def main():
     
     # Check if seeding already applied
     if not should_seed(engine):
-        logger.info("✅ Seed already applied — skipping seeding")
-        print("✅ Seed already applied — skipping seeding")
+        logger.info("✅ Seed already applied — skipping full seeding")
+        print("✅ Seed already applied — skipping full seeding")
+        
+        # FORCE REFRESH fire_iib_rates (corrected CSV data)
+        logger.info("🔄 Running FORCE REFRESH for fire_iib_rates...")
+        print("🔄 Running FORCE REFRESH for fire_iib_rates...")
+        try:
+            seed_fire_iib_rates()
+            print("✅ fire_iib_rates refreshed with corrected data")
+        except Exception as e:
+            logger.error(f"❌ fire_iib_rates refresh failed: {e}")
+            print(f"❌ fire_iib_rates refresh failed: {e}")
+        
         print("✅ Database is ready")
         return
     
