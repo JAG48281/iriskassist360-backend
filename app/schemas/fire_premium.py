@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, ConfigDict, field_validator
+from pydantic import BaseModel, Field, ConfigDict, field_validator, model_validator
 from typing import Optional, List, Dict
 from decimal import Decimal
 
@@ -37,16 +37,16 @@ class UBGRUVGRRequest(BaseModel):
     productCode: str = Field(..., description="UBGR or UVGR")
     occupancyCode: str = Field(..., description="IIB Code (e.g., 1001, 1001_2)")
     
-    # NEW: Preference fields for UBGR/BGRP
-    basic_cover_si: float = Field(0, description="Maps to Building SI")
-    add_on_cover_si: float = Field(0, description="Maps to Add-on Covers SI (Excl PA)")
-    total_sum_insured: float = Field(0, description="For reference only")
+    # Primary fields for UBGR/BGRP
+    buildingSI: float = Field(..., ge=0, description="Building Sum Insured")
+    contentsSI: float = Field(..., ge=0, description="Contents Sum Insured")
     terrorism_si: float = Field(0, description="ONLY for terrorism premium")
     
-    # Sum Insured Components (Legacy/Deprecated but kept for compat)
-    buildingSI: float = Field(0, description="Building Sum Insured (Deprecated)")
-    contentsSI: float = Field(0, description="Contents Sum Insured (Deprecated)")
-    terrorismSI: float = Field(0, description="Terrorism Sum Insured (Legacy Compat)")
+    # Optional/Alias fields for backward compatibility
+    basic_cover_si: Optional[float] = Field(None, description="Alias for buildingSI")
+    add_on_cover_si: Optional[float] = Field(None, description="Alias for contentsSI")
+    total_sum_insured: float = Field(0, description="For reference only")
+    terrorismSI: float = Field(0, description="Legacy Compat for terrorism_si")
     
     # Add-Ons
     addOns: List[AddOnItem] = Field(default_factory=list, description="Selected Add-Ons with SI")
@@ -63,30 +63,50 @@ class UBGRUVGRRequest(BaseModel):
     
     # Risk Rate (Explicit for UBGR)
     risk_rate_per_mille: Optional[float] = Field(default=None, ge=0, description="Explicit Risk Rate (Required for UBGR)")
-    
+
+    @model_validator(mode='before')
+    @classmethod
+    def handle_si_aliases(cls, data: any) -> any:
+        """Map basic_cover_si -> buildingSI and add_on_cover_si -> contentsSI"""
+        if isinstance(data, dict):
+            # Map basic_cover_si to buildingSI if buildingSI is not provided
+            if 'basic_cover_si' in data and data.get('buildingSI') is None:
+                data['buildingSI'] = data['basic_cover_si']
+            elif data.get('buildingSI') is None:
+                data['buildingSI'] = 0.0
+            
+            # Map add_on_cover_si to contentsSI if contentsSI is not provided
+            if 'add_on_cover_si' in data and data.get('contentsSI') is None:
+                data['contentsSI'] = data['add_on_cover_si']
+            elif data.get('contentsSI') is None:
+                data['contentsSI'] = 0.0
+
+            # terrorism_si mapping
+            if 'terrorismSI' in data and data.get('terrorism_si') is None:
+                data['terrorism_si'] = data['terrorismSI']
+        return data
+
     @field_validator('policyPeriod', mode='before')
     @classmethod
     def parse_policy_period(cls, v):
         """Parse policy period from string format like '2 Years' or integer"""
         if isinstance(v, str):
-            # Extract number from strings like "1 Year", "2 Years", "3 Years"
             import re
             match = re.search(r'(\d+)', v)
             if match:
                 return int(match.group(1))
-            return 1  # Default to 1 year if parsing fails
+            return 1
         return v
-
 
 class PremiumBreakdown(BaseModel):
     """Detailed breakdown of premium calculation - Monetary Values ONLY"""
     basic_fire_premium: float
     add_on_premium: float
-    fire_subtotal: float  # (basic + add_on +/- disc/load) BEFORE terrorism
+    subtotal: float
     terrorism_premium: float
     discount_amount: float
     loading_amount: float
-    net_premium: float  # Final scaled net premium
+    net_premium: float
     cgst: float
     sgst: float
     stamp_duty: float = 1.0
