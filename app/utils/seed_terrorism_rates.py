@@ -1,6 +1,6 @@
 """
 Auto-seeding utility for fire_terrorism_rates table.
-Runs on application startup to ensure table is populated with correct data.
+Runs on application startup to ensure table is populated with AUTHORITATIVE data.
 """
 
 import logging
@@ -9,80 +9,106 @@ from sqlalchemy.engine import Engine
 
 logger = logging.getLogger(__name__)
 
-# Hardcoded seed data for terrorism rates - MUST BE 9 ROWS (3 occupancy types × 3 slabs each)
-# Progressive slabs: each occupancy type has 3 tiers
+# AUTHORITATIVE seed data for terrorism rates - MUST BE 13 ROWS
+# Source: Official CSV data
+# Residential: 2 slabs, Non-Industrial: 5 slabs, Industrial: 6 slabs
 TERRORISM_SEED_DATA = [
-    # Residential (3 slabs)
+    # Residential (2 slabs)
     {
         "occupancy_type": "Residential",
         "min_sum_insured": 0,
-        "max_sum_insured": 5000000000,  # 5 Billion
+        "max_sum_insured": 15000000000,  # 15 Billion
         "rate_per_mille": 0.07
     },
     {
         "occupancy_type": "Residential",
-        "min_sum_insured": 5000000000,
+        "min_sum_insured": 15000000001,
+        "max_sum_insured": None,  # Unlimited (NULL)
+        "rate_per_mille": 0.04
+    },
+    # Non-Industrial (5 slabs)
+    {
+        "occupancy_type": "Non-Industrial",
+        "min_sum_insured": 0,
         "max_sum_insured": 10000000000,  # 10 Billion
-        "rate_per_mille": 0.10
-    },
-    {
-        "occupancy_type": "Residential",
-        "min_sum_insured": 10000000000,
-        "max_sum_insured": None,  # Unlimited
-        "rate_per_mille": 0.10
-    },
-    # Non-Industrial (3 slabs)
-    {
-        "occupancy_type": "Non-Industrial",
-        "min_sum_insured": 0,
-        "max_sum_insured": 5000000000,
-        "rate_per_mille": 0.15
+        "rate_per_mille": 0.13
     },
     {
         "occupancy_type": "Non-Industrial",
-        "min_sum_insured": 5000000000,
-        "max_sum_insured": 10000000000,
-        "rate_per_mille": 0.20
+        "min_sum_insured": 10000000001,
+        "max_sum_insured": 25000000000,  # 25 Billion
+        "rate_per_mille": 0.11
     },
     {
         "occupancy_type": "Non-Industrial",
-        "min_sum_insured": 10000000000,
-        "max_sum_insured": None,
-        "rate_per_mille": 0.20
+        "min_sum_insured": 25000000001,
+        "max_sum_insured": 50000000000,  # 50 Billion
+        "rate_per_mille": 0.09
     },
-    # Industrial (3 slabs)
+    {
+        "occupancy_type": "Non-Industrial",
+        "min_sum_insured": 50000000001,
+        "max_sum_insured": 100000000000,  # 100 Billion
+        "rate_per_mille": 0.07
+    },
+    {
+        "occupancy_type": "Non-Industrial",
+        "min_sum_insured": 100000000001,
+        "max_sum_insured": None,  # Unlimited (NULL)
+        "rate_per_mille": 0.05
+    },
+    # Industrial (6 slabs)
     {
         "occupancy_type": "Industrial",
         "min_sum_insured": 0,
-        "max_sum_insured": 5000000000,
-        "rate_per_mille": 0.20
+        "max_sum_insured": 5000000000,  # 5 Billion
+        "rate_per_mille": 0.21
     },
     {
         "occupancy_type": "Industrial",
-        "min_sum_insured": 5000000000,
-        "max_sum_insured": 10000000000,
-        "rate_per_mille": 0.25
+        "min_sum_insured": 5000000001,
+        "max_sum_insured": 15000000000,  # 15 Billion
+        "rate_per_mille": 0.18
     },
     {
         "occupancy_type": "Industrial",
-        "min_sum_insured": 10000000000,
-        "max_sum_insured": None,
-        "rate_per_mille": 0.25
+        "min_sum_insured": 15000000001,
+        "max_sum_insured": 25000000000,  # 25 Billion
+        "rate_per_mille": 0.13
+    },
+    {
+        "occupancy_type": "Industrial",
+        "min_sum_insured": 25000000001,
+        "max_sum_insured": 50000000000,  # 50 Billion
+        "rate_per_mille": 0.09
+    },
+    {
+        "occupancy_type": "Industrial",
+        "min_sum_insured": 50000000001,
+        "max_sum_insured": 100000000000,  # 100 Billion
+        "rate_per_mille": 0.07
+    },
+    {
+        "occupancy_type": "Industrial",
+        "min_sum_insured": 100000000001,
+        "max_sum_insured": None,  # Unlimited (NULL)
+        "rate_per_mille": 0.05
     },
 ]
 
-# Verify we have exactly 9 rows (3 occupancy types × 3 slabs)
-assert len(TERRORISM_SEED_DATA) == 9, f"Expected 9 rows, got {len(TERRORISM_SEED_DATA)}"
+# Verify we have exactly 13 rows (2 + 5 + 6)
+assert len(TERRORISM_SEED_DATA) == 13, f"Expected 13 rows, got {len(TERRORISM_SEED_DATA)}"
 
 
 def seed_fire_terrorism_rates(engine: Engine) -> None:
     """
-    Auto-seed fire_terrorism_rates table with complete progressive slab data.
+    Auto-seed fire_terrorism_rates table with AUTHORITATIVE progressive slab data.
     
     This function:
-    1. DELETES all existing rows from fire_terrorism_rates
-    2. INSERTS the full 9-row dataset (3 occupancy types × 3 slabs each)
-    3. Is idempotent (safe to run multiple times)
+    1. TRUNCATES fire_terrorism_rates table
+    2. INSERTS the full 13-row authoritative dataset
+    3. Verifies row counts per occupancy type
+    4. Is idempotent (safe to run multiple times)
     
     Args:
         engine: SQLAlchemy engine instance
@@ -106,12 +132,12 @@ def seed_fire_terrorism_rates(engine: Engine) -> None:
                 
                 logger.info(f"🔄 Current fire_terrorism_rates rows: {old_count}")
                 
-                # Step 2: DELETE all existing rows
-                delete_query = text("DELETE FROM fire_terrorism_rates")
-                conn.execute(delete_query)
-                logger.info(f"🗑️  Deleted {old_count} existing rows")
+                # Step 2: TRUNCATE table (faster than DELETE for full table clear)
+                truncate_query = text("TRUNCATE TABLE fire_terrorism_rates")
+                conn.execute(truncate_query)
+                logger.info(f"🗑️  Truncated fire_terrorism_rates table")
                 
-                # Step 3: INSERT all 9 rows
+                # Step 3: INSERT all 13 rows
                 insert_query = text("""
                     INSERT INTO fire_terrorism_rates 
                     (occupancy_type, min_sum_insured, max_sum_insured, rate_per_mille)
@@ -123,24 +149,37 @@ def seed_fire_terrorism_rates(engine: Engine) -> None:
                 for row in TERRORISM_SEED_DATA:
                     conn.execute(insert_query, row)
                     inserted_count += 1
-                    max_si_display = f"{row['max_sum_insured']:,}" if row['max_sum_insured'] else "Unlimited"
+                    max_si_display = f"{row['max_sum_insured']:,}" if row['max_sum_insured'] else "NULL (Unlimited)"
                     logger.info(
-                        f"  ✓ [{inserted_count}] {row['occupancy_type']:15} | "
-                        f"{row['min_sum_insured']:15,} - {max_si_display:15} | "
+                        f"  ✓ [{inserted_count:2d}] {row['occupancy_type']:15} | "
+                        f"{row['min_sum_insured']:15,} - {max_si_display:20} | "
                         f"Rate: {row['rate_per_mille']}‰"
                     )
                 
-                # Step 4: Verify final count
-                result = conn.execute(count_query)
-                final_count = result.scalar()
+                # Step 4: Verify final count per occupancy type
+                verify_query = text("""
+                    SELECT occupancy_type, COUNT(*) as count
+                    FROM fire_terrorism_rates
+                    GROUP BY occupancy_type
+                    ORDER BY occupancy_type
+                """)
+                result = conn.execute(verify_query)
+                rows = result.fetchall()
+                
+                logger.info(f"\n📊 Row counts by occupancy type:")
+                total_count = 0
+                for row in rows:
+                    logger.info(f"  {row.occupancy_type:15} = {row.count} rows")
+                    total_count += row.count
                 
                 # Commit transaction
                 trans.commit()
                 
-                logger.info(f"✅ Successfully seeded {final_count} terrorism rate slabs (Expected: {len(TERRORISM_SEED_DATA)})")
+                logger.info(f"\n✅ Successfully seeded {total_count} terrorism rate slabs")
+                logger.info(f"   Expected: Residential=2, Non-Industrial=5, Industrial=6, Total=13")
                 
-                if final_count != len(TERRORISM_SEED_DATA):
-                    logger.error(f"❌ Row count mismatch! Expected {len(TERRORISM_SEED_DATA)}, got {final_count}")
+                if total_count != 13:
+                    logger.error(f"❌ Row count mismatch! Expected 13, got {total_count}")
                 
             except Exception as e:
                 trans.rollback()
