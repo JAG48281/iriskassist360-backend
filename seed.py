@@ -348,8 +348,8 @@ def seed_fire_eq_rates():
     logger.info(f"✅ Fire EQ Rates: {stats['fire_eq_rates']['success']} success, {stats['fire_eq_rates']['failed']} failed")
 
 def seed_fire_terrorism_rates():
-    """Seed fire_terrorism_rates from CSV (Objective 3: Truncate + Insert)"""
-    logger.info("Seeding Fire Terrorism Rates (CSV)...")
+    """Seed fire_terrorism_rates from CSV using UPSERT (production-safe)"""
+    logger.info("Seeding Fire Terrorism Rates (CSV - UPSERT)...")
     csv_path = "data/fire_terrorism_rates.csv"
     
     if not os.path.exists(csv_path):
@@ -361,19 +361,7 @@ def seed_fire_terrorism_rates():
         if not check_table_exists(conn, "fire_terrorism_rates"):
              return
 
-        # Objective 3: Truncate + Insert
-        try:
-            # Use DELETE for compatibility if TRUNCATE is not supported (SQLite)
-            if "sqlite" in str(engine.url).lower():
-                conn.execute(text("DELETE FROM fire_terrorism_rates"))
-            else:
-                conn.execute(text("TRUNCATE TABLE fire_terrorism_rates RESTART IDENTITY CASCADE"))
-            conn.commit()
-            logger.info("Table fire_terrorism_rates cleared.")
-        except Exception as e:
-            conn.rollback()
-            logger.warning(f"Failed to clear fire_terrorism_rates: {e}")
-
+        # Production-safe: UPSERT instead of TRUNCATE
         with open(csv_path, 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
@@ -384,9 +372,15 @@ def seed_fire_terrorism_rates():
                 else:
                     max_si = float(max_si)
 
+                # UPSERT using unique constraint (occupancy_type, min_sum_insured)
                 sql = text("""
                     INSERT INTO fire_terrorism_rates (occupancy_type, min_sum_insured, max_sum_insured, rate_per_mille)
                     VALUES (:ot, :min_si, :max_si, :rate)
+                    ON CONFLICT (occupancy_type, min_sum_insured)
+                    DO UPDATE SET
+                        max_sum_insured = EXCLUDED.max_sum_insured,
+                        rate_per_mille = EXCLUDED.rate_per_mille,
+                        updated_at = now()
                 """)
                 params = {
                     "ot": row['occupancy_type'],

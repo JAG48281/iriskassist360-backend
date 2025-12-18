@@ -238,25 +238,36 @@ def get_terrorism_slabs(occupancy_type: str) -> list:
 def get_fire_terrorism_premium(occupancy_type: str, total_sum_insured: float) -> float:
     """
     Calculates total terrorism premium based on progressive slabs.
-    (Objective 4 Logic)
+    Progressive means: first slab applies to first range, second to next range, etc.
     """
     slabs = get_terrorism_slabs(occupancy_type)
+    if not slabs:
+        logger.warning(f"No terrorism slabs found for occupancy_type={occupancy_type}")
+        return 0.0
+    
     total_premium = Decimal("0")
-    total_si = Decimal(str(total_sum_insured))
+    remaining_si = Decimal(str(total_sum_insured))
 
     for slab in slabs:
         min_si = Decimal(str(slab['min_sum_insured']))
         max_si = slab['max_sum_insured']
         rate = Decimal(str(slab['rate_per_mille']))
 
-        # Logic: slab_upper = max_sum_insured or total_sum_insured
-        slab_upper = Decimal(str(max_si)) if max_si is not None else total_si
-        
-        # Logic: slab_amount = max(0, min(total_sum_insured, slab_upper) - min_sum_insured)
-        slab_amount = max(Decimal("0"), min(total_si, slab_upper) - min_si)
-        
-        if slab_amount > 0:
-            total_premium += (slab_amount * rate / Decimal("1000"))
+        # Calculate slab width
+        upper = Decimal(str(max_si)) if max_si is not None else remaining_si + min_si
+        slab_width = upper - min_si
+
+        # Apply to this slab
+        applied_si = min(remaining_si, slab_width)
+        if applied_si <= 0:
+            break
+
+        premium_for_slab = (applied_si * rate) / Decimal("1000")
+        total_premium += premium_for_slab
+        remaining_si -= applied_si
+
+        if remaining_si <= 0:
+            break
             
     return float(total_premium)
 
