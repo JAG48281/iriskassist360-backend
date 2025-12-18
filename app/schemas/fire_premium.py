@@ -18,6 +18,7 @@ class UBGRUVGRRequest(BaseModel):
     Supports both products with identical calculation logic.
     """
     model_config = ConfigDict(
+        populate_by_name=True,
         json_schema_extra={
             "example": {
                 "productCode": "UBGR",
@@ -42,6 +43,13 @@ class UBGRUVGRRequest(BaseModel):
     contentsSI: float = Field(0.0, ge=0, description="Contents Sum Insured")
     terrorism_si: float = Field(0.0, description="ONLY for terrorism premium")
     
+    # New specific SIs for add-on premium calculation
+    lossOfRentSI: float = Field(0.0, ge=0, description="Loss of Rent Sum Insured")
+    altAccommodationSI: float = Field(0.0, ge=0, description="Alternative Accommodation Sum Insured")
+    valuableContentsSI: float = Field(0.0, ge=0, description="Valuable Contents Sum Insured")
+    paProposerSI: float = Field(0.0, ge=0, description="PA for Proposer Sum Insured")
+    paSpouseSI: float = Field(0.0, ge=0, description="PA for Spouse Sum Insured")
+    
     # Optional/Alias fields for backward compatibility
     basic_cover_si: Optional[float] = Field(None, description="Alias for buildingSI")
     add_on_cover_si: Optional[float] = Field(None, description="Alias for contentsSI")
@@ -54,9 +62,9 @@ class UBGRUVGRRequest(BaseModel):
     # Personal Accident
     paSelection: PASelection = Field(default_factory=PASelection, description="PA Selection")
     
-    # Discount & Loading
-    discountPercentage: float = Field(default=0, ge=0, le=100, description="Discount %")
-    loadingPercentage: float = Field(default=0, ge=0, le=100, description="Loading %")
+    # Discount & Loading (User uses discountPercent / loadingPercent)
+    discountPercentage: float = Field(default=0, ge=0, le=100, description="Discount %", alias="discountPercent")
+    loadingPercentage: float = Field(default=0, ge=0, le=100, description="Loading %", alias="loadingPercent")
     
     # Policy Details
     policyPeriod: int = Field(default=1, ge=1, le=20, description="Policy Period in Years")
@@ -83,11 +91,22 @@ class UBGRUVGRRequest(BaseModel):
             if 'terrorismSI' in data and data.get('terrorism_si') is None:
                 data['terrorism_si'] = data['terrorismSI']
 
+            # Handle discountPercent / loadingPercent if passed without alias support in some contexts
+            if 'discountPercent' in data and 'discountPercentage' not in data:
+                data['discountPercentage'] = data['discountPercent']
+            if 'loadingPercent' in data and 'loadingPercentage' not in data:
+                data['loadingPercentage'] = data['loadingPercent']
+
             # 2. UBGR 1001_2 Cleansing
             if data.get('productCode') == "UBGR" and data.get('occupancyCode') == "1001_2":
                 # Forcibly zero out add-on and PA related fields
                 data['contentsSI'] = 0.0
                 data['add_on_cover_si'] = 0.0
+                data['lossOfRentSI'] = 0.0
+                data['altAccommodationSI'] = 0.0
+                data['valuableContentsSI'] = 0.0
+                data['paProposerSI'] = 0.0
+                data['paSpouseSI'] = 0.0
                 
                 # Keep ONLY TERRORISM in addOns if it exists
                 current_addons = data.get('addOns', [])
@@ -97,9 +116,6 @@ class UBGRUVGRRequest(BaseModel):
                 # Clear standard PA object if present
                 if 'paSelection' in data:
                     data['paSelection'] = {"proposer": False, "spouse": False}
-                # Also ignore the snake_case fields mentioned by user if they were passed
-                data.pop('pa_proposer_si', None)
-                data.pop('pa_spouse_si', None)
         return data
 
     @field_validator('policyPeriod', mode='before')
@@ -118,15 +134,14 @@ class PremiumBreakdown(BaseModel):
     """Detailed breakdown of premium calculation - Monetary Values ONLY"""
     basic_fire_premium: float
     add_on_premium: float
-    subtotal: float
+    subtotal_premium: float
     terrorism_premium: float
     discount_amount: float
     loading_amount: float
     net_premium: float
     cgst: float
     sgst: float
-    gst: float # Total GST (CGST + SGST)
-    stamp_duty: float = 1.0
+    stamp_duty: int = 1
     gross_premium: float
 
 class CalculationMeta(BaseModel):
@@ -143,19 +158,23 @@ class CalculationMeta(BaseModel):
 
 class UBGRUVGRResponse(BaseModel):
     """Response schema for UBGR/UVGR premium calculation"""
-    success: bool
-    message: str
-    product_code: str = Field(..., alias="productCode")
-    optional_addons_applicable: bool = True
-    # User requirement: "Return a structured JSON... Expose ONLY the canonical snake_case fields".
-    # User also listed "product_code" in meta.
-    # The top level response has `productCode` in camelCase in the previous file.
-    # The user mandated: "Expose ONLY the canonical snake_case fields" - this likely applies to the breakdown mostly.
-    # But "productCode" vs "product_code" in root?
-    # I'll use `product_code` in root to be safe, but alias it if I fear breaking frontend immediate.
-    # The user said "Ensure frontend needs ZERO interpretation". Snake case is usually preferred in Python backends but camelCase in JS.
-    # Whatever I choose, I must be consistent. The prompt explicitly used snake_case in the JSON example: `{ basic_premium, ... }`.
-    # I will use snake_case for everything.
+    # Contract Fields (Mandatory)
+    basic_fire_premium: float
+    add_on_premium: float
+    discount_amount: float
+    loading_amount: float
+    subtotal_premium: float
+    terrorism_premium: float
+    net_premium: float
+    cgst: float
+    sgst: float
+    stamp_duty: int = 1
+    gross_premium: float
+
+    # Metadata & Status (Keeping for API consistency)
+    success: bool = True
+    message: str = ""
+    product_code: Optional[str] = Field(None, alias="productCode")
+    meta: Optional[CalculationMeta] = None
     
-    breakdown: PremiumBreakdown
-    meta: CalculationMeta
+    model_config = ConfigDict(populate_by_name=True)

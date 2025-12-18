@@ -174,34 +174,35 @@ class FirePremiumCalculator:
             basic_fire_premium_annual = building_si * basic_rate / Decimal("1000")
             basic_fire_premium_annual = Decimal(str(round_currency(float(basic_fire_premium_annual))))
             
-            # add_on_premium = contentsSI × risk_rate / 1000
+            # 1️⃣ Add-on Premium Calculation
+            # add_on_premium = (lossOfRentSI + altAccommodationSI + valuableContentsSI + paProposerSI + paSpouseSI) × risk_rate / 1000
             # MUST ALWAYS be 0 for 1001_2
-            if not optional_addons_applicable:
+            if request.occupancyCode == "1001_2":
                 add_on_premium_annual = Decimal("0")
+                optional_addons_applicable = False
             else:
-                add_on_premium_annual = contents_si * basic_rate / Decimal("1000")
+                add_on_si_sum = (
+                    Decimal(str(request.lossOfRentSI or 0)) +
+                    Decimal(str(request.altAccommodationSI or 0)) +
+                    Decimal(str(request.valuableContentsSI or 0)) +
+                    Decimal(str(request.paProposerSI or 0)) +
+                    Decimal(str(request.paSpouseSI or 0))
+                )
+                add_on_premium_annual = add_on_si_sum * basic_rate / Decimal("1000")
                 add_on_premium_annual = Decimal(str(round_currency(float(add_on_premium_annual))))
             
-            # 4. Minimum Premium Rule (Applied to raw fire premium)
-            # Apply ₹50 ONLY IF calculated (basic + add-on) < minimum
-            raw_fire_annual = basic_fire_premium_annual + add_on_premium_annual
-            if raw_fire_annual < 50:
-                logger.info(f"Applying ₹50 Minimum Premium Rule (Calculated: {raw_fire_annual})")
-                subtotal_annual = Decimal("50")
-            else:
-                subtotal_annual = raw_fire_annual
+            # 2️⃣ Subtotal Premium (EXCLUDING terrorism)
+            subtotal_premium_annual = basic_fire_premium_annual + add_on_premium_annual
             
-            # 5. Discount & Loading (Apply ONLY on subtotal, NOT on terrorism)
-            discount_amount_annual = subtotal_annual * discount_pct / Decimal("100")
+            # 3️⃣ Discount Logic (Apply ONLY on subtotal_premium)
+            discount_amount_annual = subtotal_premium_annual * discount_pct / Decimal("100")
             discount_amount_annual = Decimal(str(round_currency(float(discount_amount_annual))))
             
-            loading_amount_annual = subtotal_annual * loading_pct / Decimal("100")
+            # 4️⃣ Loading Logic (Apply ONLY after discount, on (subtotal - discount))
+            loading_amount_annual = (subtotal_premium_annual - discount_amount_annual) * loading_pct / Decimal("100")
             loading_amount_annual = Decimal(str(round_currency(float(loading_amount_annual))))
             
-            adjusted_fire_subtotal_annual = subtotal_annual - discount_amount_annual + loading_amount_annual
-            
             # 6. Terrorism Premium (ANNUAL)
-            # Calculated normally on terrorism_si
             terrorism_premium_annual = Decimal("0")
             # For UBGR, check if "TERRORISM" is in add_ons list
             is_terrorism_selected = any(addon.addOnCode.upper() == "TERRORISM" for addon in request.addOns)
@@ -216,9 +217,9 @@ class FirePremiumCalculator:
                     logger.warning(f"Terrorism calc failed: {e}")
                     terrorism_premium_annual = Decimal("0")
             
-            # 7. Net Premium (ANNUAL)
-            # net_premium = subtotal (after min/adj) + terrorism
-            net_premium_annual = adjusted_fire_subtotal_annual + terrorism_premium_annual
+            # 5️⃣ Net Premium Calculation (FINAL)
+            # net_premium = (subtotal_premium - discount_amount + loading_amount) + terrorism_premium
+            net_premium_annual = (subtotal_premium_annual - discount_amount_annual + loading_amount_annual) + terrorism_premium_annual
             net_premium_annual = Decimal(str(round_currency(float(net_premium_annual))))
             
             # 8. Policy Period Scaling
@@ -226,7 +227,7 @@ class FirePremiumCalculator:
             
             basic_fire_premium = basic_fire_premium_annual * period_multiplier
             add_on_premium = add_on_premium_annual * period_multiplier
-            subtotal = subtotal_annual * period_multiplier
+            subtotal_premium = subtotal_premium_annual * period_multiplier
             terrorism_premium = terrorism_premium_annual * period_multiplier
             discount_amount = discount_amount_annual * period_multiplier
             loading_amount = loading_amount_annual * period_multiplier
@@ -235,7 +236,7 @@ class FirePremiumCalculator:
             # Round scaled components
             basic_fire_premium = Decimal(str(round_currency(float(basic_fire_premium))))
             add_on_premium = Decimal(str(round_currency(float(add_on_premium))))
-            subtotal = Decimal(str(round_currency(float(subtotal))))
+            subtotal_premium = Decimal(str(round_currency(float(subtotal_premium))))
             terrorism_premium = Decimal(str(round_currency(float(terrorism_premium))))
             discount_amount = Decimal(str(round_currency(float(discount_amount))))
             loading_amount = Decimal(str(round_currency(float(loading_amount))))
@@ -248,7 +249,7 @@ class FirePremiumCalculator:
             sgst = Decimal(str(round_currency(float(sgst))))
             
             # Stamp Duty - FIXED
-            stamp = Decimal("1.0")
+            stamp = 1
             
             # gross_premium
             gross = net_premium + cgst + sgst + stamp
@@ -257,30 +258,30 @@ class FirePremiumCalculator:
             # Final Logging
             logger.info(
               f"🔥 CALC BREAKDOWN | "
-              f"basic_fire={basic_fire_premium}, add_on={add_on_premium}, subtotal={subtotal}, "
+              f"basic_fire={basic_fire_premium}, add_on={add_on_premium}, subtotal={subtotal_premium}, "
               f"terr={terrorism_premium}, disc={discount_amount}, load={loading_amount}, "
               f"net={net_premium}, gross={gross}"
             )
             
+            breakdown = PremiumBreakdown(
+                basic_fire_premium=float(basic_fire_premium),
+                add_on_premium=float(add_on_premium),
+                subtotal_premium=float(subtotal_premium),
+                terrorism_premium=float(terrorism_premium),
+                discount_amount=float(discount_amount),
+                loading_amount=float(loading_amount),
+                net_premium=float(net_premium),
+                cgst=float(cgst),
+                sgst=float(sgst),
+                stamp_duty=float(stamp),
+                gross_premium=float(gross)
+            )
+
             return {
                 "success": True,
                 "message": f"{product_code} Premium Calculated Successfully",
                 "productCode": product_code,
-                "optional_addons_applicable": optional_addons_applicable,
-                "breakdown": PremiumBreakdown(
-                    basic_fire_premium=float(basic_fire_premium),
-                    add_on_premium=float(add_on_premium),
-                    subtotal=float(subtotal),
-                    terrorism_premium=float(terrorism_premium),
-                    discount_amount=float(discount_amount),
-                    loading_amount=float(loading_amount),
-                    net_premium=float(net_premium),
-                    cgst=float(cgst),
-                    sgst=float(sgst),
-                    gst=float(cgst + sgst),
-                    stamp_duty=float(stamp),
-                    gross_premium=float(gross)
-                ),
+                **breakdown.model_dump(),
                 "meta": CalculationMeta(
                     applied_rate=float(basic_rate),
                     risk_rate=float(basic_rate),

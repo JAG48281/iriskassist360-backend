@@ -27,7 +27,7 @@ def test_ubgr_calculation_standard(mock_rates):
         productCode="UBGR",
         occupancyCode="1001",
         buildingSI=1000000.0,
-        contentsSI=500000.0, # Total 1.5M
+        lossOfRentSI=500000.0, # Part of add-ons now
         terrorism_si=1500000.0,
         addOns=[AddOnItem(addOnCode="TERRORISM", sumInsured=1500000.0)],
         discountPercentage=0,
@@ -36,18 +36,19 @@ def test_ubgr_calculation_standard(mock_rates):
     )
     
     result = FirePremiumCalculator.calculate_ubgr_uvgr(request)
-    breakdown = result['breakdown']
     
-    # 1.5M * 0.15 / 1000 = 225
-    assert breakdown.basic_fire_premium == 150.0
-    assert breakdown.add_on_premium == 75.0
-    assert breakdown.subtotal == 225.0
+    # Basic: 1M * 0.15 / 1000 = 150
+    # Add-on: 0.5M * 0.15 / 1000 = 75
+    # Subtotal: 150 + 75 = 225
+    assert result['basic_fire_premium'] == 150.0
+    assert result['add_on_premium'] == 75.0
+    assert result['subtotal_premium'] == 225.0
     
     # Terrorism: 130 (mocked)
-    assert breakdown.terrorism_premium == 130.0
+    assert result['terrorism_premium'] == 130.0
     
     # Net: 225 + 130 = 355
-    assert breakdown.net_premium == 355.0
+    assert result['net_premium'] == 355.0
 
 def test_uvgr_calculation_no_terrorism(mock_rates):
     mock_basic, mock_terr, mock_terr_calc, mock_occ, mock_addon = mock_rates
@@ -61,16 +62,16 @@ def test_uvgr_calculation_no_terrorism(mock_rates):
         terrorism_si=0,
         addOns=[],
         discountPercentage=0,
-        loadingPercentage=0
+        loadingPercentage=0,
+        risk_rate_per_mille=0.15
     )
     
     result = FirePremiumCalculator.calculate_ubgr_uvgr(request)
-    breakdown = result['breakdown']
     
     # 1M * 0.15 / 1000 = 150
-    assert breakdown.basic_fire_premium == 150.0
-    assert breakdown.terrorism_premium == 0.0
-    assert breakdown.net_premium == 150.0
+    assert result['basic_fire_premium'] == 150.0
+    assert result['terrorism_premium'] == 0.0
+    assert result['net_premium'] == 150.0
 
 def test_loading_logic(mock_rates):
     mock_basic, mock_terr, mock_terr_calc, mock_occ, mock_addon = mock_rates
@@ -80,6 +81,7 @@ def test_loading_logic(mock_rates):
         productCode="UBGR",
         occupancyCode="1001",
         buildingSI=1000000.0,
+        contentsSI=0,
         terrorism_si=1000000.0,
         addOns=[AddOnItem(addOnCode="TERRORISM", sumInsured=1000000.0)],
         discountPercentage=0,
@@ -88,15 +90,15 @@ def test_loading_logic(mock_rates):
     )
     
     # Basic: 150, Subtotal: 150
-    # Loading: 15, Terrorism: 130
+    # Loading: (150 - 0) * 10% = 15
+    # Terrorism: 130
     # Net: 150 + 15 + 130 = 295
     
     result = FirePremiumCalculator.calculate_ubgr_uvgr(request)
-    breakdown = result['breakdown']
-    assert breakdown.subtotal == 150.0
-    assert breakdown.loading_amount == 15.0
-    assert breakdown.terrorism_premium == 130.0
-    assert breakdown.net_premium == 295.0
+    assert result['subtotal_premium'] == 150.0
+    assert result['loading_amount'] == 15.0
+    assert result['terrorism_premium'] == 130.0
+    assert result['net_premium'] == 295.0
 
 def test_discount_logic(mock_rates):
     mock_basic, mock_terr, mock_terr_calc, mock_occ, mock_addon = mock_rates
@@ -106,6 +108,7 @@ def test_discount_logic(mock_rates):
         productCode="UBGR",
         occupancyCode="1001",
         buildingSI=1000000.0,
+        contentsSI=0,
         terrorism_si=1000000.0,
         addOns=[AddOnItem(addOnCode="TERRORISM", sumInsured=1000000.0)],
         discountPercentage=10, 
@@ -118,10 +121,9 @@ def test_discount_logic(mock_rates):
     # Net: 150 - 15 + 130 = 265
     
     result = FirePremiumCalculator.calculate_ubgr_uvgr(request)
-    breakdown = result['breakdown']
-    assert breakdown.subtotal == 150.0
-    assert breakdown.discount_amount == 15.0
-    assert breakdown.net_premium == 265.0
+    assert result['subtotal_premium'] == 150.0
+    assert result['discount_amount'] == 15.0
+    assert result['net_premium'] == 265.0
 
 def test_terrorism_si_isolation(mock_rates):
     """Verify terrorism is calculated on terrorism_si, not BuildingSI"""
@@ -138,19 +140,64 @@ def test_terrorism_si_isolation(mock_rates):
         productCode="UBGR",
         occupancyCode="1001",
         buildingSI=1000000.0,
+        contentsSI=0,
         terrorism_si=500000.0, # Less than building
         addOns=[AddOnItem(addOnCode="TERRORISM", sumInsured=500000.0)],
         risk_rate_per_mille=0.15
     )
     
     result = FirePremiumCalculator.calculate_ubgr_uvgr(request)
-    breakdown = result['breakdown']
     
     # Basic: 1M * 0.15 = 150
-    assert breakdown.basic_fire_premium == 150.0
+    assert result['basic_fire_premium'] == 150.0
     # Terrorism: 65 (for 500k)
-    assert breakdown.terrorism_premium == 65.0
-    assert breakdown.net_premium == 215.0
+    assert result['terrorism_premium'] == 65.0
+    assert result['net_premium'] == 215.0
+
+def test_ubgr_coop_society_rule(mock_rates):
+    """Verify 1001_2 forces add_on_premium to 0"""
+    mock_basic, mock_terr, mock_terr_calc, mock_occ, mock_addon = mock_rates
+    mock_occ.return_value = {"allow_addons": False, "occupancy_type": "Co-operative Housing Society"}
+    
+    request = UBGRUVGRRequest(
+        productCode="UBGR",
+        occupancyCode="1001_2",
+        buildingSI=1000000.0,
+        lossOfRentSI=500000.0,
+        valuableContentsSI=200000.0,
+        paProposerSI=100000.0,
+        risk_rate_per_mille=0.15
+    )
+    
+    result = FirePremiumCalculator.calculate_ubgr_uvgr(request)
+    assert result['basic_fire_premium'] == 150.0
+    assert result['add_on_premium'] == 0.0 # Forced to 0
+    assert result['subtotal_premium'] == 150.0
+
+def test_comprehensive_add_on_formula(mock_rates):
+    """Verify sum of all specific add-on SIs"""
+    mock_basic, mock_terr, mock_terr_calc, mock_occ, mock_addon = mock_rates
+    mock_occ.return_value = {"allow_addons": True, "occupancy_type": "Non-Industrial"}
+    
+    request = UBGRUVGRRequest(
+        productCode="UBGR",
+        occupancyCode="1001",
+        buildingSI=1000000.0,
+        lossOfRentSI=100000.0,
+        altAccommodationSI=100000.0,
+        valuableContentsSI=100000.0,
+        paProposerSI=100000.0,
+        paSpouseSI=100000.0,
+        risk_rate_per_mille=0.5
+    )
+    
+    # Basic: 1M * 0.5 / 1000 = 500
+    # Add-on: (100k + 100k + 100k + 100k + 100k) * 0.5 / 1000 = 500k * 0.5 / 1000 = 250
+    # Subtotal: 750
+    result = FirePremiumCalculator.calculate_ubgr_uvgr(request)
+    assert result['basic_fire_premium'] == 500.0
+    assert result['add_on_premium'] == 250.0
+    assert result['subtotal_premium'] == 750.0
 
 def test_policy_period_multiplier(mock_rates):
     """Verify Policy Multiplier applies to Net Premium"""
@@ -161,6 +208,7 @@ def test_policy_period_multiplier(mock_rates):
         productCode="UBGR",
         occupancyCode="1001",
         buildingSI=1000000.0,
+        contentsSI=0,
         terrorism_si=1000000.0,
         addOns=[AddOnItem(addOnCode="TERRORISM", sumInsured=1000000.0)],
         policyPeriod=10, 
@@ -168,10 +216,9 @@ def test_policy_period_multiplier(mock_rates):
     )
 
     result = FirePremiumCalculator.calculate_ubgr_uvgr(request)
-    breakdown = result['breakdown']
 
     # Annual: Basic 150 + Terr 130 = 280
     # 10 Years: 2800
-    assert breakdown.net_premium == 2800.0
-    assert breakdown.basic_fire_premium == 1500.0
-    assert breakdown.terrorism_premium == 1300.0
+    assert result['net_premium'] == 2800.0
+    assert result['basic_fire_premium'] == 1500.0
+    assert result['terrorism_premium'] == 1300.0

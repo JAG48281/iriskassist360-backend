@@ -63,15 +63,7 @@ def calculate_ubgr_premium(
             )
         
         result = FirePremiumCalculator.calculate_ubgr_uvgr(payload)
-        
-        return UBGRUVGRResponse(
-            success=True,
-            message="UBGR Premium Calculated Successfully",
-            productCode="UBGR",
-            optional_addons_applicable=result.get("optional_addons_applicable", True),
-            breakdown=result["breakdown"],
-            meta=result["meta"]
-        )
+        return UBGRUVGRResponse(**result)
     except ValueError as e:
         logger.error(f"Validation Error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
@@ -99,15 +91,7 @@ def calculate_uvgr_premium(
         payload.productCode = "UVGR"
         
         result = FirePremiumCalculator.calculate_ubgr_uvgr(payload)
-        
-        return UBGRUVGRResponse(
-            success=True,
-            message="UVGR Premium Calculated Successfully",
-            productCode="UVGR",
-            optional_addons_applicable=result.get("optional_addons_applicable", True),
-            breakdown=result["breakdown"],
-            meta=result["meta"]
-        )
+        return UBGRUVGRResponse(**result)
     except ValueError as e:
         logger.error(f"Validation Error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
@@ -136,20 +120,7 @@ def calculate_uvgs_premium(
         payload.productCode = "UVGS"
         
         result = FirePremiumCalculator.calculate_ubgr_uvgr(payload)
-        breakdown = result["breakdown"]
-        
-        # Validate terrorism is not present
-        if breakdown.terrorism_premium is not None and breakdown.terrorism_premium != 0:
-            logger.warning(f"UVGS returned non-zero terrorism premium: {breakdown.terrorism_premium}")
-        
-        return UBGRUVGRResponse(
-            success=True,
-            message="UVGS Premium Calculated Successfully",
-            productCode="UVGS",
-            optional_addons_applicable=result.get("optional_addons_applicable", True),
-            breakdown=breakdown,
-            meta=result["meta"]
-        )
+        return UBGRUVGRResponse(**result)
     except ValueError as e:
         logger.error(f"Validation Error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
