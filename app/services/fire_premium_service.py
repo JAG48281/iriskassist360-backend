@@ -142,7 +142,7 @@ class FirePremiumCalculator:
             # --- UBGR EXCLUSION RULE: Dwellings: Co-operative Society (1001_2) ---
             optional_addons_applicable = True
             if product_code == "UBGR" and request.occupancyCode == "1001_2":
-                logger.info("UBGR 1001_2 detected – add-ons disabled")
+                logger.info("UBGR Co-operative Society logic applied")
                 optional_addons_applicable = False
                 # Forcibly set contents_si and PA to 0
                 contents_si = Decimal("0")

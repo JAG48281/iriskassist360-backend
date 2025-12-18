@@ -67,23 +67,39 @@ class UBGRUVGRRequest(BaseModel):
     @model_validator(mode='before')
     @classmethod
     def handle_si_aliases(cls, data: any) -> any:
-        """Map basic_cover_si -> buildingSI and add_on_cover_si -> contentsSI"""
+        """Map basic_cover_si -> buildingSI and add_on_cover_si -> contentsSI and cleanse 1001_2"""
         if isinstance(data, dict):
-            # Map basic_cover_si to buildingSI if buildingSI is not provided
+            # 1. Alias Mapping
             if 'basic_cover_si' in data and data.get('buildingSI') is None:
                 data['buildingSI'] = data['basic_cover_si']
             elif data.get('buildingSI') is None:
                 data['buildingSI'] = 0.0
             
-            # Map add_on_cover_si to contentsSI if contentsSI is not provided
             if 'add_on_cover_si' in data and data.get('contentsSI') is None:
                 data['contentsSI'] = data['add_on_cover_si']
             elif data.get('contentsSI') is None:
                 data['contentsSI'] = 0.0
 
-            # terrorism_si mapping
             if 'terrorismSI' in data and data.get('terrorism_si') is None:
                 data['terrorism_si'] = data['terrorismSI']
+
+            # 2. UBGR 1001_2 Cleansing
+            if data.get('productCode') == "UBGR" and data.get('occupancyCode') == "1001_2":
+                # Forcibly zero out add-on and PA related fields
+                data['contentsSI'] = 0.0
+                data['add_on_cover_si'] = 0.0
+                
+                # Keep ONLY TERRORISM in addOns if it exists
+                current_addons = data.get('addOns', [])
+                if isinstance(current_addons, list):
+                    data['addOns'] = [a for a in current_addons if isinstance(a, dict) and a.get('addOnCode', '').upper() == 'TERRORISM']
+                
+                # Clear standard PA object if present
+                if 'paSelection' in data:
+                    data['paSelection'] = {"proposer": False, "spouse": False}
+                # Also ignore the snake_case fields mentioned by user if they were passed
+                data.pop('pa_proposer_si', None)
+                data.pop('pa_spouse_si', None)
         return data
 
     @field_validator('policyPeriod', mode='before')
