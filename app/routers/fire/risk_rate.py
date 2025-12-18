@@ -27,19 +27,21 @@ def get_risk_rate(
     
     rate_val = get_fire_risk_rate(code_str, db)
     
-    # Logging (MANDATORY)
-    logger.info(
-      f"[FIRE RISK RATE] iib_code={code_str} → rate={rate_val}"
-    )
+    # Debug Log (MANDATORY)
+    if rate_val is not None:
+        logger.info(f"Fire risk rate fetched from fire_iib_rates for iib_code={code_str}")
+    else:
+        logger.info(f"No risk rate found in fire_iib_rates for iib_code={code_str}")
 
     return {
         "iib_code": code_str,
         "risk_rate_per_mille": rate_val
     }
 
-def get_fire_risk_rate(iib_code: str, db: Session) -> float:
+def get_fire_risk_rate(iib_code: str, db: Session) -> float | None:
     """
     Unified Resolver: Fetch rate strictly from fire_iib_rates.
+    Returns value or None.
     """
     rate_row = (
         db.query(FireIibRate)
@@ -48,11 +50,7 @@ def get_fire_risk_rate(iib_code: str, db: Session) -> float:
     )
 
     if not rate_row:
-        logger.warning(f"Risk rate not found for IIB code {iib_code}")
-        raise HTTPException(
-            status_code=404,
-            detail=f"Risk rate not found for IIB code {iib_code}"
-        )
+        return None
 
     return float(rate_row.rate_per_mille)
 
