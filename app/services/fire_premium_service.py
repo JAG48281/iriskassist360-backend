@@ -8,7 +8,7 @@ from typing import List, Dict, Tuple
 from app.services.rating_engine import (
     get_basic_rate_per_mille,
     get_terrorism_rate_per_mille,
-    calculate_terrorism_premium_slab_wise,
+    calculate_terrorism_premium,
     get_add_on_rate,
     get_occupancy_details,
     get_fire_eq_rate_per_mille,
@@ -204,7 +204,7 @@ class FirePremiumCalculator:
                     terrorism_rate = get_terrorism_rate_per_mille(occ_type, float(total_si))
                     
                     # Task 4: Calculate premium slab-wise
-                    terrorism_premium = calculate_terrorism_premium_slab_wise(occ_type, terr_si)
+                    terrorism_premium = Decimal(str(calculate_terrorism_premium(occ_type, float(terr_si))))
                     terrorism_premium = Decimal(str(round_currency(float(terrorism_premium))))
                     
                     logger.info(f"Terrorism Premium: {terrorism_premium} (Slab-wise for {occ_type})")

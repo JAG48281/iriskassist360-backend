@@ -230,51 +230,55 @@ def get_terrorism_slabs(occupancy_type: str) -> list:
         logger.error(f"DB Error (get_terrorism_slabs): {e}")
         return []
 
-def calculate_terrorism_premium_slab_wise(occupancy_type: str, total_si: Decimal) -> Decimal:
+def calculate_terrorism_premium(occupancy_type: str, total_sum_insured: float) -> float:
     """
-    Calculates terrorism premium by splitting total SI into slabs.
-    Follows Rule 4: "Split SI by slabs, Calculate each slab premium, Sum them".
+    Calculates terrorism premium by splitting total sum insured into slabs.
+    (Objective 3: Progressive / Slab-wise calculation)
     """
+    total_si = Decimal(str(total_sum_insured))
     slabs = get_terrorism_slabs(occupancy_type)
     total_premium = Decimal("0")
     
     if not slabs:
         logger.warning(f"No terrorism slabs found for {occupancy_type}")
-        return Decimal("0")
+        return 0.0
 
-    # Sort just in case DB order was weird, though query has ORDER BY
+    remaining_si = total_si
+    
     for slab in slabs:
-        min_si = Decimal(str(slab['min_sum_insured']))
-        # Treat NULL max_sum_insured as effectively infinity
-        max_si = Decimal(str(slab['max_sum_insured'])) if slab['max_sum_insured'] is not None else Decimal('Infinity')
-        rate = Decimal(str(slab['rate_per_mille']))
-        
-        if total_si < min_si:
-            # SI doesn't reach this slab
-            continue
+        if remaining_si <= 0:
+            break
             
-        # Amount in this slab
-        # e.g. if slab is 0 - 500M, and SI is 1000M
-        # portion = min(1000M, 500M) - 0 = 500M
-        # e.g. if slab is 500M+1 - 1000M, and SI is 1000M
-        # portion = min(1000M, 1000M) - 500M = 500M
+        slab_min = Decimal(str(slab['min_sum_insured']))
+        slab_max = Decimal(str(slab['max_sum_insured'])) if slab['max_sum_insured'] is not None else Decimal('Infinity')
+        rate = Decimal(str(slab['rate_per_mille']))
+
+        # Size of the slab interval
+        # If it's the first slab (0-500), interval is 500.
+        # If it's 501-1000, interval is 500 (1000 - 500).
+        # We use (slab_max - max(0, slab_min - 1)) as the interval size.
+        lower_bound = max(Decimal("0"), slab_min - 1)
+        slab_interval = slab_max - lower_bound
         
-        # We use min_si - 1 for the lower bound of the slab calculation 
-        # because the slab is inclusive of min_si. 
-        # If min_si is 1, lower bound for subtraction is 0.
-        # If min_si is 15,000,000,001, lower bound for subtraction is 15,000,000,000.
-        
-        lower_bound_for_calc = max(Decimal("0"), min_si - 1)
-        upper_limit_for_calc = min(total_si, max_si)
-        
-        amount_in_slab = upper_limit_for_calc - lower_bound_for_calc
+        # Portion of total_si that falls into this slab
+        # If total_si = 1000, and slab is 0-500: amount = 500.
+        # If total_si = 1000, and slab is 501-1500: amount = 500.
+        amount_in_slab = min(remaining_si, slab_interval)
         
         if amount_in_slab > 0:
             slab_premium = amount_in_slab * rate / Decimal("1000")
             total_premium += slab_premium
-            # logger.info(f"Slab {min_si}-{max_si}: Upper={upper_limit_for_calc}, Lower={lower_bound_for_calc}, Amt={amount_in_slab}, Rate={rate} -> Prem={slab_premium}")
+            remaining_si -= amount_in_slab
+            # logger.info(f"Slab {slab_min}-{slab_max}: Amt={amount_in_slab}, Rate={rate} -> Prem={slab_premium}")
 
-    return total_premium
+    return float(total_premium)
+
+def get_fire_terrorism_premium(occupancy_type: str, total_sum_insured: float) -> float:
+    """
+    Internal service method for terrorism premium calculation.
+    (Objective 4)
+    """
+    return calculate_terrorism_premium(occupancy_type, total_sum_insured)
 
 def get_add_on_rate(product_code: str, add_on_code: str, occupancy_code: Optional[str] = None) -> Tuple[str, Decimal]:
     """

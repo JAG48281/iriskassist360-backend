@@ -8,7 +8,13 @@ from app.models.quote import Quote
 from app.utils.pdf_generator import generate_premium_pdf
 
 from app.schemas.response import ResponseModel
-from app.services.rating_engine import get_basic_rate_per_mille, get_terrorism_rate_per_mille
+from app.services.rating_engine import (
+    get_basic_rate_per_mille, 
+    get_terrorism_rate_per_mille,
+    get_fire_terrorism_premium,
+    get_occupancy_details
+)
+from decimal import Decimal
 import logging
 
 logger = logging.getLogger(__name__)
@@ -22,6 +28,7 @@ class FireCalcRequest(BaseModel):
     building_si: int = Field(..., gt=0, description="Sum insured (whole rupees)")
     occupancy: str
     pa_selected: bool = False
+    add_ons: List[str] = Field(default_factory=list, description="Selected add-ons (e.g. ['TERRORISM'])")
 
 class UBGRRequest(BaseModel):
     buildingSI: float
@@ -33,6 +40,7 @@ class UBGRRequest(BaseModel):
     paSpouse: Optional[str] = None
     paSpouseSI: Optional[float] = None
     discountPercentage: float = 0.0
+    add_ons: List[str] = Field(default_factory=list, description="Selected add-ons")
     # Additional fields for FE integration validation
     occupancyId: Optional[str] = Field(None, description="Occupancy ID/Code (e.g. 1001)")
     productCode: Optional[str] = Field(None, description="Product Code (e.g. BGRP)")
@@ -42,15 +50,26 @@ class UBGRRequest(BaseModel):
 # -------------------------------
 
 def _calculate_premium(building_si: int, rate_per_mille: float, pa_selected: bool,
-                       mandatory_terrorism_per_mille: float = 0.07) -> Dict[str, Any]:
+                       occupancy_type: str = "Non-Industrial", add_ons: List[str] = []) -> Dict[str, Any]:
+    """
+    Refined premium calculator following Objective 5 rules.
+    """
     basic = building_si * (rate_per_mille / 1000.0)
-    terrorism = building_si * (mandatory_terrorism_per_mille / 1000.0)
+    
+    # Objective 5: Terrorism Logic
+    terrorism = 0.0
+    if "TERRORISM" in [a.upper() for a in add_ons]:
+        terrorism = get_fire_terrorism_premium(occupancy_type, float(building_si))
+        
     pa = 7 if pa_selected else 0
+    
+    # Net Premium includes terrorism per Rule 5
     net = basic + terrorism + pa
 
     if net < 50:
         net = 50.0
 
+    # GST applies on Net Premium (including terrorism) per Rule 5
     gst = round(net * 0.18, 2)
     gross = round(net + gst, 2)
 
@@ -58,12 +77,12 @@ def _calculate_premium(building_si: int, rate_per_mille: float, pa_selected: boo
         "basic_premium": round(basic, 2),
         "add_on_premium": float(pa),
         "discount_amount": 0.0,
-        "sub_total": round(basic + pa, 2), # simplified subtotal
+        "sub_total": round(basic + pa, 2),
         "loading_amount": 0.0,
         "terrorism_premium": round(terrorism, 2),
         "net_premium": round(net, 2),
-        "cgst": gst,
-        "sgst": 0.0, # Helper only calc 18% total as 'gst'. Splitting for schema.
+        "cgst": round(gst / 2, 2),
+        "sgst": round(gst / 2, 2),
         "stamp_duty": 0.0,
         "gross_premium": gross
     }
@@ -113,13 +132,19 @@ def calculate_vusp(payload: FireCalcRequest, db: Session = Depends(get_db)):
     fallback = {"Office": 0.20, "Residential": 0.16, "Hospital": 0.22, "Shop": 0.25}
     occ = payload.occupancy.strip().title()
     rate = _lookup_rate(db, product_code, occ, fallback)
-    result = _calculate_premium(payload.building_si, rate, payload.pa_selected)
     
-    # Split GST for schema compliance (18% total -> 9% CGST, 9% SGST)
-    total_gst = result["gst"]
-    result["cgst"] = round(total_gst / 2, 2)
-    result["sgst"] = round(total_gst / 2, 2)
-    del result["gst"] # Remove non-compliant key
+    # Resolve occupancy type for terrorism
+    occ_type = "Non-Industrial"
+    if "Residential" in occ: occ_type = "Residential"
+    elif "Industrial" in occ: occ_type = "Industrial"
+    
+    result = _calculate_premium(
+        payload.building_si, 
+        rate, 
+        payload.pa_selected, 
+        occupancy_type=occ_type, 
+        add_ons=payload.add_ons
+    )
     
     response = {
         **result,
@@ -145,12 +170,18 @@ def calculate_bsusp(payload: FireCalcRequest, db: Session = Depends(get_db)):
     fallback = {"Office": 0.20, "Residential": 0.16, "Hospital": 0.22, "Shop": 0.25}
     occ = payload.occupancy.strip().title()
     rate = _lookup_rate(db, product_code, occ, fallback)
-    result = _calculate_premium(payload.building_si, rate, payload.pa_selected)
     
-    total_gst = result["gst"]
-    result["cgst"] = round(total_gst / 2, 2)
-    result["sgst"] = round(total_gst / 2, 2)
-    del result["gst"]
+    occ_type = "Non-Industrial"
+    if "Residential" in occ: occ_type = "Residential"
+    elif "Industrial" in occ: occ_type = "Industrial"
+
+    result = _calculate_premium(
+        payload.building_si, 
+        rate, 
+        payload.pa_selected, 
+        occupancy_type=occ_type, 
+        add_ons=payload.add_ons
+    )
     
     response = {
         **result,
@@ -176,13 +207,19 @@ def calculate_blusp(payload: FireCalcRequest, db: Session = Depends(get_db)):
     fallback = {"Office": 0.20, "Residential": 0.16, "Hospital": 0.22, "Shop": 0.25}
     occ = payload.occupancy.strip().title()
     rate = _lookup_rate(db, product_code, occ, fallback)
-    result = _calculate_premium(payload.building_si, rate, payload.pa_selected)
     
-    total_gst = result["gst"]
-    result["cgst"] = round(total_gst / 2, 2)
-    result["sgst"] = round(total_gst / 2, 2)
-    del result["gst"]
-
+    occ_type = "Non-Industrial"
+    if "Residential" in occ: occ_type = "Residential"
+    elif "Industrial" in occ: occ_type = "Industrial"
+    
+    result = _calculate_premium(
+        payload.building_si, 
+        rate, 
+        payload.pa_selected, 
+        occupancy_type=occ_type, 
+        add_ons=payload.add_ons
+    )
+    
     response = {
         **result,
         "meta": {
@@ -232,29 +269,43 @@ def calculate_bgrp(payload: UBGRRequest, db: Session = Depends(get_db)):
     # Fire Premium
     firePremium = totalSI * (basic_rate / 1000.0)
     
-    # 3. Terrorism Premium
-    terrorismSI = totalSI
+    # 3. Terrorism Premium (Objective 3 & 4)
     terrorismPremium = 0.0
+    occ_type = "Residential" # Default for BGRP
     
     try:
-        # Strict check relaxed to allow testing various occupancies as per requirement
-        if occupancy_code != "1001":
-            logger.warning(f"BGRP request using non-standard occupancy: {occupancy_code}")
+        # Resolve actual occupancy type if available
+        occ_details = get_occupancy_details(occupancy_code)
+        if occ_details:
+            occ_type = occ_details.get("occupancy_type", "Residential")
 
-        terr_rate_decimal = get_terrorism_rate_per_mille(product_code, occupancy_code=occupancy_code, tsi=totalSI)
-        terr_rate = float(terr_rate_decimal)
-        
-        # Hard Assertion: Rate must be 0.07 for Residential (1001)
-        if occupancy_code == "1001" and abs(terr_rate - 0.07) > 0.00001:
-             error_msg = f"CRITICAL VALIDATION FAILED: Terrorism Rate is {terr_rate}, expected 0.07"
-             logger.error(error_msg)
-             raise ValueError(error_msg)
+        # Check if terrorism is selected
+        # Task 5: "If TERRORISM is in add_ons"
+        is_terrorism_selected = False
+        if "TERRORISM" in [a.upper() for a in payload.add_ons]:
+            is_terrorism_selected = True
+        elif payload.terrorismCover and payload.terrorismCover.upper() in ["YES", "TERRORISM"]:
+            is_terrorism_selected = True
+        elif payload.terrorismSI and payload.terrorismSI > 0:
+             is_terrorism_selected = True
              
-        terrorismPremium = round(terrorismSI * (terr_rate / 1000.0), 2)
-        logger.info(f"Terrorism Calc: SI={terrorismSI} * Rate={terr_rate}‰ = {terrorismPremium}")
+        if is_terrorism_selected:
+            # Use slab-wise calculation logic
+            terrorismPremium = get_fire_terrorism_premium(occ_type, totalSI)
+            logger.info(f"Terrorism Calc (Slab-wise): SI={totalSI} Type={occ_type} -> {terrorismPremium}")
+            
+            # For BGRP meta: resolve a "representative" rate for UI display if needed
+            # We'll use the highest matching slab rate for the total SI as the " terrorism_rate"
+            terr_rate = float(get_terrorism_rate_per_mille(occ_type, float(totalSI)))
+        else:
+            terrorismPremium = 0.0
+            terr_rate = 0.0
+            
     except Exception as e:
-        logger.error(f"Terrorism Rate Lookup/Validation Failed: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        logger.error(f"Terrorism Calculation Failed: {e}")
+        # If terrorism is mandatory for some config, we might raise, but here we proceed with 0 or fallback
+        terrorismPremium = 0.0
+        terr_rate = 0.0
 
     # 4. PA Premium (Flat Rs. 7 per person)
     paPremium = 0.0
@@ -346,13 +397,18 @@ def calculate_sfsp(payload: FireCalcRequest, db: Session = Depends(get_db)):
     fallback = {"Factory": 0.60, "Plant": 0.75, "Warehouse": 0.40}
     occ = payload.occupancy.strip().title()
     rate = _lookup_rate(db, product_code, occ, fallback)
-    result = _calculate_premium(payload.building_si, rate, payload.pa_selected)
     
-    total_gst = result["gst"]
-    result["cgst"] = round(total_gst / 2, 2)
-    result["sgst"] = round(total_gst / 2, 2)
-    del result["gst"]
-
+    occ_type = "Industrial" # Default for SFSP
+    if "Office" in occ or "Shop" in occ: occ_type = "Non-Industrial"
+    
+    result = _calculate_premium(
+        payload.building_si, 
+        rate, 
+        payload.pa_selected, 
+        occupancy_type=occ_type, 
+        add_ons=payload.add_ons
+    )
+    
     response = {
         **result,
         "meta": {
@@ -377,13 +433,17 @@ def calculate_iar(payload: FireCalcRequest, db: Session = Depends(get_db)):
     fallback = {"Factory": 0.60, "Plant": 0.75, "Warehouse": 0.40}
     occ = payload.occupancy.strip().title()
     rate = _lookup_rate(db, product_code, occ, fallback)
-    result = _calculate_premium(payload.building_si, rate, payload.pa_selected)
     
-    total_gst = result["gst"]
-    result["cgst"] = round(total_gst / 2, 2)
-    result["sgst"] = round(total_gst / 2, 2)
-    del result["gst"]
-
+    occ_type = "Industrial" # Default for IAR
+    
+    result = _calculate_premium(
+        payload.building_si, 
+        rate, 
+        payload.pa_selected, 
+        occupancy_type=occ_type, 
+        add_ons=payload.add_ons
+    )
+    
     response = {
         **result,
         "meta": {

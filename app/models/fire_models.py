@@ -80,25 +80,15 @@ class EqRate(Base):
 
     occupancy = relationship("Occupancy")
 
-class TerrorismSlab(Base):
-    __tablename__ = "terrorism_slabs"
-
-    id = Column(Integer, primary_key=True, index=True)
-    occupancy_type = Column(String(length=50), nullable=False)
-    min_sum_insured = Column(Numeric(precision=20, scale=2), nullable=False)
-    max_sum_insured = Column(Numeric(precision=20, scale=2), nullable=True)
-    rate_per_mille = Column(Numeric(precision=10, scale=6), nullable=False)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
 class FireTerrorismRate(Base):
     __tablename__ = "fire_terrorism_rates"
 
     id = Column(Integer, primary_key=True, index=True)
-    occupancy_type = Column(String(length=30), nullable=False)
-    min_sum_insured = Column(Numeric(precision=18, scale=2), nullable=False, server_default='0')
+    occupancy_type = Column(String(length=50), nullable=False)
+    min_sum_insured = Column(Numeric(precision=18, scale=2), nullable=False)
     max_sum_insured = Column(Numeric(precision=18, scale=2), nullable=True)
-    rate_per_mille = Column(Numeric(precision=6, scale=4), nullable=False)
+    rate_per_mille = Column(Numeric(precision=10, scale=6), nullable=False)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
