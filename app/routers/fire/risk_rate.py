@@ -35,8 +35,8 @@ def get_risk_rate(
             detail=f"Risk rate not found for IIB code {code_str}"
         )
 
-    # Debug Log (MANDATORY)
-    logger.info(f"Fire risk rate fetched from fire_iib_rates for iib_code={code_str}")
+    # Mandatory Log (as per requirement)
+    logger.info(f"Fetching base risk rate from fire_iib_rates for iib_code={code_str}")
 
     return {
         "iib_code": code_str,
