@@ -15,7 +15,7 @@ class Occupancy(Base):
     allow_addons = Column(Boolean, server_default='true', nullable=False)
 
 class AddOnMaster(Base):
-    __tablename__ = "add_on_master"
+    __tablename__ = "fire_add_on_master"
     
     id = Column(Integer, primary_key=True, index=True)
     add_on_code = Column(String(length=50), nullable=False, unique=True)
@@ -54,7 +54,7 @@ class ProductBasicRate(Base):
     occupancy = relationship("Occupancy")
 
 class StfiRate(Base):
-    __tablename__ = "stfi_rates"
+    __tablename__ = "fire_stfi_rates"
     
     id = Column(Integer, primary_key=True, index=True)
     occupancy_id = Column(Integer, ForeignKey("occupancies.id"), nullable=False, unique=True)
@@ -67,7 +67,7 @@ class StfiRate(Base):
     occupancy = relationship("Occupancy")
 
 class EqRate(Base):
-    __tablename__ = "eq_rates"
+    __tablename__ = "fire_eq_rates"
 
     id = Column(Integer, primary_key=True, index=True)
     occupancy_id = Column(Integer, ForeignKey("occupancies.id"), nullable=False)
@@ -93,7 +93,7 @@ class FireTerrorismRate(Base):
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
 class BsusRate(Base):
-    __tablename__ = "bsus_rates"
+    __tablename__ = "fire_bsus_rates"
 
     id = Column(Integer, primary_key=True, index=True)
     product_code = Column(String(length=20), nullable=True) 
@@ -111,7 +111,7 @@ class BsusRate(Base):
     )
 
 class AddOnRate(Base):
-    __tablename__ = "add_on_rates"
+    __tablename__ = "fire_add_on_rates"
 
     id = Column(Integer, primary_key=True, index=True)
     add_on_id = Column(Integer, ForeignKey("add_on_master.id"), nullable=False)
@@ -135,5 +135,6 @@ class AddOnRate(Base):
 class FireIibRate(Base):
     __tablename__ = "fire_iib_rates"
     
-    iib_code = Column(String(length=20), primary_key=True)
+    id = Column(Integer, primary_key=True, index=True)
+    iib_code = Column(String(length=20), nullable=False, unique=True)
     rate_per_mille = Column(Numeric(precision=10, scale=6), nullable=False)

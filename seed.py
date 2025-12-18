@@ -33,7 +33,7 @@ from sqlalchemy import text, select, insert
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from app.database import engine, SessionLocal
 from app.models.fire_models import (
-    Occupancy, TerrorismSlab, AddOnMaster, AddOnRate
+    Occupancy, FireTerrorismRate, AddOnMaster, AddOnRate
 )
 from app.models.master import LobMaster
 
@@ -49,7 +49,7 @@ stats = {
     "fire_bsus_rates": {"success": 0, "failed": 0, "skipped": False},
     "fire_stfi_rates": {"success": 0, "failed": 0, "skipped": False},
     "fire_eq_rates": {"success": 0, "failed": 0, "skipped": False},
-    "terrorism_slabs": {"success": 0, "failed": 0, "skipped": False},
+    "fire_terrorism_rates": {"success": 0, "failed": 0, "skipped": False},
     "fire_add_on_master": {"success": 0, "failed": 0, "skipped": False},
     "fire_add_on_rates": {"success": 0, "failed": 0, "skipped": False}
 }
@@ -347,42 +347,58 @@ def seed_fire_eq_rates():
     
     logger.info(f"✅ Fire EQ Rates: {stats['fire_eq_rates']['success']} success, {stats['fire_eq_rates']['failed']} failed")
 
-def seed_terrorism_slabs():
-    """Seed terrorism_slabs with official values"""
-    logger.info("Seeding Terrorism Slabs...")
+def seed_fire_terrorism_rates():
+    """Seed fire_terrorism_rates from CSV (Objective 3: Truncate + Insert)"""
+    logger.info("Seeding Fire Terrorism Rates (CSV)...")
+    csv_path = "data/fire_terrorism_rates.csv"
     
-    slabs = [
-        {"product_code": "BGRP", "occupancy_type": "Residential", "si_min": 0, "si_max": None, "rate_per_mille": 0.07},
-        {"product_code": "UBGR", "occupancy_type": "Residential", "si_min": 0, "si_max": None, "rate_per_mille": 0.07},
-        {"product_code": "UVGR", "occupancy_type": "Residential", "si_min": 0, "si_max": None, "rate_per_mille": 0.07},
-        {"product_code": "SFSP", "occupancy_type": "Residential", "si_min": 0, "si_max": None, "rate_per_mille": 0.10},
-        {"product_code": "SFSP", "occupancy_type": "Non-Industrial", "si_min": 0, "si_max": 20000000000, "rate_per_mille": 0.15},
-        {"product_code": "SFSP", "occupancy_type": "Non-Industrial", "si_min": 20000000000, "si_max": None, "rate_per_mille": 0.12},
-        {"product_code": "SFSP", "occupancy_type": "Industrial", "si_min": 0, "si_max": 20000000000, "rate_per_mille": 0.20},
-        {"product_code": "SFSP", "occupancy_type": "Industrial", "si_min": 20000000000, "si_max": None, "rate_per_mille": 0.15},
-        {"product_code": "IAR", "occupancy_type": "Residential", "si_min": 0, "si_max": None, "rate_per_mille": 0.10},
-        {"product_code": "IAR", "occupancy_type": "Non-Industrial", "si_min": 0, "si_max": 20000000000, "rate_per_mille": 0.15},
-        {"product_code": "IAR", "occupancy_type": "Non-Industrial", "si_min": 20000000000, "si_max": None, "rate_per_mille": 0.12},
-        {"product_code": "IAR", "occupancy_type": "Industrial", "si_min": 0, "si_max": 20000000000, "rate_per_mille": 0.20},
-        {"product_code": "IAR", "occupancy_type": "Industrial", "si_min": 20000000000, "si_max": None, "rate_per_mille": 0.15},
-        {"product_code": "BSUS", "occupancy_type": "Residential", "si_min": 0, "si_max": None, "rate_per_mille": 0.10},
-        {"product_code": "BSUS", "occupancy_type": "Non-Industrial", "si_min": 0, "si_max": 20000000000, "rate_per_mille": 0.15},
-        {"product_code": "BSUS", "occupancy_type": "Non-Industrial", "si_min": 20000000000, "si_max": None, "rate_per_mille": 0.12},
-        {"product_code": "BLUS", "occupancy_type": "Residential", "si_min": 0, "si_max": None, "rate_per_mille": 0.10},
-        {"product_code": "BLUS", "occupancy_type": "Non-Industrial", "si_min": 0, "si_max": 20000000000, "rate_per_mille": 0.15},
-        {"product_code": "BLUS", "occupancy_type": "Non-Industrial", "si_min": 20000000000, "si_max": None, "rate_per_mille": 0.12},
-        {"product_code": "UVUS", "occupancy_type": "Residential", "si_min": 0, "si_max": None, "rate_per_mille": 0.10},
-        {"product_code": "UVUS", "occupancy_type": "Non-Industrial", "si_min": 0, "si_max": 20000000000, "rate_per_mille": 0.15},
-        {"product_code": "UVUS", "occupancy_type": "Non-Industrial", "si_min": 20000000000, "si_max": None, "rate_per_mille": 0.12},
-    ]
-    
+    if not os.path.exists(csv_path):
+        logger.warning(f"⚠️  {csv_path} not found, skipping")
+        return
+        
     with engine.connect() as conn:
-        for slab in slabs:
-            success, error = safe_upsert(conn, TerrorismSlab, slab, "terrorism_slabs")
-            if not success:
-                logger.warning(f"Failed terrorism slab {slab.get('product_code')}/{slab.get('occupancy_type')}: {error}")
-    
-    logger.info(f"✅ Terrorism Slabs: {stats['terrorism_slabs']['success']} success, {stats['terrorism_slabs']['failed']} failed")
+        # Check if table exists
+        if not check_table_exists(conn, "fire_terrorism_rates"):
+             return
+
+        # Objective 3: Truncate + Insert
+        try:
+            # Use DELETE for compatibility if TRUNCATE is not supported (SQLite)
+            if "sqlite" in str(engine.url).lower():
+                conn.execute(text("DELETE FROM fire_terrorism_rates"))
+            else:
+                conn.execute(text("TRUNCATE TABLE fire_terrorism_rates RESTART IDENTITY CASCADE"))
+            conn.commit()
+            logger.info("Table fire_terrorism_rates cleared.")
+        except Exception as e:
+            conn.rollback()
+            logger.warning(f"Failed to clear fire_terrorism_rates: {e}")
+
+        with open(csv_path, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                # Handle NULL max_sum_insured
+                max_si = row.get('max_sum_insured')
+                if max_si is None or (isinstance(max_si, str) and max_si.strip() == ""):
+                    max_si = None
+                else:
+                    max_si = float(max_si)
+
+                sql = text("""
+                    INSERT INTO fire_terrorism_rates (occupancy_type, min_sum_insured, max_sum_insured, rate_per_mille)
+                    VALUES (:ot, :min_si, :max_si, :rate)
+                """)
+                params = {
+                    "ot": row['occupancy_type'],
+                    "min_si": float(row['min_sum_insured']),
+                    "max_si": max_si,
+                    "rate": float(row['rate_per_mille'])
+                }
+                success, error = safe_execute_sql(conn, sql, params, "fire_terrorism_rates")
+                if not success:
+                    logger.warning(f"Failed terrorism rate {row.get('occupancy_type')}: {error}")
+        
+    logger.info(f"✅ Fire Terrorism Rates: {stats['fire_terrorism_rates']['success']} success, {stats['fire_terrorism_rates']['failed']} failed")
 
 def seed_fire_add_on_master():
     """Seed fire_add_on_master from CSV"""
@@ -477,7 +493,7 @@ def verify_seeding():
         "fire_bsus_rates",
         "fire_stfi_rates",
         "fire_eq_rates",
-        "terrorism_slabs",
+        "fire_terrorism_rates",
         "fire_add_on_master",
         "fire_add_on_rates"
     ]
@@ -553,7 +569,7 @@ def main():
         seed_fire_bsus_rates()
         seed_fire_stfi_rates()
         seed_fire_eq_rates()
-        seed_terrorism_slabs()
+        seed_fire_terrorism_rates()
         seed_fire_add_on_master()
         seed_fire_add_on_rates()
         

@@ -103,29 +103,30 @@ async def calculate_risk_rate(request: CalculateRequest):
             # Resolve Occupancy Type
             occupancy_type = "Residential" # Default
             try:
-                occ_res = conn.execute(
-                    text("SELECT occupancy_type FROM occupancies WHERE iib_code = :iib"),
-                    {"iib": iib_code}
-                ).scalar()
-                if occ_res:
-                    occupancy_type = occ_res
+                with engine.connect() as conn:
+                    occ_res = conn.execute(
+                        text("SELECT occupancy_type FROM occupancies WHERE iib_code = :iib"),
+                        {"iib": iib_code}
+                    ).scalar()
+                    if occ_res:
+                        occupancy_type = occ_res
             except Exception as e:
                 logger.warning(f"Occupancy type lookup failed for {iib_code}: {e}. Using Default: Residential.")
 
             try:
-                from app.services.rating_engine import calculate_terrorism_premium_slab_wise
+                from app.services.rating_engine import get_fire_terrorism_premium
                 terrorism_rate_d = get_terrorism_rate_per_mille(
                     occupancy_type=occupancy_type, 
                     total_si=total_si
                 )
                 terrorism_rate = float(terrorism_rate_d)
                 
-                # Rule 4: Slab-wise calculation
-                terrorism_premium_d = calculate_terrorism_premium_slab_wise(
+                # Rule 4: Slab-wise calculation (using Objective 4 Logic)
+                terrorism_premium = get_fire_terrorism_premium(
                     occupancy_type=occupancy_type,
-                    total_si=Decimal(str(total_si))
+                    total_sum_insured=total_si
                 )
-                terrorism_premium = float(round_currency(float(terrorism_premium_d)))
+                terrorism_premium = float(round_currency(terrorism_premium))
             except Exception as e:
                 logger.warning(f"Terrorism lookup failed: {e}. Defaulting to 1st slab rate.")
                 # Fallback to 0.07 if Residential or basic logic

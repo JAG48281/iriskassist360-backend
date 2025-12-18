@@ -99,8 +99,9 @@ def create_app():
     app.include_router(fire_premium.router, prefix="/api")
     
     # Fire Risk Rate API
-    from app.routers.fire import risk_rate
+    from app.routers.fire import risk_rate, terrorism
     app.include_router(risk_rate.router)
+    app.include_router(terrorism.router, prefix="/api")
     
     # Health Check
     from app.routers import health

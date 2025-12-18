@@ -30,10 +30,17 @@ def get_basic_rate_per_mille(product_code: str, occupancy_code: Union[str, int],
     Raises:
         ValueError: If no rate is configured or inputs invalid
     """
-    iib_code = str(occupancy_code)
+    val = str(occupancy_code)
+    iib_code = val
     
     try:
         with engine.connect() as conn:
+            # If occupancy_code looks like a DB ID, resolve it to iib_code first
+            if val.isdigit() and len(val) < 8: # Small int likely an ID
+                 res = conn.execute(text("SELECT iib_code FROM occupancies WHERE id = :id"), {"id": int(val)}).scalar()
+                 if res:
+                     iib_code = res
+                     
             if product_code.upper() == "BSUS":
                 if not eq_zone:
                     raise ValueError("EQ Zone is required for BSUS rating")
@@ -134,26 +141,32 @@ def get_stfi_rate_per_mille(iib_code: str) -> Decimal:
         logger.error(f"DB Error (get_stfi_rate_per_mille): {e}")
         return Decimal("0.0")
 
-def get_occupancy_details(occupancy_code: str) -> dict:
+def get_occupancy_details(occupancy_code: Union[str, int]) -> dict:
     """
-    Fetches full occupancy details including all required fields.
-    
-    Returns dict with keys: id, iib_code, occupancy_type, section_aift, allow_addons
-    
-    Args:
-        occupancy_code: IIB code (e.g., '1001')
-        
-    Returns:
-        dict: Occupancy details or None if not found
+    Fetches full occupancy details. Handles both DB ID or IIB Code.
     """
-    stmt = text("""
-        SELECT id, iib_code, occupancy_type, section_aift, allow_addons 
-        FROM occupancies 
-        WHERE iib_code = :code
-    """)
+    # Determine if occupancy_code is an ID (integer/numeric string) or IIB code
+    try:
+        # If it can be cast to int, try matching by ID first, then by iib_code
+        occ_id = int(str(occupancy_code))
+        stmt = text("""
+            SELECT id, iib_code, occupancy_type, section_aift, allow_addons 
+            FROM occupancies 
+            WHERE id = :val OR iib_code = CAST(:val AS VARCHAR)
+        """)
+        val = occ_id
+    except (ValueError, TypeError):
+        # Otherwise match by iib_code
+        stmt = text("""
+            SELECT id, iib_code, occupancy_type, section_aift, allow_addons 
+            FROM occupancies 
+            WHERE iib_code = :val
+        """)
+        val = str(occupancy_code)
+
     try:
         with engine.connect() as conn:
-            row = conn.execute(stmt, {"code": occupancy_code}).fetchone()
+            row = conn.execute(stmt, {"val": val}).fetchone()
             if row:
                 details = {
                     "id": row.id,
@@ -173,13 +186,9 @@ def get_occupancy_details(occupancy_code: str) -> dict:
 
 def get_terrorism_rate_per_mille(occupancy_type: str, total_si: float) -> Decimal:
     """
-    Fetches the terrorism rate based on TSI slabs.
-    Matches Occupancy Type and TSI range.
-    Product-agnostic.
+    Fetches the terrorism rate for metadata (representative rate for the current SI).
+    Ordered by min_sum_insured DESC to get the highest matching slab.
     """
-    logger.info(f"Looking up Terrorism Rate: OccType={occupancy_type}, TSI={total_si}")
-
-    # Query with TSI range check & Deterministic Ordering (per Task 3)
     stmt = text("""
         SELECT rate_per_mille
         FROM fire_terrorism_rates
@@ -192,24 +201,15 @@ def get_terrorism_rate_per_mille(occupancy_type: str, total_si: float) -> Decima
         ORDER BY min_sum_insured DESC
         LIMIT 1;
     """)
-    
     try:
         with engine.connect() as conn:
             result = conn.execute(stmt, {"ot": occupancy_type, "tsi": total_si}).scalar()
-            
             if result is not None:
-                rate = Decimal(str(result))
-                logger.info(f"TERRORISM RATE RESOLVED → occupancy={occupancy_type}, total_si={total_si}, rate={rate}") 
-                return rate
-            
-            # Explicit failure if no slab matches
-            error_msg = f"No terrorism slab found for Type={occupancy_type}, TSI={total_si}"
-            logger.error(error_msg)
-            raise ValueError(error_msg)
-            
+                return Decimal(str(result))
+            return Decimal("0")
     except Exception as e:
         logger.error(f"DB Error (get_terrorism_rate_per_mille): {e}")
-        raise e
+        return Decimal("0")
 
 def get_terrorism_slabs(occupancy_type: str) -> list:
     """
@@ -230,55 +230,34 @@ def get_terrorism_slabs(occupancy_type: str) -> list:
         logger.error(f"DB Error (get_terrorism_slabs): {e}")
         return []
 
-def calculate_terrorism_premium(occupancy_type: str, total_sum_insured: float) -> float:
-    """
-    Calculates terrorism premium by splitting total sum insured into slabs.
-    (Objective 3: Progressive / Slab-wise calculation)
-    """
-    total_si = Decimal(str(total_sum_insured))
-    slabs = get_terrorism_slabs(occupancy_type)
-    total_premium = Decimal("0")
-    
-    if not slabs:
-        logger.warning(f"No terrorism slabs found for {occupancy_type}")
-        return 0.0
-
-    remaining_si = total_si
-    
-    for slab in slabs:
-        if remaining_si <= 0:
-            break
-            
-        slab_min = Decimal(str(slab['min_sum_insured']))
-        slab_max = Decimal(str(slab['max_sum_insured'])) if slab['max_sum_insured'] is not None else Decimal('Infinity')
-        rate = Decimal(str(slab['rate_per_mille']))
-
-        # Size of the slab interval
-        # If it's the first slab (0-500), interval is 500.
-        # If it's 501-1000, interval is 500 (1000 - 500).
-        # We use (slab_max - max(0, slab_min - 1)) as the interval size.
-        lower_bound = max(Decimal("0"), slab_min - 1)
-        slab_interval = slab_max - lower_bound
-        
-        # Portion of total_si that falls into this slab
-        # If total_si = 1000, and slab is 0-500: amount = 500.
-        # If total_si = 1000, and slab is 501-1500: amount = 500.
-        amount_in_slab = min(remaining_si, slab_interval)
-        
-        if amount_in_slab > 0:
-            slab_premium = amount_in_slab * rate / Decimal("1000")
-            total_premium += slab_premium
-            remaining_si -= amount_in_slab
-            # logger.info(f"Slab {slab_min}-{slab_max}: Amt={amount_in_slab}, Rate={rate} -> Prem={slab_premium}")
-
-    return float(total_premium)
-
 def get_fire_terrorism_premium(occupancy_type: str, total_sum_insured: float) -> float:
     """
-    Internal service method for terrorism premium calculation.
-    (Objective 4)
+    Calculates total terrorism premium based on progressive slabs.
+    (Objective 4 Logic)
     """
-    return calculate_terrorism_premium(occupancy_type, total_sum_insured)
+    slabs = get_terrorism_slabs(occupancy_type)
+    total_premium = Decimal("0")
+    total_si = Decimal(str(total_sum_insured))
+
+    for slab in slabs:
+        min_si = Decimal(str(slab['min_sum_insured']))
+        max_si = slab['max_sum_insured']
+        rate = Decimal(str(slab['rate_per_mille']))
+
+        # Logic: slab_upper = max_sum_insured or total_sum_insured
+        slab_upper = Decimal(str(max_si)) if max_si is not None else total_si
+        
+        # Logic: slab_amount = max(0, min(total_sum_insured, slab_upper) - min_sum_insured)
+        slab_amount = max(Decimal("0"), min(total_si, slab_upper) - min_si)
+        
+        if slab_amount > 0:
+            total_premium += (slab_amount * rate / Decimal("1000"))
+            
+    return float(total_premium)
+
+def calculate_terrorism_premium(occupancy_type: str, total_sum_insured: float) -> float:
+    """Legacy wrapper for get_fire_terrorism_premium"""
+    return get_fire_terrorism_premium(occupancy_type, total_sum_insured)
 
 def get_add_on_rate(product_code: str, add_on_code: str, occupancy_code: Optional[str] = None) -> Tuple[str, Decimal]:
     """

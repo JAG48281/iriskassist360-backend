@@ -11,7 +11,8 @@ from .fire_models import (
     ProductBasicRate, 
     StfiRate, 
     EqRate, 
-    TerrorismSlab, 
+    FireTerrorismRate, 
     BsusRate, 
-    AddOnRate
+    AddOnRate,
+    FireIibRate
 )
