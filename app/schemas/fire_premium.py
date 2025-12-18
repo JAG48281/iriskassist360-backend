@@ -38,9 +38,9 @@ class UBGRUVGRRequest(BaseModel):
     occupancyCode: str = Field(..., description="IIB Code (e.g., 1001, 1001_2)")
     
     # Primary fields for UBGR/BGRP
-    buildingSI: float = Field(..., ge=0, description="Building Sum Insured")
-    contentsSI: float = Field(..., ge=0, description="Contents Sum Insured")
-    terrorism_si: float = Field(0, description="ONLY for terrorism premium")
+    buildingSI: float = Field(0.0, ge=0, description="Building Sum Insured")
+    contentsSI: float = Field(0.0, ge=0, description="Contents Sum Insured")
+    terrorism_si: float = Field(0.0, description="ONLY for terrorism premium")
     
     # Optional/Alias fields for backward compatibility
     basic_cover_si: Optional[float] = Field(None, description="Alias for buildingSI")
@@ -109,6 +109,7 @@ class PremiumBreakdown(BaseModel):
     net_premium: float
     cgst: float
     sgst: float
+    gst: float # Total GST (CGST + SGST)
     stamp_duty: float = 1.0
     gross_premium: float
 

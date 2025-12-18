@@ -107,7 +107,7 @@ class FirePremiumCalculator:
     def calculate_ubgr_uvgr(request: UBGRUVGRRequest) -> Dict:
         """
         Calculate premium for UBGR/UVGR products.
-        STRICT MODE with ₹50 Net Premium Rule.
+        STRICT MODE with ₹50 (Basic+Addon) Minimum Premium Rule.
         """
         logger.info(f"Calculating {request.productCode} Premium")
         logger.info(f"Payload: {request.model_dump()}")
@@ -117,14 +117,14 @@ class FirePremiumCalculator:
             discount_pct = Decimal(str(request.discountPercentage or 0.0))
             loading_pct = Decimal(str(request.loadingPercentage or 0.0))
             
-            # Primary fields for UBGR/BGRP (Aliased in schema validator already)
-            building_si = Decimal(str(request.buildingSI))
-            contents_si = Decimal(str(request.contentsSI))
+            # Resolve Source SIs (Preference for basic_cover_si/add_on_cover_si as per turn prompt)
+            raw_basic_si = request.basic_cover_si if request.basic_cover_si is not None else request.buildingSI
+            raw_addon_si = request.add_on_cover_si if request.add_on_cover_si is not None else request.contentsSI
+            
+            building_si = Decimal(str(raw_basic_si or 0.0))
+            contents_si = Decimal(str(raw_addon_si or 0.0))
             terrorism_si_input = Decimal(str(request.terrorism_si or request.terrorismSI or 0.0))
             
-            # DEBUG Logs
-            logger.debug(f"UBGR SI Resolution | buildingSI={building_si}, contentsSI={contents_si}")
-
             # Policy period safety
             policy_period = request.policyPeriod
             if policy_period < 1:
@@ -142,12 +142,14 @@ class FirePremiumCalculator:
             # --- UBGR EXCLUSION RULE: Dwellings: Co-operative Society (1001_2) ---
             optional_addons_applicable = True
             if product_code == "UBGR" and request.occupancyCode == "1001_2":
-                logger.warning(f"UBGR Exclusion Rule Triggered for {request.occupancyCode}: Force-disabling all optional add-ons and PA.")
+                logger.info("UBGR 1001_2 detected – add-ons disabled")
                 optional_addons_applicable = False
+                # Forcibly set contents_si and PA to 0
                 contents_si = Decimal("0")
                 request.paSelection.proposer = False
                 request.paSelection.spouse = False
-                request.addOns = []
+                # If there are any add-ons in the list, we ignore them in premium calc
+                # (handled by setting contents_si to 0 above since add_on_premium depends on it)
 
             # 2. Basic Rate Lookup (SAFE)
             if product_code == "UBGR":
@@ -172,29 +174,36 @@ class FirePremiumCalculator:
             basic_fire_premium_annual = building_si * basic_rate / Decimal("1000")
             basic_fire_premium_annual = Decimal(str(round_currency(float(basic_fire_premium_annual))))
             
-            # add_on_premium = contentsSI × add_on_rate / 1000 (Using basic_rate for add_on_rate in UBGR)
-            add_on_premium_annual = contents_si * basic_rate / Decimal("1000")
-            add_on_premium_annual = Decimal(str(round_currency(float(add_on_premium_annual))))
+            # add_on_premium = contentsSI × risk_rate / 1000
+            # MUST ALWAYS be 0 for 1001_2
+            if not optional_addons_applicable:
+                add_on_premium_annual = Decimal("0")
+            else:
+                add_on_premium_annual = contents_si * basic_rate / Decimal("1000")
+                add_on_premium_annual = Decimal(str(round_currency(float(add_on_premium_annual))))
             
-            # subtotal = basic_fire_premium + add_on_premium
-            subtotal_annual = basic_fire_premium_annual + add_on_premium_annual
+            # 4. Minimum Premium Rule (Applied to raw fire premium)
+            # Apply ₹50 ONLY IF calculated (basic + add-on) < minimum
+            raw_fire_annual = basic_fire_premium_annual + add_on_premium_annual
+            if raw_fire_annual < 50:
+                logger.info(f"Applying ₹50 Minimum Premium Rule (Calculated: {raw_fire_annual})")
+                subtotal_annual = Decimal("50")
+            else:
+                subtotal_annual = raw_fire_annual
             
-            # DEBUG Logs
-            logger.debug(
-              f"UBGR CALC PRE-ADJUST | "
-              f"basic_fire={basic_fire_premium_annual}, add_on={add_on_premium_annual}, subtotal={subtotal_annual}"
-            )
-
-            # 4. Apply Discount & Loading ONLY on subtotal
+            # 5. Discount & Loading (Apply ONLY on subtotal, NOT on terrorism)
             discount_amount_annual = subtotal_annual * discount_pct / Decimal("100")
             discount_amount_annual = Decimal(str(round_currency(float(discount_amount_annual))))
             
             loading_amount_annual = subtotal_annual * loading_pct / Decimal("100")
             loading_amount_annual = Decimal(str(round_currency(float(loading_amount_annual))))
             
-            # 5. Terrorism Premium (ANNUAL)
-            # Only if "TERRORISM" is in add_ons
+            adjusted_fire_subtotal_annual = subtotal_annual - discount_amount_annual + loading_amount_annual
+            
+            # 6. Terrorism Premium (ANNUAL)
+            # Calculated normally on terrorism_si
             terrorism_premium_annual = Decimal("0")
+            # For UBGR, check if "TERRORISM" is in add_ons list
             is_terrorism_selected = any(addon.addOnCode.upper() == "TERRORISM" for addon in request.addOns)
             
             if is_terrorism_selected and terrorism_si_input > 0:
@@ -207,19 +216,12 @@ class FirePremiumCalculator:
                     logger.warning(f"Terrorism calc failed: {e}")
                     terrorism_premium_annual = Decimal("0")
             
-            logger.info(f"Terrorism Premium (Annual): {terrorism_premium_annual} (Selected: {is_terrorism_selected})")
-
-            # 6. Net Premium (ANNUAL)
-            # net_premium = max((subtotal ± discount/loading) + terrorism_premium, 50)
-            fire_after_adj_annual = subtotal_annual - discount_amount_annual + loading_amount_annual
-            net_premium_calc_annual = fire_after_adj_annual + terrorism_premium_annual
-            
-            net_premium_annual = max(net_premium_calc_annual, Decimal("50"))
+            # 7. Net Premium (ANNUAL)
+            # net_premium = subtotal (after min/adj) + terrorism
+            net_premium_annual = adjusted_fire_subtotal_annual + terrorism_premium_annual
             net_premium_annual = Decimal(str(round_currency(float(net_premium_annual))))
             
-            logger.info(f"Net Premium (Annual, Adjusted): {net_premium_annual}")
-
-            # 7. Policy Period Scaling
+            # 8. Policy Period Scaling
             period_multiplier = Decimal(str(policy_period))
             
             basic_fire_premium = basic_fire_premium_annual * period_multiplier
@@ -239,8 +241,7 @@ class FirePremiumCalculator:
             loading_amount = Decimal(str(round_currency(float(loading_amount))))
             net_premium = Decimal(str(round_currency(float(net_premium))))
             
-            # 8. Taxes & Stamp Duty
-            # User says gst = 18% of net_premium (9% cgst + 9% sgst)
+            # 9. Taxes & Stamp Duty
             cgst = net_premium * Decimal("0.09")
             cgst = Decimal(str(round_currency(float(cgst))))
             sgst = net_premium * Decimal("0.09")
@@ -249,7 +250,7 @@ class FirePremiumCalculator:
             # Stamp Duty - FIXED
             stamp = Decimal("1.0")
             
-            # gross_premium = sum
+            # gross_premium
             gross = net_premium + cgst + sgst + stamp
             gross = Decimal(str(round_currency(float(gross))))
             
@@ -276,6 +277,7 @@ class FirePremiumCalculator:
                     net_premium=float(net_premium),
                     cgst=float(cgst),
                     sgst=float(sgst),
+                    gst=float(cgst + sgst),
                     stamp_duty=float(stamp),
                     gross_premium=float(gross)
                 ),
