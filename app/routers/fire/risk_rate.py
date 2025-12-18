@@ -12,7 +12,7 @@ router = APIRouter(
 
 logger = logging.getLogger(__name__)
 
-from app.models.fire_models import FireIibRate
+from sqlalchemy import text
 
 @router.get("/api/fire/risk-rate")
 def get_risk_rate(
@@ -42,17 +42,21 @@ def get_fire_risk_rate(iib_code: str, db: Session) -> float | None:
     """
     Unified Resolver: Fetch rate strictly from fire_iib_rates.
     Returns value or None.
+    Uses MANDATORY RAW SQL.
     """
-    rate_row = (
-        db.query(FireIibRate)
-        .filter(FireIibRate.iib_code == iib_code)
-        .first()
-    )
+    query = text("""
+        SELECT rate_per_mille
+        FROM fire_iib_rates
+        WHERE iib_code = :iib_code
+        LIMIT 1
+    """)
+    
+    result = db.execute(query, {"iib_code": iib_code}).fetchone()
 
-    if not rate_row:
+    if not result:
         return None
 
-    return float(rate_row.rate_per_mille)
+    return float(result.rate_per_mille)
 
 @router.get("/fire/terrorism-rate")
 def get_terrorism_rate(
