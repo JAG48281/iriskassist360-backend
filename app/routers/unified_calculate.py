@@ -113,22 +113,27 @@ async def calculate_risk_rate(request: CalculateRequest):
                 logger.warning(f"Occupancy type lookup failed for {iib_code}: {e}. Using Default: Residential.")
 
             try:
+                from app.services.rating_engine import calculate_terrorism_premium_slab_wise
                 terrorism_rate_d = get_terrorism_rate_per_mille(
                     occupancy_type=occupancy_type, 
                     total_si=total_si
                 )
                 terrorism_rate = float(terrorism_rate_d)
+                
+                # Rule 4: Slab-wise calculation
+                terrorism_premium_d = calculate_terrorism_premium_slab_wise(
+                    occupancy_type=occupancy_type,
+                    total_si=Decimal(str(total_si))
+                )
+                terrorism_premium = float(round_currency(float(terrorism_premium_d)))
             except Exception as e:
-                logger.warning(f"Terrorism lookup failed: {e}. Defaulting to 0.07 as per BGRP standard.")
+                logger.warning(f"Terrorism lookup failed: {e}. Defaulting to 1st slab rate.")
+                # Fallback to 0.07 if Residential or basic logic
                 terrorism_rate = 0.07 
+                terrorism_premium = round_currency(total_si * terrorism_rate / 1000.0)
 
             # Step 3: Premium Calculation (Strict Logic)
-            # fire_premium = total_si * risk_rate / 1000
             fire_premium = round_currency(total_si * risk_rate / 1000.0)
-            
-            # terrorism_premium = terrorism_si * terrorism_rate / 1000
-            # (Rule: Total SI = Terrorism SI)
-            terrorism_premium = round_currency(total_si * terrorism_rate / 1000.0)
             
             # Net Premium
             net_premium = fire_premium + terrorism_premium
@@ -165,24 +170,6 @@ async def calculate_risk_rate(request: CalculateRequest):
                 "total_si": total_si,
                 "stamp_duty": stamp_duty # Implicitly needed for gross check
             }
-        
-        # Legacy/Other Products Logic (if any)
-        # currently only UBGR/BGRP is supported by this fix scope
-        logger.warning(f"Product {product_code} not fully supported in unified calculate yet")
-        return JSONResponse(
-            status_code=400,
-            content={"error": f"Product {product_code} not supported", "success": False}
-        )
-        
-    except Exception as e:
-        logger.error(f"🔥 Error in calculate endpoint: {str(e)}", exc_info=True)
-        return JSONResponse(
-            status_code=500,
-            content={
-                "error": f"Internal server error: {str(e)}",
-                "meta": {"risk_rate": None}
-            }
-        )
         
         # Legacy/Other Products Logic (if any)
         # currently only UBGR/BGRP is supported by this fix scope

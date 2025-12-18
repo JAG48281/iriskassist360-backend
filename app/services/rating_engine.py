@@ -179,15 +179,18 @@ def get_terrorism_rate_per_mille(occupancy_type: str, total_si: float) -> Decima
     """
     logger.info(f"Looking up Terrorism Rate: OccType={occupancy_type}, TSI={total_si}")
 
-    # Query with TSI range check & Deterministic Ordering
+    # Query with TSI range check & Deterministic Ordering (per Task 3)
     stmt = text("""
-        SELECT rate_per_mille 
-        FROM terrorism_slabs 
+        SELECT rate_per_mille
+        FROM fire_terrorism_rates
         WHERE occupancy_type = :ot
-          AND (:tsi >= COALESCE(min_sum_insured, 0))
-          AND (:tsi < COALESCE(max_sum_insured, 1000000000000000000))
+          AND :tsi >= min_sum_insured
+          AND (
+                max_sum_insured IS NULL
+                OR :tsi <= max_sum_insured
+              )
         ORDER BY min_sum_insured DESC
-        LIMIT 1
+        LIMIT 1;
     """)
     
     try:
@@ -207,6 +210,71 @@ def get_terrorism_rate_per_mille(occupancy_type: str, total_si: float) -> Decima
     except Exception as e:
         logger.error(f"DB Error (get_terrorism_rate_per_mille): {e}")
         raise e
+
+def get_terrorism_slabs(occupancy_type: str) -> list:
+    """
+    Fetches all terrorism slabs for a given occupancy type.
+    Ordered by min_sum_insured ASC.
+    """
+    stmt = text("""
+        SELECT min_sum_insured, max_sum_insured, rate_per_mille
+        FROM fire_terrorism_rates
+        WHERE occupancy_type = :ot
+        ORDER BY min_sum_insured ASC
+    """)
+    try:
+        with engine.connect() as conn:
+            result = conn.execute(stmt, {"ot": occupancy_type}).fetchall()
+            return [dict(row._mapping) for row in result]
+    except Exception as e:
+        logger.error(f"DB Error (get_terrorism_slabs): {e}")
+        return []
+
+def calculate_terrorism_premium_slab_wise(occupancy_type: str, total_si: Decimal) -> Decimal:
+    """
+    Calculates terrorism premium by splitting total SI into slabs.
+    Follows Rule 4: "Split SI by slabs, Calculate each slab premium, Sum them".
+    """
+    slabs = get_terrorism_slabs(occupancy_type)
+    total_premium = Decimal("0")
+    
+    if not slabs:
+        logger.warning(f"No terrorism slabs found for {occupancy_type}")
+        return Decimal("0")
+
+    # Sort just in case DB order was weird, though query has ORDER BY
+    for slab in slabs:
+        min_si = Decimal(str(slab['min_sum_insured']))
+        # Treat NULL max_sum_insured as effectively infinity
+        max_si = Decimal(str(slab['max_sum_insured'])) if slab['max_sum_insured'] is not None else Decimal('Infinity')
+        rate = Decimal(str(slab['rate_per_mille']))
+        
+        if total_si < min_si:
+            # SI doesn't reach this slab
+            continue
+            
+        # Amount in this slab
+        # e.g. if slab is 0 - 500M, and SI is 1000M
+        # portion = min(1000M, 500M) - 0 = 500M
+        # e.g. if slab is 500M+1 - 1000M, and SI is 1000M
+        # portion = min(1000M, 1000M) - 500M = 500M
+        
+        # We use min_si - 1 for the lower bound of the slab calculation 
+        # because the slab is inclusive of min_si. 
+        # If min_si is 1, lower bound for subtraction is 0.
+        # If min_si is 15,000,000,001, lower bound for subtraction is 15,000,000,000.
+        
+        lower_bound_for_calc = max(Decimal("0"), min_si - 1)
+        upper_limit_for_calc = min(total_si, max_si)
+        
+        amount_in_slab = upper_limit_for_calc - lower_bound_for_calc
+        
+        if amount_in_slab > 0:
+            slab_premium = amount_in_slab * rate / Decimal("1000")
+            total_premium += slab_premium
+            # logger.info(f"Slab {min_si}-{max_si}: Upper={upper_limit_for_calc}, Lower={lower_bound_for_calc}, Amt={amount_in_slab}, Rate={rate} -> Prem={slab_premium}")
+
+    return total_premium
 
 def get_add_on_rate(product_code: str, add_on_code: str, occupancy_code: Optional[str] = None) -> Tuple[str, Decimal]:
     """

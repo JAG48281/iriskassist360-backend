@@ -23,7 +23,7 @@ REQUIRED_TABLES = [
     "fire_bsus_rates", 
     "fire_stfi_rates",
     "fire_eq_rates",
-    "terrorism_slabs",
+    "fire_terrorism_rates",
     "fire_add_on_master",
     "fire_add_on_rates",
     "alembic_version"
@@ -38,6 +38,7 @@ FORBIDDEN_TABLES = [
     "bsus_rates",
     "stfi_rates",
     "generic_rates",
+    "terrorism_slabs",  # Replaced by fire_terrorism_rates
     "product_master"  # NEVER should exist
 ]
 

@@ -8,6 +8,7 @@ from typing import List, Dict, Tuple
 from app.services.rating_engine import (
     get_basic_rate_per_mille,
     get_terrorism_rate_per_mille,
+    calculate_terrorism_premium_slab_wise,
     get_add_on_rate,
     get_occupancy_details,
     get_fire_eq_rate_per_mille,
@@ -188,26 +189,28 @@ class FirePremiumCalculator:
             # 5. Discount Calculation (On Base + AddOn)
             # Note: Will be calculated on total_before_adjustments later
             
-            # 8. Terrorism Premium
+            # 8. Terrorism Premium (Task 3 & 4)
             terrorism_premium = Decimal("0")
             terrorism_rate = Decimal("0")
             
-            if product_code in ["UBGR", "BGR"]:
-                terr_si = Decimal(str(request.terrorismSI or 0.0))
-                if terr_si > 0:
-                    try:
-                        t_rate_val = get_terrorism_rate_per_mille(
-                             product_code=product_code,
-                             occupancy_code=request.occupancyCode,
-                             tsi=float(terr_si)
-                        )
-                        terrorism_rate = t_rate_val if t_rate_val is not None else Decimal("0.0")
-                        
-                        terrorism_premium = terr_si * terrorism_rate / Decimal("1000")
-                        terrorism_premium = Decimal(str(round_currency(float(terrorism_premium))))
-                    except Exception as e:
-                        logger.warning(f"Terrorism calc skipped due to lookup error: {e}")
-                        terrorism_premium = Decimal("0")
+            # Use provided terrorism SI
+            terr_si = Decimal(str(request.terrorismSI or 0.0))
+            
+            if terr_si > 0:
+                try:
+                    occ_type = occ_details.get("occupancy_type", "Non-Industrial") if occ_details else "Non-Industrial"
+                    
+                    # Task 3: Resolve single rate for metadata
+                    terrorism_rate = get_terrorism_rate_per_mille(occ_type, float(total_si))
+                    
+                    # Task 4: Calculate premium slab-wise
+                    terrorism_premium = calculate_terrorism_premium_slab_wise(occ_type, terr_si)
+                    terrorism_premium = Decimal(str(round_currency(float(terrorism_premium))))
+                    
+                    logger.info(f"Terrorism Premium: {terrorism_premium} (Slab-wise for {occ_type})")
+                except Exception as e:
+                    logger.warning(f"Terrorism calc skipped/failed: {e}")
+                    terrorism_premium = Decimal("0")
             
             # --- EARTHQUAKE (EQ) PREMIUM CALCULATION ---
             # Rules:
