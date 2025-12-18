@@ -1,7 +1,7 @@
 """create_and_seed_fire_bsus_rates
 
 Revision ID: b9d1bc7dfbba
-Revises: 5d956542faf8
+Revises: 5f67847b9e6e
 Create Date: 2025-12-16 15:30:58.198819
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = 'b9d1bc7dfbba'
-down_revision: Union[str, None] = '5d956542faf8'
+down_revision: Union[str, None] = '5f67847b9e6e'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
