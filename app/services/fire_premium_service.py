@@ -272,30 +272,39 @@ class FirePremiumCalculator:
             discount_amount = total_before_adjustments * discount_pct / Decimal("100")
             discount_amount = Decimal(str(round_currency(float(discount_amount))))
             
-            # Loading
-            loading_amount = total_before_adjustments * loading_pct / Decimal("100")
+            # Subtotal after discount (before loading)
+            sub_total_after_discount = total_before_adjustments - discount_amount
+            
+            # Loading (applied to subtotal after discount)
+            loading_amount = sub_total_after_discount * loading_pct / Decimal("100")
             loading_amount = Decimal(str(round_currency(float(loading_amount))))
             
             # Net Excl Terrorism
-            net_premium_excl_terrorism = total_before_adjustments - discount_amount + loading_amount
+            net_premium_excl_terrorism = sub_total_after_discount + loading_amount
             
-            # Final Net
+            # Annual Net Premium (1-year)
             annual_net = net_premium_excl_terrorism + terrorism_premium
             annual_net = Decimal(str(round_currency(float(annual_net))))
             
-            # Policy Period
+            logger.info(f"Annual Net Premium (1-year): {annual_net}")
+            logger.info(f"Policy Period: {policy_period} years")
+            
+            # Policy Period Multiplier - Applied ONCE to annual net
             final_net = annual_net * Decimal(str(policy_period))
             final_net = Decimal(str(round_currency(float(final_net))))
             
+            logger.info(f"Net Premium ({policy_period} years): {final_net}")
+            
             if final_net <= 0 and total_si > 0:
                  logger.warning("Net premium is zero despite SI > 0")
-                 # Check logic?
                  
-            # Taxes
+            # Taxes (calculated on multi-year net premium)
             cgst = final_net * Decimal("0.09")
             cgst = Decimal(str(round_currency(float(cgst))))
             sgst = final_net * Decimal("0.09")
             sgst = Decimal(str(round_currency(float(sgst))))
+            
+            # Stamp Duty - FIXED, does NOT scale with policy period
             stamp = Decimal("1.0")
             
             gross = final_net + cgst + sgst + stamp
@@ -306,7 +315,7 @@ class FirePremiumCalculator:
               f"🔥 CALC BREAKDOWN | "
               f"base={base_premium}, add_on={add_on_premium}, terr={terrorism_premium}, "
               f"disc={discount_amount}, load={loading_amount}, "
-              f"net={final_net}, gross={gross}"
+              f"annual_net={annual_net}, net({policy_period}y)={final_net}, gross={gross}"
             )
             
             return {
@@ -314,10 +323,11 @@ class FirePremiumCalculator:
                     basic_premium=float(base_premium),
                     add_on_premium=float(add_on_premium),
                     discount_amount=float(discount_amount),
-                    sub_total=float(total_before_adjustments), # Prompt called this subtotal
+                    sub_total=float(sub_total_after_discount),  # Subtotal after discount, before loading
                     loading_amount=float(loading_amount),
                     terrorism_premium=float(terrorism_premium),
-                    net_premium=float(final_net),
+                    annual_net_premium=float(annual_net),  # NEW: 1-year net premium
+                    net_premium=float(final_net),  # Multi-year net premium
                     cgst=float(cgst),
                     sgst=float(sgst),
                     stamp_duty=float(stamp),
@@ -329,7 +339,8 @@ class FirePremiumCalculator:
                     rate_source="product_basic_rates",
                     terrorism_rate=float(terrorism_rate),
                     occupancy_code=request.occupancyCode,
-                    product_code=product_code
+                    product_code=product_code,
+                    policy_period_years=policy_period  # NEW: Policy period used
                 )
             }
 

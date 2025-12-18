@@ -67,7 +67,8 @@ class PremiumBreakdown(BaseModel):
     sub_total: float
     loading_amount: float
     terrorism_premium: Optional[float] = None
-    net_premium: float
+    annual_net_premium: float  # 1-year net premium before policy period multiplier
+    net_premium: float  # Multi-year net (annual_net × policy_period_years)
     cgst: float
     sgst: float
     stamp_duty: float
@@ -81,6 +82,7 @@ class CalculationMeta(BaseModel):
     terrorism_rate: Optional[float] = None
     occupancy_code: str
     product_code: str
+    policy_period_years: int  # Policy period used in calculation
 
 
 class UBGRUVGRResponse(BaseModel):
