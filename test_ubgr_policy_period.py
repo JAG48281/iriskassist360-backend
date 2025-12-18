@@ -83,15 +83,17 @@ def test_ubgr_policy_period_scaling():
             meta = result['meta']
             
             # Validate
-            annual_net = breakdown.annual_net_premium
+            basic_fire = breakdown.basic_fire_premium
+            fire_subtotal = breakdown.fire_subtotal
             net_premium = breakdown.net_premium
             policy_years = meta.policy_period_years
             
-            # Check annual net (should always be 600)
-            annual_expected = 600.0
-            annual_match = abs(annual_net - annual_expected) < 0.01
+            # Check basic fire (should scale with period)
+            expected_basic = 600.0 * policy_period
+            basic_match = abs(basic_fire - expected_basic) < 0.01
             
             # Check multi-year net
+            expected_net = 600.0 * policy_period
             net_match = abs(net_premium - expected_net) < 0.01
             
             # Check policy period
@@ -107,9 +109,10 @@ def test_ubgr_policy_period_scaling():
             gross_match = abs(breakdown.gross_premium - expected_gross) < 0.01
             
             # Print results
-            status = "PASS" if (annual_match and net_match and period_match and cgst_match and sgst_match and gross_match) else "FAIL"
+            status = "PASS" if (basic_match and net_match and period_match and cgst_match and sgst_match and gross_match) else "FAIL"
             print(f"\n{status} | Policy Period: {policy_period} Year(s)")
-            print(f"  Annual Net Premium: Rs {annual_net:.2f} (Expected: Rs {annual_expected:.2f}) {'OK' if annual_match else 'FAIL'}")
+            print(f"  Basic Fire Premium: Rs {basic_fire:.2f} (Expected: Rs {expected_basic:.2f}) {'OK' if basic_match else 'FAIL'}")
+            print(f"  Fire Subtotal: Rs {fire_subtotal:.2f}")
             print(f"  Net Premium: Rs {net_premium:.2f} (Expected: Rs {expected_net:.2f}) {'OK' if net_match else 'FAIL'}")
             print(f"  Policy Period Years: {policy_years} (Expected: {policy_period}) {'OK' if period_match else 'FAIL'}")
             print(f"  CGST (9%): Rs {breakdown.cgst:.2f} (Expected: Rs {expected_cgst:.2f}) {'OK' if cgst_match else 'FAIL'}")
@@ -117,7 +120,7 @@ def test_ubgr_policy_period_scaling():
             print(f"  Stamp Duty: Rs {breakdown.stamp_duty:.2f} (Fixed, no scaling)")
             print(f"  Gross Premium: Rs {breakdown.gross_premium:.2f} (Expected: Rs {expected_gross:.2f}) {'OK' if gross_match else 'FAIL'}")
             
-            if not (annual_match and net_match and period_match and cgst_match and sgst_match and gross_match):
+            if not (basic_match and net_match and period_match and cgst_match and sgst_match and gross_match):
                 all_passed = False
         
         print("\n" + "="*70)

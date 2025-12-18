@@ -158,20 +158,17 @@ class FirePremiumCalculator:
             
             logger.info(f"Basic Rate: {basic_rate} (Per Mille)")
             
-            # 3. Basic Fire Premium Calc
+            # 3. Basic Fire Premium Calc (ANNUAL)
             # IMPORTANT: Basic fire premium = (Building + Contents) ONLY
-            # Do NOT include add-on SIs in basic fire premium
             basic_fire_si = building_si + contents_si
-            basic_fire_premium = basic_fire_si * basic_rate / Decimal("1000")
-            basic_fire_premium = Decimal(str(round_currency(float(basic_fire_premium))))
+            basic_fire_premium_annual = basic_fire_si * basic_rate / Decimal("1000")
+            basic_fire_premium_annual = Decimal(str(round_currency(float(basic_fire_premium_annual))))
             
-            if basic_fire_premium < 0:  # Should not happen but strict check
-                basic_fire_premium = Decimal("0")
-            
-            logger.info(f"Basic Fire Premium (Building+Contents only): {basic_fire_premium}")
+            logger.info(f"Basic Fire Premium (Annual): {basic_fire_premium_annual}")
                 
-            # 4. Add-On Premium
-            add_on_premium = Decimal("0")
+            # 4. Add-On Premium (ANNUAL, PAID add-ons only)
+            # EQ and STFI are FREE (covered by default) - do NOT include in add_on_premium
+            add_on_premium_annual = Decimal("0")
             add_on_details = []
             
             # Allow addons check
@@ -181,7 +178,7 @@ class FirePremiumCalculator:
                 allow_addons = False
             
             if allow_addons:
-                add_on_premium, add_on_details = FirePremiumCalculator._calculate_add_on_premium(
+                add_on_premium_annual, add_on_details = FirePremiumCalculator._calculate_add_on_premium(
                     product_code=product_code,
                     occupancy_code=request.occupancyCode,
                     add_ons=request.addOns,
@@ -189,13 +186,13 @@ class FirePremiumCalculator:
                     pa_spouse=request.paSelection.spouse
                 )
             
-            logger.info(f"Add-On Premium (LOR+Alt+PA+Valuable Contents): {add_on_premium}")
+            logger.info(f"Add-On Premium (Annual): {add_on_premium_annual}")
             
             # 5. Discount Calculation (On Base + AddOn)
             # Note: Will be calculated on total_before_adjustments later
             
-            # 8. Terrorism Premium (Task 3 & 4)
-            terrorism_premium = Decimal("0")
+            # 5. Terrorism Premium (ANNUAL)
+            terrorism_premium_annual = Decimal("0")
             terrorism_rate = Decimal("0")
             
             # Use provided terrorism SI
@@ -205,17 +202,17 @@ class FirePremiumCalculator:
                 try:
                     occ_type = occ_details.get("occupancy_type", "Non-Industrial") if occ_details else "Non-Industrial"
                     
-                    # Task 3: Resolve single rate for metadata
+                    # Resolve single rate for metadata
                     terrorism_rate = get_terrorism_rate_per_mille(occ_type, float(total_si))
                     
-                    # Task 4: Calculate premium slab-wise
-                    terrorism_premium = Decimal(str(calculate_terrorism_premium(occ_type, float(terr_si))))
-                    terrorism_premium = Decimal(str(round_currency(float(terrorism_premium))))
+                    # Calculate premium slab-wise (ANNUAL)
+                    terrorism_premium_annual = Decimal(str(calculate_terrorism_premium(occ_type, float(terr_si))))
+                    terrorism_premium_annual = Decimal(str(round_currency(float(terrorism_premium_annual))))
                     
-                    logger.info(f"Terrorism Premium: {terrorism_premium} (Slab-wise for {occ_type})")
+                    logger.info(f"Terrorism Premium (Annual): {terrorism_premium_annual}")
                 except Exception as e:
-                    logger.warning(f"Terrorism calc skipped/failed: {e}")
-                    terrorism_premium = Decimal("0")
+                    logger.warning(f"Terrorism calc failed: {e}")
+                    terrorism_premium_annual = Decimal("0")
             
             # --- EARTHQUAKE (EQ) PREMIUM CALCULATION ---
             # Rules:
@@ -267,58 +264,63 @@ class FirePremiumCalculator:
                       # Proceed with 0 for now unless strict
                       stfi_premium = Decimal("0")
 
-            # 9. Net Premium Aggregation
-            # Define Subtotal (Excluding Terrorism)
-            # EQ and STFI are FREE (covered by default) - do NOT add to total
-            # Only Basic Fire + Paid Add-ons
-            total_before_adjustments = basic_fire_premium + add_on_premium
+            # 6. Apply Discount & Loading (ANNUAL, only on fire components)
+            fire_base_annual = basic_fire_premium_annual + add_on_premium_annual
             
-            logger.info(f"EQ Premium (FREE - not added to total): {eq_premium}")
-            logger.info(f"STFI Premium (FREE - not added to total): {stfi_premium}")
+            # Discount (On Fire Base)
+            discount_amount_annual = fire_base_annual * discount_pct / Decimal("100")
+            discount_amount_annual = Decimal(str(round_currency(float(discount_amount_annual))))
             
-            # Recalculate Discount/Loading on this valid subtotal
-            # Discount
-            discount_amount = total_before_adjustments * discount_pct / Decimal("100")
-            discount_amount = Decimal(str(round_currency(float(discount_amount))))
+            # Loading (On Fire Base after discount)
+            loading_base_annual = fire_base_annual - discount_amount_annual
+            loading_amount_annual = loading_base_annual * loading_pct / Decimal("100")
+            loading_amount_annual = Decimal(str(round_currency(float(loading_amount_annual))))
             
-            # Subtotal after discount (before loading)
-            sub_total_after_discount = total_before_adjustments - discount_amount
+            # Fire Subtotal (Annual)
+            fire_subtotal_annual = fire_base_annual - discount_amount_annual + loading_amount_annual
+            fire_subtotal_annual = Decimal(str(round_currency(float(fire_subtotal_annual))))
             
-            # Loading (applied to subtotal after discount)
-            loading_amount = sub_total_after_discount * loading_pct / Decimal("100")
-            loading_amount = Decimal(str(round_currency(float(loading_amount))))
-            
-            # Net Excl Terrorism
-            net_premium_excl_terrorism = sub_total_after_discount + loading_amount
-            
-            # Add terrorism premium to get annual net premium (1-year)
-            # Terrorism is NOT subject to discount/loading but IS included in annual net
-            annual_net_premium = net_premium_excl_terrorism + terrorism_premium
+            # Annual Net Premium (1-year)
+            annual_net_premium = fire_subtotal_annual + terrorism_premium_annual
             annual_net_premium = Decimal(str(round_currency(float(annual_net_premium))))
             
-            logger.info(f"Annual Net Premium (1-year): {annual_net_premium}")
-            logger.info(f"Policy Period: {policy_period} years")
+            logger.info(f"Annual Net Premium: {annual_net_premium}")
             
-            # Policy Period Multiplier - Applied to FINAL net premium (including terrorism)
-            # All premiums are annual - multiply final net by policy period
-            final_net = annual_net_premium * Decimal(str(policy_period))
-            final_net = Decimal(str(round_currency(float(final_net))))
+            # 7. Policy Period Scaling (Multiply EVERY component for consistent UI breakdown)
+            period_multiplier = Decimal(str(policy_period))
             
-            logger.info(f"Final Net Premium ({policy_period}Y): {final_net}")
+            basic_fire_premium = basic_fire_premium_annual * period_multiplier
+            add_on_premium = add_on_premium_annual * period_multiplier
+            discount_amount = discount_amount_annual * period_multiplier
+            loading_amount = loading_amount_annual * period_multiplier
+            fire_subtotal = fire_subtotal_annual * period_multiplier
+            terrorism_premium = terrorism_premium_annual * period_multiplier
+            net_premium = annual_net_premium * period_multiplier
             
-            if final_net <= 0 and total_si > 0:
+            # Round all scaled components
+            basic_fire_premium = Decimal(str(round_currency(float(basic_fire_premium))))
+            add_on_premium = Decimal(str(round_currency(float(add_on_premium))))
+            discount_amount = Decimal(str(round_currency(float(discount_amount))))
+            loading_amount = Decimal(str(round_currency(float(loading_amount))))
+            fire_subtotal = Decimal(str(round_currency(float(fire_subtotal))))
+            terrorism_premium = Decimal(str(round_currency(float(terrorism_premium))))
+            net_premium = Decimal(str(round_currency(float(net_premium))))
+            
+            logger.info(f"Final Net Premium ({policy_period}Y): {net_premium}")
+            
+            if net_premium <= 0 and total_si > 0:
                  logger.warning("Net premium is zero despite SI > 0")
                  
-            # Taxes (calculated on multi-year net premium)
-            cgst = final_net * Decimal("0.09")
+            # 8. Taxes & Stamp Duty
+            cgst = net_premium * Decimal("0.09")
             cgst = Decimal(str(round_currency(float(cgst))))
-            sgst = final_net * Decimal("0.09")
+            sgst = net_premium * Decimal("0.09")
             sgst = Decimal(str(round_currency(float(sgst))))
             
-            # Stamp Duty - FIXED, does NOT scale with policy period
+            # Stamp Duty - FIXED
             stamp = Decimal("1.0")
             
-            gross = final_net + cgst + sgst + stamp
+            gross = net_premium + cgst + sgst + stamp
             gross = Decimal(str(round_currency(float(gross))))
             
             # LOGGING
@@ -326,19 +328,18 @@ class FirePremiumCalculator:
               f"🔥 CALC BREAKDOWN | "
               f"basic_fire={basic_fire_premium}, add_on={add_on_premium}, terr={terrorism_premium}, "
               f"disc={discount_amount}, load={loading_amount}, "
-              f"annual_net={annual_net}, net({policy_period}y)={final_net}, gross={gross}"
+              f"annual_net={annual_net_premium}, net({policy_period}y)={net_premium}, gross={gross}"
             )
             
             return {
                 "breakdown": PremiumBreakdown(
-                    basic_premium=float(basic_fire_premium),
+                    basic_fire_premium=float(basic_fire_premium),
                     add_on_premium=float(add_on_premium),
-                    discount_amount=float(discount_amount),
-                    sub_total=float(sub_total_after_discount),  # Subtotal after discount, before loading
-                    loading_amount=float(loading_amount),
+                    fire_subtotal=float(fire_subtotal),
                     terrorism_premium=float(terrorism_premium),
-                    annual_net_premium=float(annual_net),  # NEW: 1-year net premium
-                    net_premium=float(final_net),  # Multi-year net premium
+                    discount_amount=float(discount_amount),
+                    loading_amount=float(loading_amount),
+                    net_premium=float(net_premium),
                     cgst=float(cgst),
                     sgst=float(sgst),
                     stamp_duty=float(stamp),
@@ -347,11 +348,11 @@ class FirePremiumCalculator:
                 "meta": CalculationMeta(
                     applied_rate=float(basic_rate),
                     risk_rate=float(basic_rate),
-                    rate_source="product_basic_rates",
+                    rate_source="explicit_risk_rate" if product_code == "UBGR" else "product_basic_rates",
                     terrorism_rate=float(terrorism_rate),
                     occupancy_code=request.occupancyCode,
                     product_code=product_code,
-                    policy_period_years=policy_period  # NEW: Policy period used
+                    policy_period_years=policy_period
                 )
             }
 

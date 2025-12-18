@@ -74,17 +74,16 @@ class UBGRUVGRRequest(BaseModel):
 
 class PremiumBreakdown(BaseModel):
     """Detailed breakdown of premium calculation - Monetary Values ONLY"""
-    basic_premium: float
+    basic_fire_premium: float
     add_on_premium: float
+    fire_subtotal: float  # (basic + add_on +/- disc/load) BEFORE terrorism
+    terrorism_premium: float
     discount_amount: float
-    sub_total: float
     loading_amount: float
-    terrorism_premium: Optional[float] = None
-    annual_net_premium: float  # 1-year net premium before policy period multiplier
-    net_premium: float  # Multi-year net (annual_net × policy_period_years)
+    net_premium: float  # Final scaled net premium
     cgst: float
     sgst: float
-    stamp_duty: float
+    stamp_duty: float = 1.0
     gross_premium: float
 
 class CalculationMeta(BaseModel):
