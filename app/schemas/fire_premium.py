@@ -37,10 +37,16 @@ class UBGRUVGRRequest(BaseModel):
     productCode: str = Field(..., description="UBGR or UVGR")
     occupancyCode: str = Field(..., description="IIB Code (e.g., 1001, 1001_2)")
     
-    # Sum Insured Components
-    buildingSI: float = Field(..., ge=0, description="Building Sum Insured")
-    contentsSI: float = Field(default=0, ge=0, description="Contents Sum Insured")
-    terrorismSI: float = Field(default=0, ge=0, description="Terrorism Sum Insured (Mandatory for Terrorism calc)")
+    # NEW: Preference fields for UBGR/BGRP
+    basic_cover_si: float = Field(0, description="Maps to Building SI")
+    add_on_cover_si: float = Field(0, description="Maps to Add-on Covers SI (Excl PA)")
+    total_sum_insured: float = Field(0, description="For reference only")
+    terrorism_si: float = Field(0, description="ONLY for terrorism premium")
+    
+    # Sum Insured Components (Legacy/Deprecated but kept for compat)
+    buildingSI: float = Field(0, description="Building Sum Insured (Deprecated)")
+    contentsSI: float = Field(0, description="Contents Sum Insured (Deprecated)")
+    terrorismSI: float = Field(0, description="Terrorism Sum Insured (Legacy Compat)")
     
     # Add-Ons
     addOns: List[AddOnItem] = Field(default_factory=list, description="Selected Add-Ons with SI")

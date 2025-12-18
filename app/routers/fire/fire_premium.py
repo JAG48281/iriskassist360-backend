@@ -47,7 +47,7 @@ def calculate_ubgr_premium(
     - All rates fetched from database
     """
     try:
-        logger.info(f"UBGR Premium Calculation Request: {payload.dict()}")
+        logger.info(f"UBGR Premium Calculation Request: {payload.model_dump()}")
         
         # Override product code to ensure UBGR
         payload.productCode = "UBGR"
@@ -92,7 +92,7 @@ def calculate_uvgr_premium(
     See /ubgr/calculate for detailed calculation flow.
     """
     try:
-        logger.info(f"UVGR Premium Calculation Request: {payload.dict()}")
+        logger.info(f"UVGR Premium Calculation Request: {payload.model_dump()}")
         
         # Override product code to ensure UVGR
         payload.productCode = "UVGR"
@@ -128,7 +128,7 @@ def calculate_uvgs_premium(
     - Otherwise follows same calculation logic
     """
     try:
-        logger.info(f"UVGS Premium Calculation Request: {payload.dict()}")
+        logger.info(f"UVGS Premium Calculation Request: {payload.model_dump()}")
         
         # Override product code to ensure UVGS
         payload.productCode = "UVGS"

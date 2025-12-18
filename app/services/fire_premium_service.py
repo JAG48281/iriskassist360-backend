@@ -104,20 +104,24 @@ class FirePremiumCalculator:
         return total_add_on, details
     
     @staticmethod
-    def calculate_ubgr_uvgr(request: UBGRUVGRRequest) -> PremiumBreakdown:
+    def calculate_ubgr_uvgr(request: UBGRUVGRRequest) -> Dict:
         """
         Calculate premium for UBGR/UVGR products.
-        STRICT MODE with crash-proof defaults.
+        STRICT MODE with ₹50 Minimum Premium Rule.
         """
         logger.info(f"Calculating {request.productCode} Premium")
-        logger.info(f"Payload: {request.dict()}")
+        logger.info(f"Payload: {request.model_dump()}")
 
         try:
             # 1. Normalize ALL numeric inputs with safety defaults
             discount_pct = Decimal(str(request.discountPercentage or 0.0))
             loading_pct = Decimal(str(request.loadingPercentage or 0.0))
-            building_si = Decimal(str(request.buildingSI or 0.0))
-            contents_si = Decimal(str(request.contentsSI or 0.0))
+            
+            # Resolving Sum Insureds (Preference for new fields as per authoritative contract)
+            # Fallback to legacy fields if new ones are not provided (0.0)
+            basic_cover_si = Decimal(str(request.basic_cover_si if (request.basic_cover_si or 0) > 0 else (request.buildingSI + request.contentsSI)))
+            add_on_cover_si = Decimal(str(request.add_on_cover_si if (request.add_on_cover_si or 0) > 0 else 0.0))
+            terrorism_si = Decimal(str(request.terrorism_si if (request.terrorism_si or 0) > 0 else request.terrorismSI))
             
             # Policy period safety
             policy_period = request.policyPeriod
@@ -133,21 +137,13 @@ class FirePremiumCalculator:
             if product_code not in ['UBGR', 'UVGR', 'UVGS']:
                 raise ValueError(f"Invalid product code: {request.productCode}")
 
-            # Total SI
-            total_si = building_si + contents_si
-            logger.info(f"Total SI: {total_si}")
-
             # 2. Basic Rate Lookup (SAFE)
             if product_code == "UBGR":
-                # STRICT: Use explicit rate provided in request
                 if request.risk_rate_per_mille is None:
-                     # This should be caught by router validation, but double safe
                      raise ValueError("Risk rate missing for UBGR calculation")
-                
                 basic_rate = Decimal(str(request.risk_rate_per_mille))
                 logger.info(f"Using Explicit Risk Rate for UBGR: {basic_rate}")
             else:
-                # Fallback / Other Products: Query Database
                 try:
                     basic_rate = get_basic_rate_per_mille(product_code, request.occupancyCode)
                     if basic_rate is None or basic_rate <= 0:
@@ -158,160 +154,77 @@ class FirePremiumCalculator:
             
             logger.info(f"Basic Rate: {basic_rate} (Per Mille)")
             
-            # 3. Basic Fire Premium Calc (ANNUAL)
-            # IMPORTANT: Basic fire premium = (Building + Contents) ONLY
-            basic_fire_si = building_si + contents_si
-            basic_fire_premium_annual = basic_fire_si * basic_rate / Decimal("1000")
-            basic_fire_premium_annual = Decimal(str(round_currency(float(basic_fire_premium_annual))))
+            # 3. RATING LOGIC (STRICT - ANNUAL)
             
-            logger.info(f"Basic Fire Premium (Annual): {basic_fire_premium_annual}")
-                
-            # 4. Add-On Premium (ANNUAL, PAID add-ons only)
-            # EQ and STFI are FREE (covered by default) - do NOT include in add_on_premium
-            add_on_premium_annual = Decimal("0")
-            add_on_details = []
+            # base_fire_premium = basic_cover_si * risk_rate_per_mille / 1000
+            base_fire_premium_annual = basic_cover_si * basic_rate / Decimal("1000")
+            base_fire_premium_annual = Decimal(str(round_currency(float(base_fire_premium_annual))))
             
-            # Allow addons check
-            occ_details = get_occupancy_details(request.occupancyCode)
-            allow_addons = True
-            if occ_details and not occ_details.get("allow_addons", True):
-                allow_addons = False
+            # add_on_premium = add_on_cover_si * risk_rate_per_mille / 1000
+            add_on_premium_annual = add_on_cover_si * basic_rate / Decimal("1000")
+            add_on_premium_annual = Decimal(str(round_currency(float(add_on_premium_annual))))
             
-            if allow_addons:
-                add_on_premium_annual, add_on_details = FirePremiumCalculator._calculate_add_on_premium(
-                    product_code=product_code,
-                    occupancy_code=request.occupancyCode,
-                    add_ons=request.addOns,
-                    pa_proposer=request.paSelection.proposer,
-                    pa_spouse=request.paSelection.spouse
-                )
+            # fire_subtotal = base_fire_premium + add_on_premium
+            fire_subtotal_annual = base_fire_premium_annual + add_on_premium_annual
             
-            logger.info(f"Add-On Premium (Annual): {add_on_premium_annual}")
+            # 4. ₹50 MIN PREMIUM RULE
+            if fire_subtotal_annual < 50:
+                logger.info(f"Applying ₹50 Minimum Premium Rule (Calculated: {fire_subtotal_annual})")
+                fire_subtotal_annual = Decimal("50")
             
-            # 5. Discount Calculation (On Base + AddOn)
-            # Note: Will be calculated on total_before_adjustments later
+            # Log as requested
+            logger.info(
+              f"UBGR CALC → basic_si={basic_cover_si}, "
+              f"addon_si={add_on_cover_si}, "
+              f"base_fire={base_fire_premium_annual}, "
+              f"addon_fire={add_on_premium_annual}"
+            )
             
-            # 5. Terrorism Premium (ANNUAL)
+            # 5. Discount & Loading (ANNUAL, only on fire_subtotal)
+            discount_amount_annual = fire_subtotal_annual * discount_pct / Decimal("100")
+            discount_amount_annual = Decimal(str(round_currency(float(discount_amount_annual))))
+            
+            loading_amount_annual = fire_subtotal_annual * loading_pct / Decimal("100")
+            loading_amount_annual = Decimal(str(round_currency(float(loading_amount_annual))))
+            
+            # 6. Terrorism Premium (ANNUAL)
             terrorism_premium_annual = Decimal("0")
-            terrorism_rate = Decimal("0")
-            
-            # Use provided terrorism SI
-            terr_si = Decimal(str(request.terrorismSI or 0.0))
-            
-            if terr_si > 0:
+            if terrorism_si > 0:
                 try:
+                    occ_details = get_occupancy_details(request.occupancyCode)
                     occ_type = occ_details.get("occupancy_type", "Non-Industrial") if occ_details else "Non-Industrial"
-                    
-                    # Resolve single rate for metadata
-                    terrorism_rate = get_terrorism_rate_per_mille(occ_type, float(total_si))
-                    
-                    # Calculate premium slab-wise (ANNUAL)
-                    terrorism_premium_annual = Decimal(str(calculate_terrorism_premium(occ_type, float(terr_si))))
+                    terrorism_premium_annual = Decimal(str(calculate_terrorism_premium(occ_type, float(terrorism_si))))
                     terrorism_premium_annual = Decimal(str(round_currency(float(terrorism_premium_annual))))
-                    
-                    logger.info(f"Terrorism Premium (Annual): {terrorism_premium_annual}")
                 except Exception as e:
                     logger.warning(f"Terrorism calc failed: {e}")
                     terrorism_premium_annual = Decimal("0")
             
-            # --- EARTHQUAKE (EQ) PREMIUM CALCULATION ---
-            # Rules:
-            # - UBGR, BSUS: EQ Not applicable (0.0) -> Wait, prompt says BSUS requires EQ Zone implies EQ applicable?
-            # Prompt Step 5: "BSUS -> fire_bsus_rates (EQ mandatory)".
-            # "EQ ... Applies to: SFSP, IAR, UVUS, BLUS ... Not for UBGR ... BSUS requires EQ Zone".
-            # This means BSUS uses `fire_bsus_rates` (which depends on EQ Zone) BUT `fire_eq_rates` (the separate EQ addon) does NOT apply to BSUS? 
-            # Prompt says "EQ ... Not for UBGR". It lists "Applies to: SFSP, IAR, UVUS, BLUS". It does NOT list BSUS in the 'Applies to' list for EQ.
-            # But "BSUS requires EQ Zone" is listed under EQ section? Or BSUS section?
-            # Under "Base Premium": "BSUS -> fire_bsus_rates (EQ mandatory)".
-            # Under "EQ": "Applies to: SFSP... Not for UBGR. BSUS requires EQ Zone".
-            # This confirms BSUS Base Rate DEPENDS on EQ Zone, but BSUS does NOT get a separate EQ Premium add-on (it's built into base or strictly derived from base table).
-            # So EQ Premium is ONLY for SFSP, IAR, UVUS, BLUS.
+            # 7. Net Premium (ANNUAL)
+            # net_premium = fire_subtotal + terrorism_premium + loading - discount
+            net_premium_annual = fire_subtotal_annual + terrorism_premium_annual + loading_amount_annual - discount_amount_annual
+            net_premium_annual = Decimal(str(round_currency(float(net_premium_annual))))
             
-            eq_premium = Decimal("0")
-            eq_rate = Decimal("0")
-            
-            if product_code in ["SFSP", "IAR", "UVUS", "BLUS", "UVGR", "UVGS"]: # Assuming UVGR/UVGS are in the 'SFSP' family for this logic
-                 # Validate Zone
-                 if not request.eqZone:
-                      raise ValueError(f"EQ Zone is required for product {product_code}")
-                 
-                 # Fetch Rate
-                 try:
-                      eq_rate = get_fire_eq_rate_per_mille(request.occupancyCode, request.eqZone)
-                      eq_si = total_si 
-                      eq_premium = eq_si * eq_rate / Decimal("1000")
-                      eq_premium = Decimal(str(round_currency(float(eq_premium))))
-                 except Exception as e:
-                      logger.error(f"EQ Rate Lookup Failed: {e}")
-                      raise ValueError(f"Failed to calculate EQ Premium: {e}")
-
-            # --- STFI PREMIUM CALCULATION ---
-            # Rules: 
-            # Applies to: SFSP, IAR, UVUS, BLUS.
-            # Not for UBGR.
-            stfi_premium = Decimal("0")
-            stfi_rate = Decimal("0")
-            
-            if product_code in ["SFSP", "IAR", "UVUS", "BLUS", "UVGR", "UVGS"]:
-                 try:
-                      stfi_rate = get_stfi_rate_per_mille(request.occupancyCode)
-                      stfi_si = total_si
-                      stfi_premium = stfi_si * stfi_rate / Decimal("1000")
-                      stfi_premium = Decimal(str(round_currency(float(stfi_premium))))
-                 except Exception as e:
-                      logger.error(f"STFI Rate Lookup Failed: {e}")
-                      # If critical, raise. Else 0.
-                      # Proceed with 0 for now unless strict
-                      stfi_premium = Decimal("0")
-
-            # 6. Apply Discount & Loading (ANNUAL, only on fire components)
-            fire_base_annual = basic_fire_premium_annual + add_on_premium_annual
-            
-            # Discount (On Fire Base)
-            discount_amount_annual = fire_base_annual * discount_pct / Decimal("100")
-            discount_amount_annual = Decimal(str(round_currency(float(discount_amount_annual))))
-            
-            # Loading (On Fire Base after discount)
-            loading_base_annual = fire_base_annual - discount_amount_annual
-            loading_amount_annual = loading_base_annual * loading_pct / Decimal("100")
-            loading_amount_annual = Decimal(str(round_currency(float(loading_amount_annual))))
-            
-            # Fire Subtotal (Annual)
-            fire_subtotal_annual = fire_base_annual - discount_amount_annual + loading_amount_annual
-            fire_subtotal_annual = Decimal(str(round_currency(float(fire_subtotal_annual))))
-            
-            # Annual Net Premium (1-year)
-            annual_net_premium = fire_subtotal_annual + terrorism_premium_annual
-            annual_net_premium = Decimal(str(round_currency(float(annual_net_premium))))
-            
-            logger.info(f"Annual Net Premium: {annual_net_premium}")
-            
-            # 7. Policy Period Scaling (Multiply EVERY component for consistent UI breakdown)
+            # 8. Policy Period Scaling
             period_multiplier = Decimal(str(policy_period))
             
-            basic_fire_premium = basic_fire_premium_annual * period_multiplier
+            basic_fire_premium = base_fire_premium_annual * period_multiplier
             add_on_premium = add_on_premium_annual * period_multiplier
-            discount_amount = discount_amount_annual * period_multiplier
-            loading_amount = loading_amount_annual * period_multiplier
             fire_subtotal = fire_subtotal_annual * period_multiplier
             terrorism_premium = terrorism_premium_annual * period_multiplier
-            net_premium = annual_net_premium * period_multiplier
+            discount_amount = discount_amount_annual * period_multiplier
+            loading_amount = loading_amount_annual * period_multiplier
+            net_premium = net_premium_annual * period_multiplier
             
-            # Round all scaled components
+            # Round scaled components
             basic_fire_premium = Decimal(str(round_currency(float(basic_fire_premium))))
             add_on_premium = Decimal(str(round_currency(float(add_on_premium))))
-            discount_amount = Decimal(str(round_currency(float(discount_amount))))
-            loading_amount = Decimal(str(round_currency(float(loading_amount))))
             fire_subtotal = Decimal(str(round_currency(float(fire_subtotal))))
             terrorism_premium = Decimal(str(round_currency(float(terrorism_premium))))
+            discount_amount = Decimal(str(round_currency(float(discount_amount))))
+            loading_amount = Decimal(str(round_currency(float(loading_amount))))
             net_premium = Decimal(str(round_currency(float(net_premium))))
             
-            logger.info(f"Final Net Premium ({policy_period}Y): {net_premium}")
-            
-            if net_premium <= 0 and total_si > 0:
-                 logger.warning("Net premium is zero despite SI > 0")
-                 
-            # 8. Taxes & Stamp Duty
+            # 9. Taxes & Stamp Duty
             cgst = net_premium * Decimal("0.09")
             cgst = Decimal(str(round_currency(float(cgst))))
             sgst = net_premium * Decimal("0.09")
@@ -320,15 +233,16 @@ class FirePremiumCalculator:
             # Stamp Duty - FIXED
             stamp = Decimal("1.0")
             
+            # gross_premium = net_premium + CGST + SGST + 1
             gross = net_premium + cgst + sgst + stamp
             gross = Decimal(str(round_currency(float(gross))))
             
-            # LOGGING
+            # Final Logging
             logger.info(
               f"🔥 CALC BREAKDOWN | "
-              f"basic_fire={basic_fire_premium}, add_on={add_on_premium}, terr={terrorism_premium}, "
-              f"disc={discount_amount}, load={loading_amount}, "
-              f"annual_net={annual_net_premium}, net({policy_period}y)={net_premium}, gross={gross}"
+              f"basic_fire={basic_fire_premium}, add_on={add_on_premium}, fire_subtotal={fire_subtotal}, "
+              f"terr={terrorism_premium}, disc={discount_amount}, load={loading_amount}, "
+              f"net={net_premium}, gross={gross}"
             )
             
             return {
@@ -349,7 +263,6 @@ class FirePremiumCalculator:
                     applied_rate=float(basic_rate),
                     risk_rate=float(basic_rate),
                     rate_source="explicit_risk_rate" if product_code == "UBGR" else "product_basic_rates",
-                    terrorism_rate=float(terrorism_rate),
                     occupancy_code=request.occupancyCode,
                     product_code=product_code,
                     policy_period_years=policy_period
