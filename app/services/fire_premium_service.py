@@ -137,6 +137,22 @@ class FirePremiumCalculator:
             if product_code not in ['UBGR', 'UVGR', 'UVGS']:
                 raise ValueError(f"Invalid product code: {request.productCode}")
 
+            # --- UBGR EXCLUSION RULE: Dwellings: Co-operative Society (1001_2) ---
+            optional_addons_applicable = True
+            if product_code == "UBGR" and request.occupancyCode == "1001_2":
+                logger.warning(f"UBGR Exclusion Rule Triggered for {request.occupancyCode}: Force-disabling all optional add-ons and PA.")
+                optional_addons_applicable = False
+                
+                # 1. Force add_on_cover_si to 0 (Covers Loss of Rent, Alt Accom, Valuable Items)
+                add_on_cover_si = Decimal("0")
+                
+                # 2. Force PA selection to False (Defensive)
+                request.paSelection.proposer = False
+                request.paSelection.spouse = False
+                
+                # 3. Clear addOns list (Defensive)
+                request.addOns = []
+
             # 2. Basic Rate Lookup (SAFE)
             if product_code == "UBGR":
                 if request.risk_rate_per_mille is None:
@@ -246,6 +262,10 @@ class FirePremiumCalculator:
             )
             
             return {
+                "success": True,
+                "message": f"{product_code} Premium Calculated Successfully",
+                "productCode": product_code,
+                "optional_addons_applicable": optional_addons_applicable,
                 "breakdown": PremiumBreakdown(
                     basic_fire_premium=float(basic_fire_premium),
                     add_on_premium=float(add_on_premium),
@@ -265,7 +285,8 @@ class FirePremiumCalculator:
                     rate_source="explicit_risk_rate" if product_code == "UBGR" else "product_basic_rates",
                     occupancy_code=request.occupancyCode,
                     product_code=product_code,
-                    policy_period_years=policy_period
+                    policy_period_years=policy_period,
+                    optional_addons_applicable=optional_addons_applicable
                 )
             }
 

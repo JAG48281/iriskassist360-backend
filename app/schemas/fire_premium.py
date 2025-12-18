@@ -101,13 +101,15 @@ class CalculationMeta(BaseModel):
     occupancy_code: str
     product_code: str
     policy_period_years: int  # Policy period used in calculation
+    optional_addons_applicable: bool = True
 
 
 class UBGRUVGRResponse(BaseModel):
     """Response schema for UBGR/UVGR premium calculation"""
     success: bool
     message: str
-    product_code: str = Field(..., alias="productCode") # Alias to maintain backward compat if needed? User said clean. I'll stick to snake_case if user didn't specify. 
+    product_code: str = Field(..., alias="productCode")
+    optional_addons_applicable: bool = True
     # User requirement: "Return a structured JSON... Expose ONLY the canonical snake_case fields".
     # User also listed "product_code" in meta.
     # The top level response has `productCode` in camelCase in the previous file.

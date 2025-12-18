@@ -68,6 +68,7 @@ def calculate_ubgr_premium(
             success=True,
             message="UBGR Premium Calculated Successfully",
             productCode="UBGR",
+            optional_addons_applicable=result.get("optional_addons_applicable", True),
             breakdown=result["breakdown"],
             meta=result["meta"]
         )
@@ -103,6 +104,7 @@ def calculate_uvgr_premium(
             success=True,
             message="UVGR Premium Calculated Successfully",
             productCode="UVGR",
+            optional_addons_applicable=result.get("optional_addons_applicable", True),
             breakdown=result["breakdown"],
             meta=result["meta"]
         )
@@ -144,6 +146,7 @@ def calculate_uvgs_premium(
             success=True,
             message="UVGS Premium Calculated Successfully",
             productCode="UVGS",
+            optional_addons_applicable=result.get("optional_addons_applicable", True),
             breakdown=breakdown,
             meta=result["meta"]
         )
