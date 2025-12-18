@@ -117,7 +117,7 @@ async def calculate_risk_rate(request: CalculateRequest):
                 from app.services.rating_engine import get_fire_terrorism_premium
                 terrorism_rate_d = get_terrorism_rate_per_mille(
                     occupancy_type=occupancy_type, 
-                    total_si=total_si
+                    total_sum_insured=total_si
                 )
                 terrorism_rate = float(terrorism_rate_d)
                 

@@ -31,7 +31,7 @@ class AddOnProductMap(Base):
     __tablename__ = "add_on_product_map"
     
     id = Column(Integer, primary_key=True, index=True)
-    add_on_id = Column(Integer, ForeignKey("add_on_master.id"), nullable=False)
+    add_on_id = Column(Integer, ForeignKey("fire_add_on_master.id"), nullable=False)
     product_code = Column(String(length=50), nullable=False)
     # NO product_master reference - products are LOGICAL
     active = Column(Boolean, server_default='true', nullable=False)
@@ -84,11 +84,11 @@ class EqRate(Base):
 class FireTerrorismRate(Base):
     __tablename__ = "fire_terrorism_rates"
 
-    id = Column(Integer, primary_key=True, index=True)
-    occupancy_type = Column(String(length=50), nullable=False)
-    min_sum_insured = Column(Numeric(precision=18, scale=2), nullable=False)
-    max_sum_insured = Column(Numeric(precision=18, scale=2), nullable=True)
-    rate_per_mille = Column(Numeric(precision=10, scale=6), nullable=False)
+    id = Column(Integer, primary_key=True)
+    occupancy_type = Column(String(50), nullable=False)
+    min_sum_insured = Column(Numeric(18,2), nullable=False)
+    max_sum_insured = Column(Numeric(18,2), nullable=True)
+    rate_per_mille = Column(Numeric(10,6), nullable=False)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
@@ -114,7 +114,7 @@ class AddOnRate(Base):
     __tablename__ = "fire_add_on_rates"
 
     id = Column(Integer, primary_key=True, index=True)
-    add_on_id = Column(Integer, ForeignKey("add_on_master.id"), nullable=False)
+    add_on_id = Column(Integer, ForeignKey("fire_add_on_master.id"), nullable=False)
     product_code = Column(String(length=50), nullable=False)
     # NO product_master reference - products are LOGICAL
     occupancy_type = Column(String(length=50), nullable=True)

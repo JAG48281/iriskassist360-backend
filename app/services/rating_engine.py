@@ -184,32 +184,37 @@ def get_occupancy_details(occupancy_code: Union[str, int]) -> dict:
         logger.error(f"DB Error (get_occupancy_details): {e}")
         return None
 
-def get_terrorism_rate_per_mille(occupancy_type: str, total_si: float) -> Decimal:
+def get_terrorism_rate_per_mille(occupancy_type: str, total_sum_insured: float) -> Decimal:
     """
-    Fetches the terrorism rate for metadata (representative rate for the current SI).
-    Ordered by min_sum_insured DESC to get the highest matching slab.
+    Get terrorism rate based on Occupancy Type and Total SI.
+    Strictly Product-Agnostic.
     """
     stmt = text("""
         SELECT rate_per_mille
         FROM fire_terrorism_rates
         WHERE occupancy_type = :ot
           AND :tsi >= min_sum_insured
-          AND (
-                max_sum_insured IS NULL
-                OR :tsi <= max_sum_insured
-              )
+          AND (:tsi < max_sum_insured OR max_sum_insured IS NULL)
         ORDER BY min_sum_insured DESC
         LIMIT 1;
     """)
     try:
         with engine.connect() as conn:
-            result = conn.execute(stmt, {"ot": occupancy_type, "tsi": total_si}).scalar()
+            result = conn.execute(stmt, {"ot": occupancy_type, "tsi": total_sum_insured}).scalar()
+            
             if result is not None:
-                return Decimal(str(result))
-            return Decimal("0")
+                rate = Decimal(str(result))
+                logger.info(f"Terrorism Rate Lookup → OccType={occupancy_type}, TSI={total_sum_insured}, Rate={rate}")
+                return rate
+            
+            # Explicit error if not found
+            msg = f"No terrorism rate found for OccType={occupancy_type}, TSI={total_sum_insured}"
+            logger.error(msg)
+            raise ValueError(msg)
+            
     except Exception as e:
         logger.error(f"DB Error (get_terrorism_rate_per_mille): {e}")
-        return Decimal("0")
+        raise e
 
 def get_terrorism_slabs(occupancy_type: str) -> list:
     """
