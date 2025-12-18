@@ -19,6 +19,8 @@ from app.limiter import limiter
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("irisk_backend")
 
+# Deployment trigger: fire_iib_rates migration v2 - 2025-12-18
+
 def create_app():
     app = FastAPI(title="iRiskAssist360 Backend", description="Backend API for iRiskAssist360 Flutter App", version="1.0.0")
     
