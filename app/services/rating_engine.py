@@ -115,28 +115,25 @@ def get_fire_eq_rate_per_mille(iib_code: str, eq_zone: str) -> Decimal:
 
 def get_stfi_rate_per_mille(iib_code: str) -> Decimal:
     """
-    Fetches STFI rate from fire_stfi_rates.
+    Fetches STFI rate from fire_iib_rates (as proxy/default).
     Key: iib_code
     """
     stmt = text("""
-        SELECT stfi_rate_per_mille 
-        FROM fire_stfi_rates 
+        SELECT rate_per_mille 
+        FROM fire_iib_rates 
         WHERE iib_code = :iib
     """)
     try:
         with engine.connect() as conn:
             row = conn.execute(stmt, {"iib": iib_code}).fetchone()
             if row:
-                rate = Decimal(str(row.stfi_rate_per_mille))
-                logger.info(f"✅ STFI Rate Lookup: IIB={iib_code} -> {rate}‰")
+                rate = Decimal(str(row.rate_per_mille))
+                logger.info(f"✅ STFI Rate Lookup (from IIB): IIB={iib_code} -> {rate}‰")
                 return rate
             
             error_msg = f"STFI Rate not found for IIB={iib_code}"
             logger.error(f"❌ {error_msg}")
-            # If strictly required, raise. If optional (legacy?), 0?
-            # Prompt says "From fire_stfi_rates". Assuming mandatory for applicable products.
-            return Decimal("0.0") # Fallback to avoid crash?
-            # Better to be strict if we expect it. But safely return 0 if not found to allow proceed (with valid log)
+            return Decimal("0.0") 
     except Exception as e:
         logger.error(f"DB Error (get_stfi_rate_per_mille): {e}")
         return Decimal("0.0")
