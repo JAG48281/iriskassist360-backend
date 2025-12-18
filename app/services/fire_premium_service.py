@@ -159,11 +159,16 @@ class FirePremiumCalculator:
             logger.info(f"Basic Rate: {basic_rate} (Per Mille)")
             
             # 3. Basic Fire Premium Calc
-            base_premium = total_si * basic_rate / Decimal("1000")
-            base_premium = Decimal(str(round_currency(float(base_premium))))
+            # IMPORTANT: Basic fire premium = (Building + Contents) ONLY
+            # Do NOT include add-on SIs in basic fire premium
+            basic_fire_si = building_si + contents_si
+            basic_fire_premium = basic_fire_si * basic_rate / Decimal("1000")
+            basic_fire_premium = Decimal(str(round_currency(float(basic_fire_premium))))
             
-            if base_premium < 0: # Should not happen but strict check
-                base_premium = Decimal("0")
+            if basic_fire_premium < 0:  # Should not happen but strict check
+                basic_fire_premium = Decimal("0")
+            
+            logger.info(f"Basic Fire Premium (Building+Contents only): {basic_fire_premium}")
                 
             # 4. Add-On Premium
             add_on_premium = Decimal("0")
@@ -184,7 +189,7 @@ class FirePremiumCalculator:
                     pa_spouse=request.paSelection.spouse
                 )
             
-            logger.info(f"Add-On Premium: {add_on_premium}")
+            logger.info(f"Add-On Premium (LOR+Alt+PA+Valuable Contents): {add_on_premium}")
             
             # 5. Discount Calculation (On Base + AddOn)
             # Note: Will be calculated on total_before_adjustments later
@@ -264,8 +269,12 @@ class FirePremiumCalculator:
 
             # 9. Net Premium Aggregation
             # Define Subtotal (Excluding Terrorism)
-            # Includes Base + AddOns + EQ + STFI
-            total_before_adjustments = base_premium + add_on_premium + eq_premium + stfi_premium
+            # EQ and STFI are FREE (covered by default) - do NOT add to total
+            # Only Basic Fire + Paid Add-ons
+            total_before_adjustments = basic_fire_premium + add_on_premium
+            
+            logger.info(f"EQ Premium (FREE - not added to total): {eq_premium}")
+            logger.info(f"STFI Premium (FREE - not added to total): {stfi_premium}")
             
             # Recalculate Discount/Loading on this valid subtotal
             # Discount
@@ -313,14 +322,14 @@ class FirePremiumCalculator:
             # LOGGING
             logger.info(
               f"🔥 CALC BREAKDOWN | "
-              f"base={base_premium}, add_on={add_on_premium}, terr={terrorism_premium}, "
+              f"basic_fire={basic_fire_premium}, add_on={add_on_premium}, terr={terrorism_premium}, "
               f"disc={discount_amount}, load={loading_amount}, "
               f"annual_net={annual_net}, net({policy_period}y)={final_net}, gross={gross}"
             )
             
             return {
                 "breakdown": PremiumBreakdown(
-                    basic_premium=float(base_premium),
+                    basic_premium=float(basic_fire_premium),
                     add_on_premium=float(add_on_premium),
                     discount_amount=float(discount_amount),
                     sub_total=float(sub_total_after_discount),  # Subtotal after discount, before loading
