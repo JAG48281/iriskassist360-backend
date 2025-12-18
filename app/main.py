@@ -130,6 +130,17 @@ app = create_app()
 @app.on_event("startup")
 async def verify_terrorism_configuration():
     """Ensure Terrorism rates are correctly configured (Product Agnostic)."""
+    
+    # Auto-seed terrorism rates if table is empty
+    logger.info("🚀 Starting application...")
+    try:
+        from app.utils.seed_terrorism_rates import seed_fire_terrorism_rates
+        seed_fire_terrorism_rates(engine)
+    except Exception as e:
+        logger.error(f"❌ Auto-seed failed: {e}")
+        # Don't crash app - validation below will catch if rates are missing
+    
+    # Validate terrorism rates are working
     try:
         from app.services.rating_engine import get_terrorism_rate_per_mille
         # Validation Case: Residential, 10L -> Exp 0.10
