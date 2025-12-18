@@ -233,6 +233,11 @@ def seed_fire_iib_rates():
     logger.info("Seeding Fire IIB Rates from CSV (FORCE REFRESH)...")
     csv_path = "data/fire_iib_rates.csv"
     
+    # DEBUG: Show absolute path
+    abs_csv_path = os.path.abspath(csv_path)
+    logger.info(f"📂 CSV Path: {abs_csv_path}")
+    logger.info(f"📂 CSV Exists: {os.path.exists(csv_path)}")
+    
     if not os.path.exists(csv_path):
         logger.warning(f"⚠️  {csv_path} not found, skipping")
         return
@@ -249,11 +254,16 @@ def seed_fire_iib_rates():
             conn.rollback()
         
         # Load corrected CSV data
+        row_count = 0
         with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 iib_code = row.get('iib_code')
                 rate = row.get('basic_rate') or row.get('rate_per_mille')
+                
+                # DEBUG: Log first 10 rows
+                if row_count < 10:
+                    logger.info(f"  Loading: {iib_code} = {rate}")
                 
                 if iib_code and rate:
                     sql = """
@@ -263,6 +273,8 @@ def seed_fire_iib_rates():
                     success, error = safe_execute_sql(conn, sql, {"iib": iib_code, "rate": float(rate)}, "fire_iib_rates")
                     if not success:
                         logger.warning(f"Failed IIB rate {iib_code}: {error}")
+                
+                row_count += 1
     
     logger.info(f"✅ Fire IIB Rates (FORCE REFRESH): {stats['fire_iib_rates']['success']} success, {stats['fire_iib_rates']['failed']} failed")
 
