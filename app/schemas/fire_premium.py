@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 from typing import Optional, List, Dict
 from decimal import Decimal
 
@@ -57,6 +57,19 @@ class UBGRUVGRRequest(BaseModel):
     
     # Risk Rate (Explicit for UBGR)
     risk_rate_per_mille: Optional[float] = Field(default=None, ge=0, description="Explicit Risk Rate (Required for UBGR)")
+    
+    @field_validator('policyPeriod', mode='before')
+    @classmethod
+    def parse_policy_period(cls, v):
+        """Parse policy period from string format like '2 Years' or integer"""
+        if isinstance(v, str):
+            # Extract number from strings like "1 Year", "2 Years", "3 Years"
+            import re
+            match = re.search(r'(\d+)', v)
+            if match:
+                return int(match.group(1))
+            return 1  # Default to 1 year if parsing fails
+        return v
 
 
 class PremiumBreakdown(BaseModel):
