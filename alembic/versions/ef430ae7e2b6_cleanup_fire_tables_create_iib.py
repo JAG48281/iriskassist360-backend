@@ -18,7 +18,14 @@ branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
+from sqlalchemy import inspect
+
 def upgrade() -> None:
+    bind = op.get_bind()
+    inspector = inspect(bind)
+    tables = inspector.get_table_names()
+    print(f"DEBUG: ef43 tables: {tables}")
+
     # 1. Drop Legacy Tables
     tables_to_drop = [
         "product_basic_rates",
@@ -41,20 +48,27 @@ def upgrade() -> None:
         "product_master"
     ]
     for table in tables_to_drop:
-        op.execute(f"DROP TABLE IF EXISTS {table} CASCADE")
+        # Check if table really exists before dropping to avoid potential (though rare) errors or just cleaner logs
+        if table in tables:
+             op.execute(f"DROP TABLE IF EXISTS {table} CASCADE")
 
-    # 2. Create fire_iib_rates
-    op.create_table(
-        'fire_iib_rates',
-        sa.Column('iib_code', sa.String(length=20), nullable=False),
-        sa.Column('rate_per_mille', sa.Numeric(precision=10, scale=4), nullable=False),
-        sa.Column('created_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
-        sa.PrimaryKeyConstraint('iib_code')
-    )
-
-    # 3. Seed Data
-    op.execute("INSERT INTO fire_iib_rates (iib_code, rate_per_mille) VALUES ('1001', 0.22), ('1001_2', 0.22), ('2001', 0.35)")
-
+    # 2. Create fire_iib_rates if not exists
+    if not inspector.has_table('fire_iib_rates'):
+        print("DEBUG: Creating fire_iib_rates (has_table=False)")
+        op.create_table(
+            'fire_iib_rates',
+            sa.Column('iib_code', sa.String(length=20), nullable=False),
+            sa.Column('rate_per_mille', sa.Numeric(precision=10, scale=4), nullable=False),
+            sa.Column('created_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
+            sa.PrimaryKeyConstraint('iib_code')
+        )
+        # 3. Seed Data
+        op.execute("INSERT INTO fire_iib_rates (iib_code, rate_per_mille) VALUES ('1001', 0.22), ('1001_2', 0.22), ('2001', 0.35)")
+    else:
+        print("DEBUG: Skipping fire_iib_rates creation (has_table=True)")
 
 def downgrade() -> None:
-    op.drop_table('fire_iib_rates')
+    bind = op.get_bind()
+    inspector = inspect(bind)
+    if inspector.has_table('fire_iib_rates'):
+        op.drop_table('fire_iib_rates')

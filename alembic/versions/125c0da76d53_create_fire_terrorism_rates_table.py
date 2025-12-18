@@ -18,18 +18,27 @@ branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
-def upgrade() -> None:
-    op.create_table(
-        'fire_terrorism_rates',
-        sa.Column('id', sa.Integer(), nullable=False, primary_key=True, autoincrement=True),
-        sa.Column('occupancy_type', sa.String(length=30), nullable=False),
-        sa.Column('min_sum_insured', sa.Numeric(precision=18, scale=2), nullable=False, server_default='0'),
-        sa.Column('max_sum_insured', sa.Numeric(precision=18, scale=2), nullable=True),
-        sa.Column('rate_per_mille', sa.Numeric(precision=6, scale=4), nullable=False),
-        sa.Column('created_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
-        sa.Column('updated_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
-    )
+from sqlalchemy import inspect
 
+def upgrade() -> None:
+    bind = op.get_bind()
+    inspector = inspect(bind)
+    if not inspector.has_table('fire_terrorism_rates'):
+        print("DEBUG: Creating fire_terrorism_rates in 125c")
+        op.create_table(
+            'fire_terrorism_rates',
+            sa.Column('id', sa.Integer(), nullable=False, primary_key=True, autoincrement=True),
+            sa.Column('occupancy_type', sa.String(length=30), nullable=False),
+            sa.Column('min_sum_insured', sa.Numeric(precision=18, scale=2), nullable=False, server_default='0'),
+            sa.Column('max_sum_insured', sa.Numeric(precision=18, scale=2), nullable=True),
+            sa.Column('rate_per_mille', sa.Numeric(precision=6, scale=4), nullable=False),
+            sa.Column('created_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
+            sa.Column('updated_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
+        )
 
 def downgrade() -> None:
-    op.drop_table('fire_terrorism_rates')
+    bind = op.get_bind()
+    inspector = inspect(bind)
+    if 'fire_terrorism_rates' in inspector.get_table_names():
+        op.drop_table('fire_terrorism_rates')
+
