@@ -63,9 +63,15 @@ def get_fire_risk_rate(iib_code: str, db: Session) -> float | None:
     result = db.execute(query, {"iib_code": iib_code}).fetchone()
 
     if not result:
+        logger.warning(f"[IIB RATE FETCH] iib_code={iib_code} rate=NOT_FOUND")
         return None
 
-    return float(result.rate_per_mille)
+    rate = float(result.rate_per_mille)
+    
+    # 🧪 MANDATORY DEBUG LOG
+    logger.info(f"[IIB RATE FETCH] iib_code={iib_code} rate={rate}")
+    
+    return rate
 
 @router.get("/fire/terrorism-rate")
 def get_terrorism_rate(
