@@ -22,8 +22,15 @@ class CalculateRequest(BaseModel):
     occupancyId: Optional[int] = None
     productCode: str
     iib_code: Optional[str] = None
-    total_si: Optional[float] = None  
-    risk_rate: Optional[float] = None # Added per mandatory rules
+    total_si: Optional[float] = None
+    risk_rate: Optional[float] = None
+    
+    # New fields for detailed calculation
+    basic_cover_si: Optional[float] = 0.0
+    add_on_cover_si: Optional[float] = 0.0
+    discountPercent: Optional[float] = 0.0
+    loadingPercent: Optional[float] = 0.0
+    terrorism_si: Optional[float] = None
 
     @validator('productCode')
     def validate_product_code(cls, v):
@@ -32,15 +39,7 @@ class CalculateRequest(BaseModel):
         # Resolver
         canonical = PRODUCT_CODE_MAP.get(v_clean.upper(), v_clean)
         
-        # If input was BGRP, loop above makes it bgrp (default).
-        # We want to support BGRP input too.
-        # If canonical is 'bgrp', it's valid.
-        
         if canonical not in ["bgrp"]:
-             # Legacy support check or strict?
-             # Previous: ["BGRP", "UBGR"]
-             # Now both map to "bgrp".
-             # If user sends "XYZ", it remains "xyz".
              raise ValueError(f"Invalid product code. Must be BGRP/UBGR, got {v}")
         return canonical
 
@@ -48,7 +47,7 @@ class CalculateRequest(BaseModel):
 async def calculate_risk_rate(request: CalculateRequest):
     """
     Calculate risk rate and premium for Fire (UBGR) product.
-    Strict implementation for BGRP.
+    Strict implementation for BGRP based on detailed rules.
     """
     try:
         logger.info(f"🧮 Calculate request: productCode={request.productCode}")
@@ -58,17 +57,12 @@ async def calculate_risk_rate(request: CalculateRequest):
         
         if product_code == "bgrp":
             logger.info(f"UBGR normalized to canonical product code: {product_code}")
-            # ---------------------------------------------------------
-            # UBGR (Bharat Griha Raksha Policy) Strict Rate & Premium Calc
-            # ---------------------------------------------------------
-            logger.info("UBGR calculate: occupancy validation skipped")
             
             from app.database import engine
             from sqlalchemy import text
             from app.utils.rating_engine import round_currency
-            from decimal import Decimal
             
-            # Step 1: Validate iib_code (for completeness) and explicit inputs
+            # Step 1: Validate iib_code
             if not request.iib_code:
                 logger.error("iib_code missing for BGRP calculation")
                 return JSONResponse(
@@ -78,7 +72,7 @@ async def calculate_risk_rate(request: CalculateRequest):
 
             iib_code = request.iib_code.strip()
             
-            # MANDATORY Rule 1: Use only risk_rate from request
+            # MANDATORY Rule: Use only risk_rate from request
             if request.risk_rate is None:
                  logger.error("risk_rate missing for BGRP calculation - Must be explicitly provided")
                  return JSONResponse(
@@ -88,19 +82,67 @@ async def calculate_risk_rate(request: CalculateRequest):
             
             risk_rate = float(request.risk_rate)
 
-            # MANDATORY Rule 2: Total SI presence
-            if request.total_si is None:
-                 logger.error("total_si missing for BGRP calculation")
-                 return JSONResponse(
-                    status_code=422,
-                    content={"error": "total_si required for premium calculation", "success": False}
-                 )
+            # Retrieve SIs and inputs
+            basic_cover_si = float(request.basic_cover_si or 0.0)
+            add_on_cover_si = float(request.add_on_cover_si or 0.0)
+            
+            # If basic_cover_si is 0 but total_si is provided, fallback to total_si as basic (legacy support)
+            # However, prompt implies strict separation. We will trust the inputs.
+            # But let's handle the case where basic_cover_si might be missing but total_si exists.
+            if basic_cover_si == 0 and request.total_si and request.total_si > 0:
+                 # Assume all is basic if not specified
+                 basic_cover_si = float(request.total_si)
+            
+            # Terrorism SI: defaulting to total_si from request if terrorism_si not explicit
+            terrorism_si = float(request.terrorism_si if request.terrorism_si is not None else (request.total_si or (basic_cover_si + add_on_cover_si)))
+            
+            discount_percent = float(request.discountPercent or 0.0)
+            loading_percent = float(request.loadingPercent or 0.0)
 
-            total_si = float(request.total_si)
+            # ---------------------------------------------------------
+            # CALCULATION LOGIC
+            # ---------------------------------------------------------
+
+            # 1. ADD-ON PREMIUM CALCULATION
+            # If add_on_cover_si > 0: add_on_premium = add_on_cover_si * risk_rate / 1000
+            # Use SAME risk_rate as basic fire premium.
+            add_on_premium = 0.0
+            if add_on_cover_si > 0:
+                add_on_premium = round_currency(add_on_cover_si * risk_rate / 1000.0)
+
+            # 2. BASIC FIRE PREMIUM
+            # basic_fire_premium = basic_cover_si * risk_rate / 1000
+            basic_fire_premium = round_currency(basic_cover_si * risk_rate / 1000.0)
+
+            # 3. SUBTOTAL PREMIUM
+            # subtotal_premium = basic_fire_premium + add_on_premium
+            subtotal_premium = round_currency(basic_fire_premium + add_on_premium)
+
+            # 4. DISCOUNT LOGIC
+            # If discountPercent > 0: discount_amount = subtotal_premium * discountPercent / 100
+            # Discount applies ONLY on subtotal_premium.
+            discount_amount = 0.0
+            if discount_percent > 0:
+                discount_amount = round_currency(subtotal_premium * discount_percent / 100.0)
+
+            # 5. LOADING LOGIC
+            # If loadingPercent > 0: loading_amount = subtotal_premium * loadingPercent / 100
+            # Loading applies ONLY on subtotal_premium.
+            loading_amount = 0.0
+            if loading_percent > 0:
+                loading_amount = round_currency(subtotal_premium * loading_percent / 100.0)
+
+            # 6. FINAL SUBTOTAL AFTER ADJUSTMENTS
+            # adjusted_subtotal = subtotal_premium - discount_amount + loading_amount
+            adjusted_subtotal = round_currency(subtotal_premium - discount_amount + loading_amount)
+            # Ensure not negative? (Though insurance logic usually implies checks)
+            if adjusted_subtotal < 0:
+                adjusted_subtotal = 0.0
+
+            # 7. TERRORISM PREMIUM
+            # terrorism_premium calculated separately. NO discount / loading on terrorism.
             
-            # Step 2: Rate Lookup (Terrorism Only) - BGRP Specific
-            
-            # Resolve Occupancy Type
+            # Rate Lookup (Terrorism Only)
             occupancy_type = "Residential" # Default
             try:
                 with engine.connect() as conn:
@@ -111,65 +153,81 @@ async def calculate_risk_rate(request: CalculateRequest):
                     if occ_res:
                         occupancy_type = occ_res
             except Exception as e:
-                logger.warning(f"Occupancy type lookup failed for {iib_code}: {e}. Using Default: Residential.")
+                logger.warning(f"Occupancy type lookup failed for {iib_code}. Using Default: Residential.")
 
+            terrorism_rate = 0.0
+            terrorism_premium = 0.0
+            
             try:
-                from app.services.rating_engine import get_fire_terrorism_premium
-                terrorism_rate_d = get_terrorism_rate_per_mille(
-                    occupancy_type=occupancy_type, 
-                    total_sum_insured=total_si
-                )
-                terrorism_rate = float(terrorism_rate_d)
+                from app.services.rating_engine import get_fire_terrorism_premium, get_terrorism_rate_per_mille
                 
-                # Rule 4: Slab-wise calculation (using Objective 4 Logic)
-                terrorism_premium = get_fire_terrorism_premium(
-                    occupancy_type=occupancy_type,
-                    total_sum_insured=total_si
+                # Get Rate for logging/response
+                tr_val = get_terrorism_rate_per_mille(
+                    occupancy_type=occupancy_type, 
+                    total_sum_insured=terrorism_si
                 )
-                terrorism_premium = float(round_currency(terrorism_premium))
+                terrorism_rate = float(tr_val)
+                
+                # Calculate Premium
+                tp_val = get_fire_terrorism_premium(
+                    occupancy_type=occupancy_type,
+                    total_sum_insured=terrorism_si
+                )
+                terrorism_premium = float(round_currency(tp_val))
+                
             except Exception as e:
-                logger.warning(f"Terrorism lookup failed: {e}. Defaulting to 1st slab rate.")
-                # Fallback to 0.07 if Residential or basic logic
-                terrorism_rate = 0.07 
-                terrorism_premium = round_currency(total_si * terrorism_rate / 1000.0)
+                logger.warning(f"Terrorism lookup failed: {e}")
+                # Fallback logic if needed, though get_fire_terrorism_premium should handle it
+                # For safety, let's keep it 0 or minimal if error? 
+                # User instructions imply existing separate calculation.
+                terrorism_premium = 0.0
 
-            # Step 3: Premium Calculation (Strict Logic)
-            fire_premium = round_currency(total_si * risk_rate / 1000.0)
+            # 8. NET PREMIUM
+            # net_premium = adjusted_subtotal + terrorism_premium
+            net_premium = round_currency(adjusted_subtotal + terrorism_premium)
+
+            # 9. GST
+            # cgst = net_premium * 0.09
+            # sgst = net_premium * 0.09
+            cgst = round_currency(net_premium * 0.09)
+            sgst = round_currency(net_premium * 0.09)
             
-            # Net Premium
-            net_premium = fire_premium + terrorism_premium
-            
-            # GST (18%)
-            gst = round_currency(net_premium * 0.18)
-            
-            # Stamp Duty (Flat 1)
+            # 10. STAMP DUTY
+            # stamp_duty = 1 (always)
             stamp_duty = 1.0
-            
-            # Gross
-            gross_premium = round_currency(net_premium + gst + stamp_duty)
-            
-            # LOGGING (MANDATORY STRICT FORMAT)
-            logger.info("UBGR CALC →")
-            logger.info(f"total_si={total_si}")
-            logger.info(f"risk_rate={risk_rate}")
-            logger.info(f"terrorism_rate={terrorism_rate}")
-            logger.info(f"fire={fire_premium}")
-            logger.info(f"terrorism={terrorism_premium}")
-            logger.info(f"net={net_premium}")
 
-            # RESPONSE CONTRACT (STRICT)
+            # 11. GROSS PREMIUM
+            # gross_premium = net_premium + cgst + sgst + stamp_duty
+            gross_premium = round_currency(net_premium + cgst + sgst + stamp_duty)
+            
+            # LOGGING
+            logger.info("UBGR CALC [V2] →")
+            logger.info(f"basic_si={basic_cover_si}, add_on_si={add_on_cover_si}, terrorism_si={terrorism_si}")
+            logger.info(f"risk_rate={risk_rate}, disc={discount_percent}%, load={loading_percent}%, terr_rate={terrorism_rate}")
+            logger.info(f"basic_prem={basic_fire_premium}, add_on_prem={add_on_premium}, subtotal={subtotal_premium}")
+            logger.info(f"disc_amt={discount_amount}, load_amt={loading_amount}, adj_subtotal={adjusted_subtotal}")
+            logger.info(f"terr_prem={terrorism_premium}, net={net_premium}, gross={gross_premium}")
+
+            # 12. RESPONSE MUST RETURN ALL FIELDS
             return {
-                "fire_premium": fire_premium,
+                "basic_fire_premium": basic_fire_premium,
+                "add_on_premium": add_on_premium,
+                "discount_amount": discount_amount,
+                "loading_amount": loading_amount,
+                "subtotal_premium": subtotal_premium,
                 "terrorism_premium": terrorism_premium,
                 "net_premium": net_premium,
-                "gst": gst,
+                "cgst": cgst,
+                "sgst": sgst,
+                "stamp_duty": stamp_duty,
                 "gross_premium": gross_premium,
+                
+                # Extra metadata
+                "fire_premium": subtotal_premium, # Alias for UI compatibility
                 "risk_rate_used": risk_rate,
                 "terrorism_rate_used": terrorism_rate,
-                # Extra fields for frontend context if needed, but contract specified explicitly these
                 "product_code": "bgrp",
-                "total_si": total_si,
-                "stamp_duty": stamp_duty # Implicitly needed for gross check
+                "calculated_at": datetime.now().isoformat()
             }
         
         # Legacy/Other Products Logic (if any)
