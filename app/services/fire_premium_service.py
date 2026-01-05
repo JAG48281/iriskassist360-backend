@@ -168,165 +168,156 @@ class FirePremiumCalculator:
             
             logger.info(f"Basic Rate: {basic_rate} (Per Mille)")
             
-            # 3. UBGR Premium Logic (STRICT - ANNUAL)
+            # 3. UBGR Premium Logic
             
-            # basic_fire_premium = buildingSI × risk_rate / 1000
-            # BUT strict rule says: "Use ONLY total_property_si for Basic Fire Premium"
-            # total_property_si = building_si + contents_si + loss_of_rent + alt_acc + valuable_contents
-            
-            # 1️⃣ Total Property SI Calculation (Rule: Exclude PA)
+            # A) SI Calculations
+            # Property Add-ons (LOR, AltAcc, ValContents)
             property_add_on_si = (
                 Decimal(str(request.lossOfRentSI or 0)) +
                 Decimal(str(request.altAccommodationSI or 0)) +
                 Decimal(str(request.valuableContentsSI or 0))
             )
+
+            # Fire SI = Building + Contents + Property Add-ons
+            fire_sum_insured = building_si + contents_si + property_add_on_si
             
-            # Contents usually part of header SI but here handled as part of total property
-            total_property_si = building_si + contents_si + property_add_on_si
-            
-            # Basic Fire Premium Calculation
-            basic_fire_premium_annual = total_property_si * basic_rate / Decimal("1000")
-            basic_fire_premium_annual = Decimal(str(round_currency(float(basic_fire_premium_annual))))
-            
-            # Add-on Premium for Property (Rent, Alt Acc, etc.)
-            # If BGRP logic dictates "Basic Rate" applies to ALL property items, and we used total_property_si above,
-            # then basic_fire_premium_annual ALREADY includes the property add-ons.
-            # To maintain the breakdown structure requested (Basic vs Add-on), we can split it:
-            # Basic = (Building + Contents) * Rate
-            # Add-on (Property) = (Rent + Alt + Val) * Rate
-            
-            if request.occupancyCode == "1001_2":
-                add_on_property_premium = Decimal("0")
-                optional_addons_applicable = False
-                # Re-calc Basic for Coop: Only Building SI matters (Contents forced to 0 earlier)
-                # building_si is already set. contents_si is 0. property_add_on_si should be 0 (via validation) but lets ensure.
-                total_property_si = building_si # Since others forced to 0
-                basic_fire_premium_annual = total_property_si * basic_rate / Decimal("1000")
-                basic_fire_premium_annual = Decimal(str(round_currency(float(basic_fire_premium_annual))))
-            else:
-                # Split calculation for breakdown accuracy
-                add_on_property_premium = property_add_on_si * basic_rate / Decimal("1000")
-                add_on_property_premium = Decimal(str(round_currency(float(add_on_property_premium))))
-                
-                # Re-calculate Basic to be strictly Building+Contents
-                base_core_si = building_si + contents_si
-                basic_fire_premium_annual = base_core_si * basic_rate / Decimal("1000")
-                basic_fire_premium_annual = Decimal(str(round_currency(float(basic_fire_premium_annual))))
-            
-            # 4️⃣ PA Premium Calculation (Fixed Flat Rates)
-            # Separate from Property SI.
+            # Terrorism SI = Building + Contents (Strict Rule: Exclude LOR/AltAcc?)
+            # User Rule 2: "Terrorism SI = Building SI + Add-on Covers SI"
+            # Assuming Add-on Covers SI means 'contents_si'.
+            terrorism_sum_insured_base = building_si + contents_si
+
+            # Total Sum Insured (Excluding PA)
+            # Rule 1: Total SI = Building SI + Add-on Covers SI + LOR + Alt Acc
+            # This equals fire_sum_insured.
+            total_sum_insured = fire_sum_insured
+
+            # B) PA Premium Calculation (Fixed/Flat, Annual)
             pa_proposer_premium = Decimal("0")
             pa_spouse_premium = Decimal("0")
             
-            if (request.paProposer or request.paSelection.proposer or request.paProposerSI > 0) and request.occupancyCode != "1001_2":
-                # Get Flat Rate or Fixed Amount. Try retrieving mapping "PA_PROPOSER"
-                try:
-                    rate_type, pa_val = get_add_on_rate(product_code, "PA_PROPOSER", request.occupancyCode)
-                    
-                    if rate_type.lower() == "fixed":
-                        pa_proposer_premium = Decimal(str(pa_val))
-                    else:
-                        # Rate based (per mille or percentage)
-                        # Fallback to fixed logic if no SI? Or use 7.0?
-                        # If SI is present:
-                        if request.paProposerSI > 0:
-                             if rate_type.lower() == "percentage":
-                                 pa_proposer_premium = Decimal(str(request.paProposerSI)) * pa_val / Decimal("100")
-                             else:
-                                 # Default to per_mille
-                                 pa_proposer_premium = Decimal(str(request.paProposerSI)) * pa_val / Decimal("1000")
+            if optional_addons_applicable:
+                if (request.paSelection.proposer or request.paProposerSI > 0):
+                    try:
+                        rate_type, pa_val = get_add_on_rate(product_code, "PA_PROPOSER", request.occupancyCode)
+                        # Assume Fixed or derive from SI if Percentage/PerMille
+                        if rate_type.lower() == "fixed":
+                            pa_proposer_premium = Decimal(str(pa_val))
+                        elif request.paProposerSI > 0:
+                             div = Decimal("100") if rate_type.lower() == "percentage" else Decimal("1000")
+                             pa_proposer_premium = Decimal(str(request.paProposerSI)) * pa_val / div
                         else:
-                             # No SI but rate provided? Maybe it is a fixed rate per person implies fixed amount?
-                             # In existing logic, 7.0 was fixed.
+                             # Fallback for rate-based without SI -> Treat as fixed amount?
                              pa_proposer_premium = Decimal(str(pa_val))
-                except:
-                     # Fallback
-                     pa_proposer_premium = Decimal("0")
-                pa_proposer_premium = Decimal(str(round_currency(float(pa_proposer_premium))))
+                    except:
+                        pa_proposer_premium = Decimal("0")
+                    pa_proposer_premium = Decimal(str(round_currency(float(pa_proposer_premium))))
 
-            if (request.paSpouse or request.paSelection.spouse or request.paSpouseSI > 0) and request.occupancyCode != "1001_2":
-                 try:
-                    rate_type, pa_val = get_add_on_rate(product_code, "PA_SPOUSE", request.occupancyCode)
-                    if rate_type.lower() == "fixed":
-                        pa_spouse_premium = Decimal(str(pa_val))
-                    else:
-                        if request.paSpouseSI > 0:
-                            if rate_type.lower() == "percentage":
-                                pa_spouse_premium = Decimal(str(request.paSpouseSI)) * pa_val / Decimal("100")
-                            else:
-                                pa_spouse_premium = Decimal(str(request.paSpouseSI)) * pa_val / Decimal("1000")
-                        else:
+                if (request.paSelection.spouse or request.paSpouseSI > 0):
+                     try:
+                        rate_type, pa_val = get_add_on_rate(product_code, "PA_SPOUSE", request.occupancyCode)
+                        if rate_type.lower() == "fixed":
                             pa_spouse_premium = Decimal(str(pa_val))
-                 except:
-                     pa_spouse_premium = Decimal("0")
-                 pa_spouse_premium = Decimal(str(round_currency(float(pa_spouse_premium))))
+                        elif request.paSpouseSI > 0:
+                             div = Decimal("100") if rate_type.lower() == "percentage" else Decimal("1000")
+                             pa_spouse_premium = Decimal(str(request.paSpouseSI)) * pa_val / div
+                        else:
+                             pa_spouse_premium = Decimal(str(pa_val))
+                     except:
+                         pa_spouse_premium = Decimal("0")
+                     pa_spouse_premium = Decimal(str(round_currency(float(pa_spouse_premium))))
             
-            property_add_on_premium_annual = add_on_property_premium
+            # C) Fire & Property Add-on Premium (Annual)
+            # We calculate loosely based on "Fire SI" then split for reporting if needed.
+            # Split logic:
+            # Basic Fire Premium = (Building + Contents) * Rate
+            # Add-on Property Premium = (LOR + Alt + Val) * Rate
             
-            # Total Add-on Premium = Property Add-ons + PA
-            add_on_premium_annual = property_add_on_premium_annual + pa_proposer_premium + pa_spouse_premium
+            base_core_si = building_si + contents_si
+            basic_fire_premium_annual = base_core_si * basic_rate / Decimal("1000")
+            basic_fire_premium_annual = Decimal(str(round_currency(float(basic_fire_premium_annual))))
             
-            # 2️⃣ Subtotal Premium
-            subtotal_premium_annual = basic_fire_premium_annual + add_on_premium_annual
+            add_on_property_premium_annual = Decimal("0")
+            if optional_addons_applicable:
+                add_on_property_premium_annual = property_add_on_si * basic_rate / Decimal("1000")
+                add_on_property_premium_annual = Decimal(str(round_currency(float(add_on_property_premium_annual))))
+
+            # D) Subtotal (Excluding PA) for Discount/Loading
+            # Subtotal = Basic Fire + Add-on Property
+            subtotal_premium_annual = basic_fire_premium_annual + add_on_property_premium_annual
             
-            # 3️⃣ Discount Logic (Apply ONLY on subtotal_premium)
+            # E) Discount & Loading
             discount_amount_annual = subtotal_premium_annual * discount_pct / Decimal("100")
             discount_amount_annual = Decimal(str(round_currency(float(discount_amount_annual))))
             
-            # 4️⃣ Loading Logic (Apply ONLY after discount, on (subtotal - discount))
-            loading_amount_annual = (subtotal_premium_annual - discount_amount_annual) * loading_pct / Decimal("100")
+            # Loading on (Subtotal - Discount)
+            base_for_loading = subtotal_premium_annual - discount_amount_annual
+            if base_for_loading < 0: base_for_loading = Decimal("0")
+            
+            loading_amount_annual = base_for_loading * loading_pct / Decimal("100")
             loading_amount_annual = Decimal(str(round_currency(float(loading_amount_annual))))
             
-            # 6. Terrorism Premium (ANNUAL)
+            # F) Terrorism Premium
             terrorism_premium_annual = Decimal("0")
             
-            # Terrorism SI defaults to Total Property SI if not specified
-            # "Terrorism SI must never exceed total_property_si"
-            calc_terrorism_si = terrorism_si_input
-            if calc_terrorism_si <= 0:
-                calc_terrorism_si = total_property_si
-            elif calc_terrorism_si > total_property_si:
-                calc_terrorism_si = total_property_si # Cap it
-                
-            # Check selection
+            # Determine Terrorism SI
+            # Defaults to terrorism_sum_insured_base (Build+Cont) if not supplied
+            use_terr_si = terrorism_si_input
+            if use_terr_si <= 0:
+                use_terr_si = terrorism_sum_insured_base
+            elif use_terr_si > terrorism_sum_insured_base:
+                # User rule: "Terrorism SI does not exceed total_property_si" (or base fire si)
+                # We cap it at the base we calculated
+                use_terr_si = terrorism_sum_insured_base
+            
             is_terrorism_selected = any(addon.addOnCode.upper() == "TERRORISM" for addon in request.addOns)
             
-            if is_terrorism_selected and calc_terrorism_si > 0:
+            if is_terrorism_selected and use_terr_si > 0:
                 try:
                     occ_details = get_occupancy_details(request.occupancyCode)
                     occ_type = occ_details.get("occupancy_type", "Non-Industrial") if occ_details else "Non-Industrial"
-                    terrorism_premium_annual = Decimal(str(calculate_terrorism_premium(occ_type, float(calc_terrorism_si))))
+                    terrorism_premium_annual = Decimal(str(calculate_terrorism_premium(occ_type, float(use_terr_si))))
                     terrorism_premium_annual = Decimal(str(round_currency(float(terrorism_premium_annual))))
                 except Exception as e:
                     logger.warning(f"Terrorism calc failed: {e}")
                     terrorism_premium_annual = Decimal("0")
             
-            # 5️⃣ Net Premium Calculation (FINAL)
-            net_premium_annual = (subtotal_premium_annual - discount_amount_annual + loading_amount_annual) + terrorism_premium_annual
+            # G) Net Premium Final Calculation
+            # Net = (Subtotal - Discount + Loading) + Terrorism + PA
+            net_premium_annual = (subtotal_premium_annual - discount_amount_annual + loading_amount_annual) + terrorism_premium_annual + pa_proposer_premium + pa_spouse_premium
             net_premium_annual = Decimal(str(round_currency(float(net_premium_annual))))
             
             # 8. Policy Period Scaling
             period_multiplier = Decimal(str(policy_period))
             
             basic_fire_premium = basic_fire_premium_annual * period_multiplier
-            add_on_premium = add_on_premium_annual * period_multiplier
+            # Note: 'add_on_premium' output field typically implies the Property Add-on Premium in this context
+            add_on_premium = add_on_property_premium_annual * period_multiplier
             subtotal_premium = subtotal_premium_annual * period_multiplier
             terrorism_premium = terrorism_premium_annual * period_multiplier
             discount_amount = discount_amount_annual * period_multiplier
             loading_amount = loading_amount_annual * period_multiplier
-            net_premium = net_premium_annual * period_multiplier
             
-            # Split breakdown for PA
             pa_proposer_final = pa_proposer_premium * period_multiplier
             pa_spouse_final = pa_spouse_premium * period_multiplier
             
-            # Round scaled components
+            # Final Net Calculation with Scaled Values (to handle rounding diffs)
+            # Recalculate Net from scaled components to be precise?
+            # Or just scale Net? Scaling Net is safer for "Annual * Period".
+            net_premium = net_premium_annual * period_multiplier
+            
+            # Verification Re-sum
+            # net_check = (subtotal - discount + loading) + terrorism + pa_self + pa_spouse
+            # Use this for gross consistency
+            
+            # Rounding
             basic_fire_premium = Decimal(str(round_currency(float(basic_fire_premium))))
             add_on_premium = Decimal(str(round_currency(float(add_on_premium))))
             subtotal_premium = Decimal(str(round_currency(float(subtotal_premium))))
             terrorism_premium = Decimal(str(round_currency(float(terrorism_premium))))
             discount_amount = Decimal(str(round_currency(float(discount_amount))))
             loading_amount = Decimal(str(round_currency(float(loading_amount))))
+            pa_proposer_final = Decimal(str(round_currency(float(pa_proposer_final))))
+            pa_spouse_final = Decimal(str(round_currency(float(pa_spouse_final))))
             net_premium = Decimal(str(round_currency(float(net_premium))))
             
             # 9. Taxes & Stamp Duty
@@ -335,10 +326,7 @@ class FirePremiumCalculator:
             sgst = net_premium * Decimal("0.09")
             sgst = Decimal(str(round_currency(float(sgst))))
             
-            # Stamp Duty - FIXED
             stamp = 1
-            
-            # gross_premium
             gross = net_premium + cgst + sgst + stamp
             gross = Decimal(str(round_currency(float(gross))))
             
@@ -347,6 +335,7 @@ class FirePremiumCalculator:
               f"🔥 CALC BREAKDOWN | "
               f"basic_fire={basic_fire_premium}, add_on={add_on_premium}, subtotal={subtotal_premium}, "
               f"terr={terrorism_premium}, disc={discount_amount}, load={loading_amount}, "
+              f"pa_self={pa_proposer_final}, pa_spouse={pa_spouse_final}, "
               f"net={net_premium}, gross={gross}"
             )
             
@@ -363,10 +352,15 @@ class FirePremiumCalculator:
                 stamp_duty=float(stamp),
                 gross_premium=float(gross),
                 # Extended Fields
-                total_property_si=float(total_property_si),
+                total_property_si=float(total_sum_insured), # Legacy name
                 pa_proposer_premium=float(pa_proposer_final),
                 pa_spouse_premium=float(pa_spouse_final),
-                terrorism_si=float(calc_terrorism_si)
+                terrorism_si=float(use_terr_si),
+                # UBGR Specifics
+                fire_sum_insured=float(fire_sum_insured),
+                terrorism_sum_insured=float(use_terr_si),
+                pa_self_premium=float(pa_proposer_final),
+                total_sum_insured=float(total_sum_insured)
             )
 
             return {

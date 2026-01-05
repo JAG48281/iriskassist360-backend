@@ -86,10 +86,16 @@ def test_ubgr_pa_exclusion_from_total_si(mock_rating_engine):
     assert result["pa_proposer_premium"] == 100.0
     assert result["pa_spouse_premium"] == 50.0
     
-    # Total Add On Premium = Add-on Property (18) + PA(100) + PA(50) = 168
-    assert result["add_on_premium"] == 168.0
+    # Total Add On Premium = Add-on Property ONLY (PA is separate now)
+    # Add-on (Rent+...) = 35,000 * 0.5 / 1000 = 17.5 -> 18
+    assert result["add_on_premium"] == 18.0
     
-    # 4. Verify Terrorism SI matches Total Property SI (and excludes PA)
-    assert result["terrorism_si"] == expected_si
-    assert result["terrorism_si"] != (expected_si + 1000000) # Ensure PA SI (10L total) is NOT included
+    # 4. Verify Terrorism SI matches Base Core SI (Building + Contents) 
+    # Logic Update: Terrorism SI = Building + Contents (Strict) = 1,500,000 (Excl LOR/AltAcc)
+    expected_terr_si = 1000000 + 500000
+    assert result["terrorism_si"] == expected_terr_si
+    
+    # 5. Verify New Fields
+    assert result["fire_sum_insured"] == expected_si
+    assert result["total_sum_insured"] == expected_si
 

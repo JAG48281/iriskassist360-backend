@@ -150,6 +150,12 @@ class PremiumBreakdown(BaseModel):
     pa_spouse_premium: float = 0.0
     terrorism_si: float = 0.0
 
+    # Validated Fields per UBGR Rule
+    fire_sum_insured: float = 0.0
+    terrorism_sum_insured: float = 0.0
+    pa_self_premium: float = 0.0
+    total_sum_insured: float = 0.0 # Excluding PA
+
 class CalculationMeta(BaseModel):
     """Metadata for transparency"""
     applied_rate: float  # Basic fire rate per mille
@@ -182,6 +188,12 @@ class UBGRUVGRResponse(BaseModel):
     pa_proposer_premium: float = 0.0
     pa_spouse_premium: float = 0.0
     terrorism_si: float = 0.0
+
+    # Validated Fields per UBGR Rule
+    fire_sum_insured: float = 0.0
+    terrorism_sum_insured: float = 0.0
+    pa_self_premium: float = 0.0
+    total_sum_insured: float = 0.0 # Excluding PA
 
     # Metadata & Status (Keeping for API consistency)
     success: bool = True
