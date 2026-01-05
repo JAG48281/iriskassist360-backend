@@ -249,9 +249,18 @@ class FirePremiumCalculator:
                 add_on_property_premium_annual = add_on_sum_insured_total * basic_rate / Decimal("1000")
                 add_on_property_premium_annual = Decimal(str(round_currency(float(add_on_property_premium_annual))))
 
-                # Validation Warning
+                # Mandatory Debug Log (TEMP)
+                logger.warning(
+                  f"ADDON_DEBUG | add_on_covers_si={add_on_sum_insured_total}, "
+                  f"risk_rate={basic_rate}, "
+                  f"add_on_premium={add_on_property_premium_annual}"
+                )
+
+                # Validation Error
                 if add_on_sum_insured_total > 0 and add_on_property_premium_annual == 0:
-                     logger.warning(f"Add-on SI {add_on_sum_insured_total} > 0 but Premium is 0 (Rate: {basic_rate})")
+                     msg = f"Add-on SI {add_on_sum_insured_total} > 0 but Premium is 0 (Rate: {basic_rate})"
+                     logger.error(msg)
+                     raise ValueError(msg)
 
             # D) Subtotal (Excluding PA) for Discount/Loading
             # Subtotal = Basic Fire + Add-on Property
