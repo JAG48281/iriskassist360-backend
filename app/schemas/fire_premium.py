@@ -192,7 +192,9 @@ class UBGRUVGRResponse(BaseModel):
     terrorism_si: float = 0.0
 
     # Validated Fields per UBGR Rule
-    fire_sum_insured: float = 0.0
+    fire_si: float = 0.0 # Total Property SI
+    pa_si: float = 0.0 # Total PA SI
+    fire_sum_insured: float = 0.0 # Legacy alias
     terrorism_sum_insured: float = 0.0
     pa_self_premium: float = 0.0
     total_sum_insured: float = 0.0 # Excluding PA

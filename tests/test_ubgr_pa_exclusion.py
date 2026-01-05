@@ -93,4 +93,6 @@ def test_ubgr_pa_exclusion_from_total_si(mock_rating_engine):
     # 5. Verify New Fields
     assert result["fire_sum_insured"] == expected_si
     assert result["total_sum_insured"] == expected_si
+    assert result["fire_si"] == expected_si
+    assert result["pa_si"] == 1000000.0 # 5L + 5L
 

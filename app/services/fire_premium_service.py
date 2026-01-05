@@ -369,6 +369,8 @@ class FirePremiumCalculator:
                 pa_spouse_premium=float(pa_spouse_final),
                 terrorism_si=float(use_terr_si),
                 # UBGR Specifics
+                fire_si=float(fire_sum_insured), # Total Property SI
+                pa_si=float(Decimal(str(request.paProposerSI)) + Decimal(str(request.paSpouseSI))), # Total PA SI
                 fire_sum_insured=float(fire_sum_insured),
                 terrorism_sum_insured=float(use_terr_si),
                 pa_self_premium=float(pa_proposer_final),
