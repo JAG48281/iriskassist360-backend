@@ -181,7 +181,7 @@ def get_occupancy_details(occupancy_code: Union[str, int]) -> dict:
         logger.error(f"DB Error (get_occupancy_details): {e}")
         return None
 
-def get_terrorism_rate_per_mille(occupancy_type: str, total_sum_insured: float) -> Decimal:
+def get_terrorism_rate_per_mille(occupancy_type: str, total_si: float) -> Decimal:
     """
     Get terrorism rate based on Occupancy Type and Total SI.
     Strictly Product-Agnostic.
@@ -197,15 +197,15 @@ def get_terrorism_rate_per_mille(occupancy_type: str, total_sum_insured: float) 
     """)
     try:
         with engine.connect() as conn:
-            result = conn.execute(stmt, {"ot": occupancy_type, "tsi": total_sum_insured}).scalar()
+            result = conn.execute(stmt, {"ot": occupancy_type, "tsi": total_si}).scalar()
             
             if result is not None:
                 rate = Decimal(str(result))
-                logger.info(f"Terrorism Rate Lookup → OccType={occupancy_type}, TSI={total_sum_insured}, Rate={rate}")
+                logger.info(f"Terrorism Rate Lookup → OccType={occupancy_type}, TSI={total_si}, Rate={rate}")
                 return rate
             
             # Explicit error if not found
-            msg = f"No terrorism rate found for OccType={occupancy_type}, TSI={total_sum_insured}"
+            msg = f"No terrorism rate found for OccType={occupancy_type}, TSI={total_si}"
             logger.error(msg)
             raise ValueError(msg)
             
