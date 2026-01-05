@@ -143,6 +143,12 @@ class PremiumBreakdown(BaseModel):
     sgst: float
     stamp_duty: int = 1
     gross_premium: float
+    
+    # New Fields for Transparency & Validation
+    total_property_si: float = 0.0
+    pa_proposer_premium: float = 0.0
+    pa_spouse_premium: float = 0.0
+    terrorism_si: float = 0.0
 
 class CalculationMeta(BaseModel):
     """Metadata for transparency"""
@@ -170,6 +176,12 @@ class UBGRUVGRResponse(BaseModel):
     sgst: float
     stamp_duty: int = 1
     gross_premium: float
+    
+    # New Fields for Transparency & Validation
+    total_property_si: float = 0.0
+    pa_proposer_premium: float = 0.0
+    pa_spouse_premium: float = 0.0
+    terrorism_si: float = 0.0
 
     # Metadata & Status (Keeping for API consistency)
     success: bool = True

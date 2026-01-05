@@ -1,144 +1,53 @@
-"""
-Fire Premium Calculation Service
-Implements authoritative premium calculation for UBGR/UVGR products.
-"""
-import logging
-from decimal import Decimal
-from typing import List, Dict, Tuple
-from app.services.rating_engine import (
-    get_basic_rate_per_mille,
-    get_terrorism_rate_per_mille,
-    calculate_terrorism_premium,
-    get_add_on_rate,
-    get_occupancy_details,
-    get_fire_eq_rate_per_mille,
-    get_stfi_rate_per_mille
-)
-from app.schemas.fire_premium import (
-    UBGRUVGRRequest,
-    PremiumBreakdown,
-    CalculationMeta,
-    AddOnItem
-)
-from app.utils.rating_engine import round_currency
+============================= test session starts =============================
+platform win32 -- Python 3.11.0, pytest-9.0.2, pluggy-1.6.0 -- C:\Program Files\Python311\python.exe
+cachedir: .pytest_cache
+rootdir: D:\iriskassist360_backend
+plugins: anyio-4.11.0
+collecting ... collected 1 item
 
-logger = logging.getLogger(__name__)
+tests/test_ubgr_pa_exclusion.py::test_ubgr_pa_exclusion_from_total_si FAILED [100%]
 
-class FirePremiumCalculator:
-    """
-    Authoritative premium calculator for Fire insurance products.
-    Implements strict calculation rules as per business requirements.
-    """
-    
-    @staticmethod
-    def _calculate_add_on_premium(
-        product_code: str,
-        occupancy_code: str,
-        add_ons: List[AddOnItem],
-        pa_proposer: bool,
-        pa_spouse: bool
-    ) -> Tuple[Decimal, List[Dict]]:
-        """
-        Calculate total add-on premium including PA.
-        
-        Returns:
-            (total_add_on_premium, add_on_details)
-        """
-        total_add_on = Decimal("0")
-        details = []
-        
-        # Process each add-on
-        for addon in add_ons:
-            rate_type, rate_value = get_add_on_rate(
-                product_code=product_code,
-                add_on_code=addon.addOnCode,
-                occupancy_code=occupancy_code
-            )
-            
-            if rate_type.lower() == "per_mille":
-                # Rate per 1000 of SI
-                premium = Decimal(str(addon.sumInsured)) * rate_value / Decimal("1000")
-            elif rate_type.lower() == "percentage":
-                # Percentage of SI
-                premium = Decimal(str(addon.sumInsured)) * rate_value / Decimal("100")
-            else:
-                # Fixed amount
-                premium = rate_value
-            
-            premium = Decimal(str(round_currency(float(premium))))
-            total_add_on += premium
-            
-            details.append({
-                "addOnCode": addon.addOnCode,
-                "sumInsured": addon.sumInsured,
-                "rateType": rate_type,
-                "rateValue": float(rate_value),
-                "premium": float(premium)
-            })
-        
-        # Add PA premiums (flat rates from DB)
-        if pa_proposer:
-            _, pa_rate = get_add_on_rate(product_code, "PA_PROPOSER", occupancy_code)
-            pa_premium = Decimal(str(round_currency(float(pa_rate))))
-            total_add_on += pa_premium
-            details.append({
-                "addOnCode": "PA_PROPOSER",
-                "sumInsured": 0,
-                "rateType": "fixed",
-                "rateValue": float(pa_rate),
-                "premium": float(pa_premium)
-            })
-        
-        if pa_spouse:
-            _, pa_rate = get_add_on_rate(product_code, "PA_SPOUSE", occupancy_code)
-            pa_premium = Decimal(str(round_currency(float(pa_rate))))
-            total_add_on += pa_premium
-            details.append({
-                "addOnCode": "PA_SPOUSE",
-                "sumInsured": 0,
-                "rateType": "fixed",
-                "rateValue": float(pa_rate),
-                "premium": float(pa_premium)
-            })
-        
-        return total_add_on, details
-    
+================================== FAILURES ===================================
+____________________ test_ubgr_pa_exclusion_from_total_si _____________________
+
+request = UBGRUVGRRequest(productCode='UBGR', occupancyCode='1001', buildingSI=1000000.0, contentsSI=500000.0, terrorism_si=0.0,...ection(proposer=True, spouse=True), discountPercentage=0, loadingPercentage=0, policyPeriod=1, risk_rate_per_mille=0.5)
+
     @staticmethod
     def calculate_ubgr_uvgr(request: UBGRUVGRRequest) -> Dict:
         """
         Calculate premium for UBGR/UVGR products.
-        STRICT MODE with ₹50 (Basic+Addon) Minimum Premium Rule.
+        STRICT MODE with \u20b950 (Basic+Addon) Minimum Premium Rule.
         """
         logger.info(f"Calculating {request.productCode} Premium")
         logger.info(f"Payload: {request.model_dump()}")
-
+    
         try:
             # 1. Normalize ALL numeric inputs with safety defaults
             discount_pct = Decimal(str(request.discountPercentage or 0.0))
             loading_pct = Decimal(str(request.loadingPercentage or 0.0))
-            
+    
             # Resolve Source SIs (Preference for basic_cover_si/add_on_cover_si as per turn prompt)
             raw_basic_si = request.basic_cover_si if request.basic_cover_si is not None else request.buildingSI
             raw_addon_si = request.add_on_cover_si if request.add_on_cover_si is not None else request.contentsSI
-            
+    
             building_si = Decimal(str(raw_basic_si or 0.0))
             contents_si = Decimal(str(raw_addon_si or 0.0))
             terrorism_si_input = Decimal(str(request.terrorism_si or request.terrorismSI or 0.0))
-            
+    
             # Policy period safety
             policy_period = request.policyPeriod
             if policy_period < 1:
                 policy_period = 1
-                
+    
             # Product code normalization
             if request.productCode:
                 product_code = request.productCode.upper()
             else:
                  raise ValueError("Product code is missing")
-                 
+    
             if product_code not in ['UBGR', 'UVGR', 'UVGS']:
                 raise ValueError(f"Invalid product code: {request.productCode}")
-
+    
             # --- UBGR EXCLUSION RULE: Dwellings: Co-operative Society (1001_2) ---
             optional_addons_applicable = True
             if product_code == "UBGR" and request.occupancyCode == "1001_2":
@@ -150,7 +59,7 @@ class FirePremiumCalculator:
                 request.paSelection.spouse = False
                 # If there are any add-ons in the list, we ignore them in premium calc
                 # (handled by setting contents_si to 0 above since add_on_premium depends on it)
-
+    
             # 2. Basic Rate Lookup (SAFE)
             if product_code == "UBGR":
                 if request.risk_rate_per_mille is None:
@@ -165,36 +74,36 @@ class FirePremiumCalculator:
                 except Exception as e:
                     logger.error(f"Basic rate lookup failed: {e}")
                     raise ValueError(f"Basic rate lookup failed for {product_code}/{request.occupancyCode}")
-            
+    
             logger.info(f"Basic Rate: {basic_rate} (Per Mille)")
-            
+    
             # 3. UBGR Premium Logic (STRICT - ANNUAL)
-            
-            # basic_fire_premium = buildingSI × risk_rate / 1000
+    
+            # basic_fire_premium = buildingSI � risk_rate / 1000
             # BUT strict rule says: "Use ONLY total_property_si for Basic Fire Premium"
             # total_property_si = building_si + contents_si + loss_of_rent + alt_acc + valuable_contents
-            
-            # 1️⃣ Total Property SI Calculation (Rule: Exclude PA)
+    
+            # 1\ufe0f\u20e3 Total Property SI Calculation (Rule: Exclude PA)
             property_add_on_si = (
                 Decimal(str(request.lossOfRentSI or 0)) +
                 Decimal(str(request.altAccommodationSI or 0)) +
                 Decimal(str(request.valuableContentsSI or 0))
             )
-            
+    
             # Contents usually part of header SI but here handled as part of total property
             total_property_si = building_si + contents_si + property_add_on_si
-            
+    
             # Basic Fire Premium Calculation
             basic_fire_premium_annual = total_property_si * basic_rate / Decimal("1000")
             basic_fire_premium_annual = Decimal(str(round_currency(float(basic_fire_premium_annual))))
-            
+    
             # Add-on Premium for Property (Rent, Alt Acc, etc.)
             # If BGRP logic dictates "Basic Rate" applies to ALL property items, and we used total_property_si above,
             # then basic_fire_premium_annual ALREADY includes the property add-ons.
             # To maintain the breakdown structure requested (Basic vs Add-on), we can split it:
             # Basic = (Building + Contents) * Rate
             # Add-on (Property) = (Rent + Alt + Val) * Rate
-            
+    
             if request.occupancyCode == "1001_2":
                 add_on_property_premium = Decimal("0")
                 optional_addons_applicable = False
@@ -207,22 +116,214 @@ class FirePremiumCalculator:
                 # Split calculation for breakdown accuracy
                 add_on_property_premium = property_add_on_si * basic_rate / Decimal("1000")
                 add_on_property_premium = Decimal(str(round_currency(float(add_on_property_premium))))
-                
+    
                 # Re-calculate Basic to be strictly Building+Contents
                 base_core_si = building_si + contents_si
                 basic_fire_premium_annual = base_core_si * basic_rate / Decimal("1000")
                 basic_fire_premium_annual = Decimal(str(round_currency(float(basic_fire_premium_annual))))
-            
-            # 4️⃣ PA Premium Calculation (Fixed Flat Rates)
+    
+            # 4\ufe0f\u20e3 PA Premium Calculation (Fixed Flat Rates)
             # Separate from Property SI.
             pa_proposer_premium = Decimal("0")
             pa_spouse_premium = Decimal("0")
-            
+    
+>           if (request.paProposer or request.paSelection.proposer or request.paProposerSI > 0) and request.occupancyCode != "1001_2":
+                ^^^^^^^^^^^^^^^^^^
+
+app\services\fire_premium_service.py:221: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = UBGRUVGRRequest(productCode='UBGR', occupancyCode='1001', buildingSI=1000000.0, contentsSI=500000.0, terrorism_si=0.0,...ection(proposer=True, spouse=True), discountPercentage=0, loadingPercentage=0, policyPeriod=1, risk_rate_per_mille=0.5)
+item = 'paProposer'
+
+    def __getattr__(self, item: str) -> Any:
+        private_attributes = object.__getattribute__(self, '__private_attributes__')
+        if item in private_attributes:
+            attribute = private_attributes[item]
+            if hasattr(attribute, '__get__'):
+                return attribute.__get__(self, type(self))  # type: ignore
+    
+            try:
+                # Note: self.__pydantic_private__ cannot be None if self.__private_attributes__ has items
+                return self.__pydantic_private__[item]  # type: ignore
+            except KeyError as exc:
+                raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}') from exc
+        else:
+            # `__pydantic_extra__` can fail to be set if the model is not yet fully initialized.
+            # See `BaseModel.__repr_args__` for more details
+            try:
+                pydantic_extra = object.__getattribute__(self, '__pydantic_extra__')
+            except AttributeError:
+                pydantic_extra = None
+    
+            if pydantic_extra and item in pydantic_extra:
+                return pydantic_extra[item]
+            else:
+                if hasattr(self.__class__, item):
+                    return super().__getattribute__(item)  # Raises AttributeError if appropriate
+                else:
+                    # this is the current error
+>                   raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+E                   AttributeError: 'UBGRUVGRRequest' object has no attribute 'paProposer'
+
+C:\Users\Jagadish Ch\AppData\Roaming\Python\Python311\site-packages\pydantic\main.py:1026: AttributeError
+
+During handling of the above exception, another exception occurred:
+
+mock_rating_engine = {'addon': <MagicMock name='get_add_on_rate' id='2859649838608'>, 'basic': <MagicMock name='get_basic_rate_per_mille' id='2859633094608'>, 'terr': <MagicMock name='calculate_terrorism_premium' id='2859649912336'>}
+
+    def test_ubgr_pa_exclusion_from_total_si(mock_rating_engine):
+        """
+        Validate that PA SIs are EXCLUDED from Total Property SI and Terrorism SI base.
+        """
+        payload = UBGRUVGRRequest(
+            productCode="UBGR",
+            occupancyCode="1001",
+            buildingSI=1000000,
+            contentsSI=500000,
+            lossOfRentSI=10000,
+            altAccommodationSI=20000,
+            valuableContentsSI=5000,
+    
+            # PA SIs - Should be EXCLUDED
+            paProposerSI=500000,
+            paSpouseSI=500000,
+            paSelection=PASelection(proposer=True, spouse=True),
+    
+            terrorism_si=0, # Should default to Total Property SI
+            addOns=[AddOnItem(addOnCode="TERRORISM", sumInsured=0)],
+    
+            risk_rate_per_mille=0.5
+        )
+    
+>       result = FirePremiumCalculator.calculate_ubgr_uvgr(payload)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_ubgr_pa_exclusion.py:62: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+request = UBGRUVGRRequest(productCode='UBGR', occupancyCode='1001', buildingSI=1000000.0, contentsSI=500000.0, terrorism_si=0.0,...ection(proposer=True, spouse=True), discountPercentage=0, loadingPercentage=0, policyPeriod=1, risk_rate_per_mille=0.5)
+
+    @staticmethod
+    def calculate_ubgr_uvgr(request: UBGRUVGRRequest) -> Dict:
+        """
+        Calculate premium for UBGR/UVGR products.
+        STRICT MODE with \u20b950 (Basic+Addon) Minimum Premium Rule.
+        """
+        logger.info(f"Calculating {request.productCode} Premium")
+        logger.info(f"Payload: {request.model_dump()}")
+    
+        try:
+            # 1. Normalize ALL numeric inputs with safety defaults
+            discount_pct = Decimal(str(request.discountPercentage or 0.0))
+            loading_pct = Decimal(str(request.loadingPercentage or 0.0))
+    
+            # Resolve Source SIs (Preference for basic_cover_si/add_on_cover_si as per turn prompt)
+            raw_basic_si = request.basic_cover_si if request.basic_cover_si is not None else request.buildingSI
+            raw_addon_si = request.add_on_cover_si if request.add_on_cover_si is not None else request.contentsSI
+    
+            building_si = Decimal(str(raw_basic_si or 0.0))
+            contents_si = Decimal(str(raw_addon_si or 0.0))
+            terrorism_si_input = Decimal(str(request.terrorism_si or request.terrorismSI or 0.0))
+    
+            # Policy period safety
+            policy_period = request.policyPeriod
+            if policy_period < 1:
+                policy_period = 1
+    
+            # Product code normalization
+            if request.productCode:
+                product_code = request.productCode.upper()
+            else:
+                 raise ValueError("Product code is missing")
+    
+            if product_code not in ['UBGR', 'UVGR', 'UVGS']:
+                raise ValueError(f"Invalid product code: {request.productCode}")
+    
+            # --- UBGR EXCLUSION RULE: Dwellings: Co-operative Society (1001_2) ---
+            optional_addons_applicable = True
+            if product_code == "UBGR" and request.occupancyCode == "1001_2":
+                logger.info("UBGR Co-operative Society logic applied")
+                optional_addons_applicable = False
+                # Forcibly set contents_si and PA to 0
+                contents_si = Decimal("0")
+                request.paSelection.proposer = False
+                request.paSelection.spouse = False
+                # If there are any add-ons in the list, we ignore them in premium calc
+                # (handled by setting contents_si to 0 above since add_on_premium depends on it)
+    
+            # 2. Basic Rate Lookup (SAFE)
+            if product_code == "UBGR":
+                if request.risk_rate_per_mille is None:
+                     raise ValueError("Risk rate missing for UBGR calculation")
+                basic_rate = Decimal(str(request.risk_rate_per_mille))
+                logger.info(f"Using Explicit Risk Rate for UBGR: {basic_rate}")
+            else:
+                try:
+                    basic_rate = get_basic_rate_per_mille(product_code, request.occupancyCode)
+                    if basic_rate is None or basic_rate <= 0:
+                         raise ValueError("Rate resolved to None or Zero")
+                except Exception as e:
+                    logger.error(f"Basic rate lookup failed: {e}")
+                    raise ValueError(f"Basic rate lookup failed for {product_code}/{request.occupancyCode}")
+    
+            logger.info(f"Basic Rate: {basic_rate} (Per Mille)")
+    
+            # 3. UBGR Premium Logic (STRICT - ANNUAL)
+    
+            # basic_fire_premium = buildingSI � risk_rate / 1000
+            # BUT strict rule says: "Use ONLY total_property_si for Basic Fire Premium"
+            # total_property_si = building_si + contents_si + loss_of_rent + alt_acc + valuable_contents
+    
+            # 1\ufe0f\u20e3 Total Property SI Calculation (Rule: Exclude PA)
+            property_add_on_si = (
+                Decimal(str(request.lossOfRentSI or 0)) +
+                Decimal(str(request.altAccommodationSI or 0)) +
+                Decimal(str(request.valuableContentsSI or 0))
+            )
+    
+            # Contents usually part of header SI but here handled as part of total property
+            total_property_si = building_si + contents_si + property_add_on_si
+    
+            # Basic Fire Premium Calculation
+            basic_fire_premium_annual = total_property_si * basic_rate / Decimal("1000")
+            basic_fire_premium_annual = Decimal(str(round_currency(float(basic_fire_premium_annual))))
+    
+            # Add-on Premium for Property (Rent, Alt Acc, etc.)
+            # If BGRP logic dictates "Basic Rate" applies to ALL property items, and we used total_property_si above,
+            # then basic_fire_premium_annual ALREADY includes the property add-ons.
+            # To maintain the breakdown structure requested (Basic vs Add-on), we can split it:
+            # Basic = (Building + Contents) * Rate
+            # Add-on (Property) = (Rent + Alt + Val) * Rate
+    
+            if request.occupancyCode == "1001_2":
+                add_on_property_premium = Decimal("0")
+                optional_addons_applicable = False
+                # Re-calc Basic for Coop: Only Building SI matters (Contents forced to 0 earlier)
+                # building_si is already set. contents_si is 0. property_add_on_si should be 0 (via validation) but lets ensure.
+                total_property_si = building_si # Since others forced to 0
+                basic_fire_premium_annual = total_property_si * basic_rate / Decimal("1000")
+                basic_fire_premium_annual = Decimal(str(round_currency(float(basic_fire_premium_annual))))
+            else:
+                # Split calculation for breakdown accuracy
+                add_on_property_premium = property_add_on_si * basic_rate / Decimal("1000")
+                add_on_property_premium = Decimal(str(round_currency(float(add_on_property_premium))))
+    
+                # Re-calculate Basic to be strictly Building+Contents
+                base_core_si = building_si + contents_si
+                basic_fire_premium_annual = base_core_si * basic_rate / Decimal("1000")
+                basic_fire_premium_annual = Decimal(str(round_currency(float(basic_fire_premium_annual))))
+    
+            # 4\ufe0f\u20e3 PA Premium Calculation (Fixed Flat Rates)
+            # Separate from Property SI.
+            pa_proposer_premium = Decimal("0")
+            pa_spouse_premium = Decimal("0")
+    
             if (request.paProposer or request.paSelection.proposer or request.paProposerSI > 0) and request.occupancyCode != "1001_2":
                 # Get Flat Rate or Fixed Amount. Try retrieving mapping "PA_PROPOSER"
                 try:
                     rate_type, pa_val = get_add_on_rate(product_code, "PA_PROPOSER", request.occupancyCode)
-                    
+    
                     if rate_type.lower() == "fixed":
                         pa_proposer_premium = Decimal(str(pa_val))
                     else:
@@ -243,7 +344,7 @@ class FirePremiumCalculator:
                      # Fallback
                      pa_proposer_premium = Decimal("0")
                 pa_proposer_premium = Decimal(str(round_currency(float(pa_proposer_premium))))
-
+    
             if (request.paSpouse or request.paSelection.spouse or request.paSpouseSI > 0) and request.occupancyCode != "1001_2":
                  try:
                     rate_type, pa_val = get_add_on_rate(product_code, "PA_SPOUSE", request.occupancyCode)
@@ -260,26 +361,26 @@ class FirePremiumCalculator:
                  except:
                      pa_spouse_premium = Decimal("0")
                  pa_spouse_premium = Decimal(str(round_currency(float(pa_spouse_premium))))
-            
+    
             property_add_on_premium_annual = add_on_property_premium
-            
+    
             # Total Add-on Premium = Property Add-ons + PA
             add_on_premium_annual = property_add_on_premium_annual + pa_proposer_premium + pa_spouse_premium
-            
-            # 2️⃣ Subtotal Premium
+    
+            # 2\ufe0f\u20e3 Subtotal Premium
             subtotal_premium_annual = basic_fire_premium_annual + add_on_premium_annual
-            
-            # 3️⃣ Discount Logic (Apply ONLY on subtotal_premium)
+    
+            # 3\ufe0f\u20e3 Discount Logic (Apply ONLY on subtotal_premium)
             discount_amount_annual = subtotal_premium_annual * discount_pct / Decimal("100")
             discount_amount_annual = Decimal(str(round_currency(float(discount_amount_annual))))
-            
-            # 4️⃣ Loading Logic (Apply ONLY after discount, on (subtotal - discount))
+    
+            # 4\ufe0f\u20e3 Loading Logic (Apply ONLY after discount, on (subtotal - discount))
             loading_amount_annual = (subtotal_premium_annual - discount_amount_annual) * loading_pct / Decimal("100")
             loading_amount_annual = Decimal(str(round_currency(float(loading_amount_annual))))
-            
+    
             # 6. Terrorism Premium (ANNUAL)
             terrorism_premium_annual = Decimal("0")
-            
+    
             # Terrorism SI defaults to Total Property SI if not specified
             # "Terrorism SI must never exceed total_property_si"
             calc_terrorism_si = terrorism_si_input
@@ -287,10 +388,10 @@ class FirePremiumCalculator:
                 calc_terrorism_si = total_property_si
             elif calc_terrorism_si > total_property_si:
                 calc_terrorism_si = total_property_si # Cap it
-                
+    
             # Check selection
             is_terrorism_selected = any(addon.addOnCode.upper() == "TERRORISM" for addon in request.addOns)
-            
+    
             if is_terrorism_selected and calc_terrorism_si > 0:
                 try:
                     occ_details = get_occupancy_details(request.occupancyCode)
@@ -300,14 +401,14 @@ class FirePremiumCalculator:
                 except Exception as e:
                     logger.warning(f"Terrorism calc failed: {e}")
                     terrorism_premium_annual = Decimal("0")
-            
-            # 5️⃣ Net Premium Calculation (FINAL)
+    
+            # 5\ufe0f\u20e3 Net Premium Calculation (FINAL)
             net_premium_annual = (subtotal_premium_annual - discount_amount_annual + loading_amount_annual) + terrorism_premium_annual
             net_premium_annual = Decimal(str(round_currency(float(net_premium_annual))))
-            
+    
             # 8. Policy Period Scaling
             period_multiplier = Decimal(str(policy_period))
-            
+    
             basic_fire_premium = basic_fire_premium_annual * period_multiplier
             add_on_premium = add_on_premium_annual * period_multiplier
             subtotal_premium = subtotal_premium_annual * period_multiplier
@@ -315,11 +416,11 @@ class FirePremiumCalculator:
             discount_amount = discount_amount_annual * period_multiplier
             loading_amount = loading_amount_annual * period_multiplier
             net_premium = net_premium_annual * period_multiplier
-            
+    
             # Split breakdown for PA
             pa_proposer_final = pa_proposer_premium * period_multiplier
             pa_spouse_final = pa_spouse_premium * period_multiplier
-            
+    
             # Round scaled components
             basic_fire_premium = Decimal(str(round_currency(float(basic_fire_premium))))
             add_on_premium = Decimal(str(round_currency(float(add_on_premium))))
@@ -328,28 +429,28 @@ class FirePremiumCalculator:
             discount_amount = Decimal(str(round_currency(float(discount_amount))))
             loading_amount = Decimal(str(round_currency(float(loading_amount))))
             net_premium = Decimal(str(round_currency(float(net_premium))))
-            
+    
             # 9. Taxes & Stamp Duty
             cgst = net_premium * Decimal("0.09")
             cgst = Decimal(str(round_currency(float(cgst))))
             sgst = net_premium * Decimal("0.09")
             sgst = Decimal(str(round_currency(float(sgst))))
-            
+    
             # Stamp Duty - FIXED
             stamp = 1
-            
+    
             # gross_premium
             gross = net_premium + cgst + sgst + stamp
             gross = Decimal(str(round_currency(float(gross))))
-            
+    
             # Final Logging
             logger.info(
-              f"🔥 CALC BREAKDOWN | "
+              f"\U0001f525 CALC BREAKDOWN | "
               f"basic_fire={basic_fire_premium}, add_on={add_on_premium}, subtotal={subtotal_premium}, "
               f"terr={terrorism_premium}, disc={discount_amount}, load={loading_amount}, "
               f"net={net_premium}, gross={gross}"
             )
-            
+    
             breakdown = PremiumBreakdown(
                 basic_fire_premium=float(basic_fire_premium),
                 add_on_premium=float(add_on_premium),
@@ -368,7 +469,7 @@ class FirePremiumCalculator:
                 pa_spouse_premium=float(pa_spouse_final),
                 terrorism_si=float(calc_terrorism_si)
             )
-
+    
             return {
                 "success": True,
                 "message": f"{product_code} Premium Calculated Successfully",
@@ -384,7 +485,22 @@ class FirePremiumCalculator:
                     optional_addons_applicable=optional_addons_applicable
                 )
             }
-
+    
         except Exception as e:
             logger.error(f"CRITICAL CALC ERROR: {e}", exc_info=True)
-            raise ValueError(f"Calculation failed: {str(e)}")
+>           raise ValueError(f"Calculation failed: {str(e)}")
+E           ValueError: Calculation failed: 'UBGRUVGRRequest' object has no attribute 'paProposer'
+
+app\services\fire_premium_service.py:390: ValueError
+------------------------------ Captured log call ------------------------------
+ERROR    app.services.fire_premium_service:fire_premium_service.py:389 CRITICAL CALC ERROR: 'UBGRUVGRRequest' object has no attribute 'paProposer'
+Traceback (most recent call last):
+  File "D:\iriskassist360_backend\app\services\fire_premium_service.py", line 221, in calculate_ubgr_uvgr
+    if (request.paProposer or request.paSelection.proposer or request.paProposerSI > 0) and request.occupancyCode != "1001_2":
+        ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Jagadish Ch\AppData\Roaming\Python\Python311\site-packages\pydantic\main.py", line 1026, in __getattr__
+    raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+AttributeError: 'UBGRUVGRRequest' object has no attribute 'paProposer'
+=========================== short test summary info ===========================
+FAILED tests/test_ubgr_pa_exclusion.py::test_ubgr_pa_exclusion_from_total_si
+============================== 1 failed in 0.73s ==============================
