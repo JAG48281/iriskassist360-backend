@@ -23,7 +23,7 @@ pip install -q pytest pytest-cov flake8 black
 
 # Run linting
 Write-Host "`nRunning linting checks..." -ForegroundColor Yellow
-$lintResult = flake8 app tests --count --select=E9,F63,F7,F82 --show-source --statistics
+flake8 app tests --count --select=E9, F63, F7, F82 --show-source --statistics
 if ($LASTEXITCODE -ne 0) {
     Write-Host "❌ Linting failed" -ForegroundColor Red
     exit 1
