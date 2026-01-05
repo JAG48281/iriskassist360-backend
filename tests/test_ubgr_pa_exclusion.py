@@ -96,3 +96,8 @@ def test_ubgr_pa_exclusion_from_total_si(mock_rating_engine):
     assert result["fire_si"] == expected_si
     assert result["pa_si"] == 1000000.0 # 5L + 5L
 
+    # 6. Verify Subtotal (Rule 4: Fire + Addon + PA)
+    # Fire = 500, Addon = 268, PA = 150
+    # Subtotal = 500 + 268 + 150 = 918
+    assert result["subtotal_premium"] == 918.0
+

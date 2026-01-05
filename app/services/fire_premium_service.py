@@ -304,13 +304,20 @@ class FirePremiumCalculator:
             basic_fire_premium = basic_fire_premium_annual * period_multiplier
             # Note: 'add_on_premium' output field typically implies the Property Add-on Premium in this context
             add_on_premium = add_on_property_premium_annual * period_multiplier
-            subtotal_premium = subtotal_premium_annual * period_multiplier
-            terrorism_premium = terrorism_premium_annual * period_multiplier
-            discount_amount = discount_amount_annual * period_multiplier
-            loading_amount = loading_amount_annual * period_multiplier
+            
+            # Subtotal Definition Update (Rule 4): Subtotal = Fire + AddOn + PA
+            # NOTE: We keep separate tracking for discountable base
+            discountable_subtotal = subtotal_premium_annual * period_multiplier
             
             pa_proposer_final = pa_proposer_premium * period_multiplier
             pa_spouse_final = pa_spouse_premium * period_multiplier
+            
+            # Subtotal now explicitly includes PA for the response field
+            subtotal_premium = discountable_subtotal + pa_proposer_final + pa_spouse_final
+            
+            terrorism_premium = terrorism_premium_annual * period_multiplier
+            discount_amount = discount_amount_annual * period_multiplier
+            loading_amount = loading_amount_annual * period_multiplier
             
             # Final Net Calculation with Scaled Values (to handle rounding diffs)
             # Recalculate Net from scaled components to be precise?
