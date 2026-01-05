@@ -69,26 +69,21 @@ def test_ubgr_pa_exclusion_from_total_si(mock_rating_engine):
     expected_si = 1000000 + 500000 + 10000 + 20000 + 5000
     assert result["total_property_si"] == expected_si
     
-    # 2. Verify basic_fire_premium uses Total Property SI
-    # Rate = 0.5 per mille
-    # Premium = 1,535,000 * 0.5 / 1000 = 767.5 -> Round to 768 or 767.50
-    # The calculator splits Basic and Add-on Property.
-    # Basic (Build+Cont) = 1,500,000 * 0.5 / 1000 = 750
-    # Add-on (Rent+...) = 35,000 * 0.5 / 1000 = 17.5 -> 18
-    # Total Property Premium = 768
-    # We check the components or just trust the SI was used correctly.
-    # basic_fire_premium in response is strictly base_core_si * rate logic now?
-    # No, we updated logic: Basic = (Building + Contents) * Rate
-    assert result["basic_fire_premium"] == 750.0
+    # 2. Verify basic_fire_premium using ONLY Building SI (New Logic)
+    # Building SI = 1,000,000. Rate = 0.5 per mille.
+    # Premium = 1,000,000 * 0.5 / 1000 = 500
+    assert result["basic_fire_premium"] == 500.0
     
     # 3. Verify PA Premium is Separate
     # Mock returned 100 for Proposer, 50 for Spouse
     assert result["pa_proposer_premium"] == 100.0
     assert result["pa_spouse_premium"] == 50.0
     
-    # Total Add On Premium = Add-on Property ONLY (PA is separate now)
-    # Add-on (Rent+...) = 35,000 * 0.5 / 1000 = 17.5 -> 18
-    assert result["add_on_premium"] == 18.0
+    # 3b. Verify Add-on Premium (Contents + Property Add-ons)
+    # Add-on SI = Contents(500k) + Rent(10k) + AltAcc(20k) + Val(5k) = 535,000
+    # Rate = 0.5
+    # Premium = 535,000 * 0.5 / 1000 = 267.5 -> 268 (Round)
+    assert result["add_on_premium"] == 268.0
     
     # 4. Verify Terrorism SI matches Base Core SI (Building + Contents) 
     # Logic Update: Terrorism SI = Building + Contents (Strict) = 1,500,000 (Excl LOR/AltAcc)

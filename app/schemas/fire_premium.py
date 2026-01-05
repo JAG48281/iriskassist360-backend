@@ -155,6 +155,8 @@ class PremiumBreakdown(BaseModel):
     terrorism_sum_insured: float = 0.0
     pa_self_premium: float = 0.0
     total_sum_insured: float = 0.0 # Excluding PA
+    add_on_sum_insured: float = 0.0
+    fire_rate_used: float = 0.0
 
 class CalculationMeta(BaseModel):
     """Metadata for transparency"""
@@ -194,6 +196,8 @@ class UBGRUVGRResponse(BaseModel):
     terrorism_sum_insured: float = 0.0
     pa_self_premium: float = 0.0
     total_sum_insured: float = 0.0 # Excluding PA
+    add_on_sum_insured: float = 0.0
+    fire_rate_used: float = 0.0
 
     # Metadata & Status (Keeping for API consistency)
     success: bool = True

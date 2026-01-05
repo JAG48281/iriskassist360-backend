@@ -227,19 +227,31 @@ class FirePremiumCalculator:
                      pa_spouse_premium = Decimal(str(round_currency(float(pa_spouse_premium))))
             
             # C) Fire & Property Add-on Premium (Annual)
-            # We calculate loosely based on "Fire SI" then split for reporting if needed.
-            # Split logic:
-            # Basic Fire Premium = (Building + Contents) * Rate
-            # Add-on Property Premium = (LOR + Alt + Val) * Rate
+            # REVISED LOGIC:
+            # Basic Fire Premium = Building SI * Rate
+            # Add-on Premium = (Add-on Covers SI + LOR + AltAcc + ValContents) * Rate
+            # "Add-on Covers SI" here corresponds to `contents_si`.
             
-            base_core_si = building_si + contents_si
-            basic_fire_premium_annual = base_core_si * basic_rate / Decimal("1000")
+            # 1. Basic Fire Premium (Building ONLY)
+            basic_fire_si = building_si
+            basic_fire_premium_annual = basic_fire_si * basic_rate / Decimal("1000")
             basic_fire_premium_annual = Decimal(str(round_currency(float(basic_fire_premium_annual))))
             
+            # 2. Add-on Premium (Contents + Property Add-ons)
+            add_on_sum_insured_total = Decimal("0")
             add_on_property_premium_annual = Decimal("0")
+            
             if optional_addons_applicable:
-                add_on_property_premium_annual = property_add_on_si * basic_rate / Decimal("1000")
+                # Total Add-on SI = Contents + LOR + AltAcc + Val
+                add_on_sum_insured_total = contents_si + property_add_on_si
+                
+                # Apply same risk rate
+                add_on_property_premium_annual = add_on_sum_insured_total * basic_rate / Decimal("1000")
                 add_on_property_premium_annual = Decimal(str(round_currency(float(add_on_property_premium_annual))))
+
+                # Validation Warning
+                if add_on_sum_insured_total > 0 and add_on_property_premium_annual == 0:
+                     logger.warning(f"Add-on SI {add_on_sum_insured_total} > 0 but Premium is 0 (Rate: {basic_rate})")
 
             # D) Subtotal (Excluding PA) for Discount/Loading
             # Subtotal = Basic Fire + Add-on Property
@@ -360,7 +372,9 @@ class FirePremiumCalculator:
                 fire_sum_insured=float(fire_sum_insured),
                 terrorism_sum_insured=float(use_terr_si),
                 pa_self_premium=float(pa_proposer_final),
-                total_sum_insured=float(total_sum_insured)
+                total_sum_insured=float(total_sum_insured),
+                add_on_sum_insured=float(add_on_sum_insured_total),
+                fire_rate_used=float(basic_rate)
             )
 
             return {
